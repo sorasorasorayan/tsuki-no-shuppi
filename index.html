@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7C6BF0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="月の出費">
+<title>月の出費</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{
+  --bg:#FFF9F2; --card:#FFFFFF; --card2:#F7F4EE;
+  --ink:#2B2A28; --sub:#6E6B64; --muted:#A5A199;
+  --line:#EFEAE1;
+  --purple:#7C6BF0; --purple-bg:#EFEDFE; --purple-ink:#3F35A0;
+  --teal:#17B183;  --teal-bg:#E2F6EF;  --teal-ink:#0B6A4E;
+  --pink:#E4628F;  --pink-bg:#FDEBF1;  --pink-ink:#962E53;
+  --amber:#F5A524; --amber-bg:#FEF3E0; --amber-ink:#8A5806;
+  --blue:#3B8DED;  --blue-bg:#E8F2FD;  --blue-ink:#1B5497;
+  --red:#EF5B5B;   --red-bg:#FDECEC;   --red-ink:#9C2A2A;
+  --shadow:0 2px 10px rgba(43,42,40,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#191816; --card:#242220; --card2:#2E2B28;
+    --ink:#F2EFE9; --sub:#B4AFA6; --muted:#807B73;
+    --line:#35322E;
+    --purple-bg:#2E2A52; --purple-ink:#C3BBFB;
+    --teal-bg:#123A2E;   --teal-ink:#7FE3C0;
+    --pink-bg:#3D2029;   --pink-ink:#F6A7C3;
+    --amber-bg:#3A2A11;  --amber-ink:#F8CE86;
+    --blue-bg:#152C46;   --blue-ink:#9CC8F7;
+    --red-bg:#3B1F1F;    --red-ink:#F6A2A2;
+    --shadow:0 2px 10px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+  font-size:15px; line-height:1.6;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+button{font-family:inherit;font-size:inherit;color:inherit;border:none;background:none;padding:0;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px}
+
+header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.month-pick{display:flex;align-items:center;gap:10px}
+.month-pick b{font-size:20px;font-weight:700;letter-spacing:.02em}
+.arrowbtn{width:32px;height:32px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub)}
+.arrowbtn:disabled{opacity:.3}
+.pill{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--purple-bg);color:var(--purple-ink);margin-left:5px}
+.pill.warn{background:var(--amber-bg);color:var(--amber-ink)}
+
+.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.hero{background:var(--purple-bg);border-radius:24px;padding:20px;margin-bottom:12px}
+.hero .lbl{font-size:12px;font-weight:700;color:var(--purple-ink);opacity:.85}
+.hero .big{font-size:34px;font-weight:800;color:var(--purple-ink);letter-spacing:-.02em;margin:2px 0 0}
+.hero .sub{font-size:12px;color:var(--purple-ink);opacity:.8;margin-top:4px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{border-radius:20px;padding:14px}
+.tile .lbl{font-size:11px;font-weight:700;opacity:.9}
+.tile .val{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.tile .sub2{font-size:10px;opacity:.75;margin-top:2px}
+.t-teal{background:var(--teal-bg);color:var(--teal-ink)}
+.t-pink{background:var(--pink-bg);color:var(--pink-ink)}
+
+.settle{background:var(--amber-bg);color:var(--amber-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.settle .ic{font-size:22px}
+.settle .lbl{font-size:11px;font-weight:700;opacity:.85}
+.settle .val{font-size:16px;font-weight:800}
+.settle.even{background:var(--teal-bg);color:var(--teal-ink)}
+
+.sechead{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}
+.sechead h2{font-size:13px;font-weight:700;color:var(--sub);margin:0;letter-spacing:.04em}
+.sechead .more{font-size:12px;font-weight:700;color:var(--purple)}
+
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.ic-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 38px}
+.row .body{flex:1;min-width:0}
+.row .t1{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:11px;color:var(--muted);margin-top:1px}
+.row .amt{font-size:15px;font-weight:700;white-space:nowrap}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:5px;vertical-align:1px}
+.tag.c{background:var(--purple-bg);color:var(--purple-ink)}
+.tag.r{background:var(--teal-bg);color:var(--teal-ink)}
+.tag.m{background:var(--pink-bg);color:var(--pink-ink)}
+.tag.gray{background:var(--card2);color:var(--muted)}
+
+.empty{text-align:center;padding:28px 12px;color:var(--muted);font-size:13px}
+.empty .e-ic{font-size:34px;display:block;margin-bottom:8px;opacity:.6}
+
+.barrow{margin-bottom:14px}
+.barrow .bh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:5px}
+.barrow .bh .nm{font-weight:600}
+.barrow .bh .vl{font-weight:700}
+.barrow .bh .pc{font-size:11px;color:var(--muted);margin-left:6px;font-weight:500}
+.track{height:9px;border-radius:999px;background:var(--card2);overflow:hidden}
+.fill{height:100%;border-radius:999px;transition:width .4s cubic-bezier(.2,.8,.3,1)}
+
+.mbars{display:flex;align-items:flex-end;gap:6px;padding-top:6px}
+.mbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
+.mbar .bb{width:100%;background:var(--purple);border-radius:7px 7px 4px 4px;min-height:3px;transition:height .4s cubic-bezier(.2,.8,.3,1)}
+.mbar .bb.dim{background:var(--purple-bg)}
+.mbar .ml{font-size:10px;color:var(--muted);white-space:nowrap}
+
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:40}
+.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 64px 1fr 1fr;align-items:end}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:var(--muted);font-size:10px;font-weight:600}
+.nb .ni{font-size:20px;line-height:1}
+.nb.on{color:var(--purple)}
+.fab{width:56px;height:56px;border-radius:50%;background:var(--purple);color:#fff;font-size:28px;font-weight:300;display:flex;align-items:center;justify-content:center;margin:0 auto;transform:translateY(-14px);box-shadow:0 6px 16px rgba(124,107,240,.4)}
+.fab:active{transform:translateY(-14px) scale(.94)}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(20,18,16,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet-bg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-radius:26px 26px 0 0;z-index:51;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.3,1);max-height:94vh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sheet.open{transform:translateY(0)}
+.sheet-in{max-width:520px;margin:0 auto;padding:8px 16px 0}
+.grab{width:38px;height:4px;border-radius:999px;background:var(--line);margin:8px auto 10px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sheet-head h3{font-size:17px;font-weight:700;margin:0}
+.xbtn{width:32px;height:32px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+
+.amtbox{background:var(--purple-bg);border-radius:22px;padding:16px;text-align:center;margin-bottom:16px}
+.amtbox input{width:100%;border:none;background:none;text-align:center;font-size:36px;font-weight:800;color:var(--purple-ink);outline:none;letter-spacing:-.02em;padding:0}
+.amtbox input::placeholder{color:var(--purple-ink);opacity:.3}
+.flabel{font-size:12px;font-weight:700;color:var(--sub);margin:0 2px 8px}
+.flabel .hint{font-weight:500;color:var(--muted);margin-left:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;gap:5px}
+.chip.on{box-shadow:none}
+.chip:active{transform:scale(.96)}
+.trio{display:flex;gap:8px;margin-bottom:18px}
+.trio .chip{flex:1;justify-content:center;padding:12px 6px;font-size:13px}
+.field{background:var(--card);border-radius:16px;padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;border:none;background:none;outline:none;padding:2px 0;font-size:15px}
+.field textarea{resize:none;min-height:22px}
+.save{width:100%;background:var(--teal);color:#fff;font-size:16px;font-weight:700;padding:15px;border-radius:999px;margin-top:6px}
+.save:active{transform:scale(.98)}
+.save.del{background:var(--red-bg);color:var(--red-ink);margin-top:10px;font-size:14px;padding:12px}
+.save.ghost{background:var(--card2);color:var(--sub);margin-top:10px;font-size:14px;padding:12px}
+.save:disabled{opacity:.45}
+
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.setrow:last-child{border-bottom:none}
+.setrow .sl{font-size:14px;font-weight:600}
+.setrow .sd{font-size:11px;color:var(--muted);margin-top:1px}
+.mini{font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;background:var(--purple-bg);color:var(--purple-ink);white-space:nowrap}
+.mini.ghost{background:var(--card2);color:var(--sub)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:0}
+.dot.ok{background:var(--teal)} .dot.ng{background:var(--muted)} .dot.er{background:var(--red)}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;padding:11px 20px;border-radius:999px;z-index:70;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+table.csv{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+table.csv td{border:1px solid var(--line);padding:5px 6px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+.maprow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.maprow .mk{font-size:13px;font-weight:600;width:86px;flex:0 0 86px}
+.maprow select{flex:1;background:var(--card);border:none;border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);outline:none}
+.note{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 2px}
+.warnbox{background:var(--amber-bg);color:var(--amber-ink);border-radius:14px;padding:11px 14px;font-size:12px;line-height:1.6;margin-bottom:12px}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.thumb{width:100%;border-radius:16px;margin-bottom:12px;display:block}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<nav>
+  <div class="navin">
+    <button class="nb on" data-tab="home"><span class="ni">🏠</span>まとめ</button>
+    <button class="nb" data-tab="stats"><span class="ni">📊</span>分析</button>
+    <button class="fab" id="fab">＋</button>
+    <button class="nb" data-tab="list"><span class="ni">📋</span>履歴</button>
+    <button class="nb" data-tab="settings"><span class="ni">⚙️</span>設定</button>
+  </div>
+</nav>
+
+<div class="sheet-bg" id="sheetbg"></div>
+<div class="sheet" id="sheet"><div class="sheet-in" id="sheetin"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   月の出費 — 二人でつける家計簿
+   支払元(payer: c=共有カード / r / m) と 負担(burden: share / r / m) を
+   別々に持つのが、この帳面の肝。旧Excelの負の数はこの区別が無かったせい。
+   ============================================================ */
+
+const CATS = [
+  {k:"食費",   ic:"🍚", c:"blue"},
+  {k:"日用品", ic:"🧺", c:"teal"},
+  {k:"光熱費", ic:"💡", c:"amber"},
+  {k:"通信",   ic:"📱", c:"purple"},
+  {k:"住居",   ic:"🏠", c:"pink"},
+  {k:"保険",   ic:"🛡️", c:"teal"},
+  {k:"交通",   ic:"🚃", c:"blue"},
+  {k:"医療",   ic:"💊", c:"red"},
+  {k:"娯楽",   ic:"🎮", c:"purple"},
+  {k:"衣服",   ic:"👕", c:"pink"},
+  {k:"交際",   ic:"🎁", c:"amber"},
+  {k:"その他", ic:"✨", c:"teal"}
+];
+const catOf = k => CATS.find(c=>c.k===k) || CATS[CATS.length-1];
+const CVAR = {blue:"--blue",teal:"--teal",amber:"--amber",purple:"--purple",pink:"--pink",red:"--red"};
+
+/* 期(いつからの決め事か)
+   base   … 年収比で按分する固定額。二人合わせた額
+   ratio  … その固定額のうち、一人目が持つ割合
+   extra  … 按分の外で上乗せしている額(共有カード払いの個人保険など)
+   これを足したものが、その人が毎月共有の財布へ入れる額になる。
+
+   下の値は旧Excelから読み解いたもの。万貴の額は常に 250,000 の按分ちょうどで、
+   諒だけが端数を上乗せしている ―― それが保険料と見られる。 */
+const RENT = ()=>({name:"家賃",amount:133330,cat:"住居",payer:"c",burden:"share",on:true});
+/* ⚠ ジム・保険を「固定費」に入れてはならぬ（2026-08-18 に踏んで直した）。
+   これらは共有カードで払っており、明細CSVを取り込むと**実物の行として入ってくる**。
+   固定費にも入れると二重になり、精算が上乗せの半分ぶん（8,143円）狂う。
+   上乗せの相殺は、取り込んだ実物の行を個人負担へ倒すことで担う ―― その決まりが下の `mine`。
+   家賃だけはカード払いでないので、固定費に入れておいてよい。 */
+const DEFAULT_PLANS = [
+  {from:"2025-03", base:250000, ratio:0.60, extra:{r:0,     m:0}, fixed:[RENT()]},
+  {from:"2025-04", base:250000, ratio:0.56, extra:{r:0,     m:0}, fixed:[RENT()]},
+  {from:"2025-09", base:250000, ratio:0.56, extra:{r:8400,  m:0}, fixed:[RENT()]},
+  {from:"2025-10", base:250000, ratio:0.56, extra:{r:16285, m:0}, fixed:[RENT()]},
+  {from:"2025-11", base:250000, ratio:0.48, extra:{r:16285, m:0}, fixed:[RENT()]}
+];
+
+const DEFAULT_CFG = {
+  api:"", token:"",
+  names:{r:"諒", m:"万貴"},
+  plans: DEFAULT_PLANS,
+  /* 共有カードで払っているが「その人の個人の負担」であるもの。
+     明細CSVの取り込み時、この言葉が店名に含まれていたら負担をその人へ倒す。
+     ⚠ 上乗せ(extra)を入れているなら、それに見合う額がここで倒れるようにしておくこと。
+       倒れないと、貸し借りの無い月にも上乗せの半分が精算として出る。
+       諒の上乗せ 16,285 ＝ ジム 8,400 ＋ メディケア 1,915 ＋ ＭｅｔＬｉｆｅ 5,970。
+     根拠は 2026-08-18 の明細CSV 775行との突合（`CLAUDE.md` を見よ）。
+     Suica は旧Excelで 91%(30/33)、SBI証券は投資ゆえ、いずれも個人と見立てている。 */
+  mine:[
+    {kw:"ＡＦ戸越公園",   who:"r"},
+    {kw:"メディケア生命", who:"r"},
+    {kw:"MetLife",        who:"r"},
+    {kw:"メットライフ",   who:"r"},
+    {kw:"Suica",          who:"r"},
+    {kw:"SBI証券",        who:"r"}
+  ],
+  /* ⚠ 上から順に当たった最初のものを採る。**書く順が意味を持つ。**
+     「ライフ」(スーパー)を「生命」より先に置くと、メットライフ生命が食費になる。
+     語は 2026-08-18 に明細CSV 775行の実際の店名から起こした。 */
+  dict:[
+    {kw:"生命",cat:"保険"},{kw:"損害保険",cat:"保険"},{kw:"損保",cat:"保険"},{kw:"保険料",cat:"保険"},
+    {kw:"Amazon Downloads",cat:"娯楽"},{kw:"GOOGLE PLAY",cat:"娯楽"},{kw:"GOOGLE GENSHIN",cat:"娯楽"},
+    {kw:"Amazon",cat:"日用品"},{kw:"ヨドバシ",cat:"日用品"},{kw:"ニトリ",cat:"日用品"},
+    {kw:"マツモトキヨシ",cat:"日用品"},{kw:"ツルハ",cat:"日用品"},{kw:"ドラッグ",cat:"日用品"},{kw:"ぱぱす",cat:"日用品"},
+    {kw:"まいばすけっと",cat:"食費"},{kw:"文化堂",cat:"食費"},{kw:"マルエツ",cat:"食費"},
+    {kw:"イオン",cat:"食費"},{kw:"セブン",cat:"食費"},{kw:"ローソン",cat:"食費"},
+    {kw:"ファミリーマート",cat:"食費"},{kw:"サイゼリヤ",cat:"食費"},{kw:"ガスト",cat:"食費"},
+    {kw:"スターバックス",cat:"食費"},{kw:"ほっともっと",cat:"食費"},{kw:"銀のさら",cat:"食費"},
+    {kw:"ライフ",cat:"食費"},
+    {kw:"東京電力",cat:"光熱費"},{kw:"東京ガス",cat:"光熱費"},{kw:"水道",cat:"光熱費"},
+    {kw:"ドコモ",cat:"通信"},{kw:"ソフトバンク",cat:"通信"},{kw:"NTT",cat:"通信"},
+    {kw:"ETC",cat:"交通"},{kw:"Suica",cat:"交通"},{kw:"タイムズ",cat:"交通"},
+    {kw:"テスラ",cat:"交通"},{kw:"JR",cat:"交通"},{kw:"メトロ",cat:"交通"},
+    {kw:"歯医者",cat:"医療"},{kw:"矯正歯科",cat:"医療"},{kw:"薬局",cat:"医療"},
+    {kw:"クリニック",cat:"医療"},{kw:"病院",cat:"医療"},
+    {kw:"ゴルフ",cat:"娯楽"},{kw:"カントリークラブ",cat:"娯楽"},{kw:"練習場",cat:"娯楽"},
+    {kw:"ZARA",cat:"衣服"},{kw:"ユニクロ",cat:"衣服"},{kw:"しまむら",cat:"衣服"},
+    {kw:"デイリーヤマザキ",cat:"食費"},{kw:"マクドナルド",cat:"食費"},{kw:"ミニストップ",cat:"食費"},
+    {kw:"ココカラファイン",cat:"日用品"},{kw:"カインズ",cat:"日用品"},
+    {kw:"UBER RIDES",cat:"交通"},{kw:"オートバックス",cat:"交通"},{kw:"アポロステーション",cat:"交通"},
+    {kw:"エネオス",cat:"交通"},{kw:"駐車",cat:"交通"},{kw:"パーキング",cat:"交通"},
+    {kw:"GOOGLE ONE",cat:"通信"}
+  ],
+  csvMap:null,
+  lastSync:""
+};
+
+const S = {
+  tab:"home", month:ym(new Date()),
+  items:[], cfg:load("cfg", DEFAULT_CFG), queue:load("queue", []),
+  online:false, syncing:false, err:""
+};
+
+function load(k,def){ try{ const v=localStorage.getItem("shuppi."+k); return v?Object.assign(structuredClone(def),JSON.parse(v)):structuredClone(def); }catch(e){ return structuredClone(def); } }
+function save(k,v){ try{ localStorage.setItem("shuppi."+k, JSON.stringify(v)); }catch(e){} }
+function ym(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+function ymLabel(s){ const [y,m]=s.split("-"); return y+"年"+Number(m)+"月"; }
+function shiftMonth(s,n){ const [y,m]=s.split("-").map(Number); return ym(new Date(y,m-1+n,1)); }
+function yen(n){ return "¥ "+Math.round(n||0).toLocaleString("ja-JP"); }
+function yenPlain(n){ return Math.round(n||0).toLocaleString("ja-JP"); }
+function today(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2400); }
+
+const PAYERS = ()=>[{k:"c",label:"共有カード",cls:"c"},{k:"r",label:S.cfg.names.r,cls:"r"},{k:"m",label:S.cfg.names.m,cls:"m"}];
+const BURDENS = ()=>[{k:"share",label:"共有",cls:"c"},{k:"r",label:S.cfg.names.r+" 個人",cls:"r"},{k:"m",label:S.cfg.names.m+" 個人",cls:"m"}];
+const payerLabel = k => (PAYERS().find(p=>p.k===k)||{label:"?"}).label;
+const burdenLabel = k => (BURDENS().find(b=>b.k===k)||{label:"?"}).label;
+
+/* ---------- データ層 ---------- */
+
+function cached(){ return load("items", []); }
+function setCached(list){ save("items", list); }
+
+async function api(action, payload){
+  const cfg=S.cfg;
+  if(!cfg.api) throw new Error("未接続");
+  const url = cfg.api + (cfg.api.includes("?")?"&":"?") + "action="+encodeURIComponent(action) + "&token="+encodeURIComponent(cfg.token||"");
+  const opt = payload
+    ? {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(payload), redirect:"follow"}
+    : {method:"GET", redirect:"follow"};
+  const res = await fetch(url, opt);
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  const j = await res.json();
+  if(j.ok===false) throw new Error(j.error||"エラー");
+  return j;
+}
+
+async function pullAll(){
+  if(!S.cfg.api){ S.items=cached(); S.online=false; return; }
+  S.syncing=true; render();
+  try{
+    await flushQueue();
+    const j = await api("list");
+    S.items = j.items||[]; setCached(S.items);
+    S.online=true; S.err="";
+    S.cfg.lastSync=new Date().toISOString(); save("cfg",S.cfg);
+  }catch(e){
+    S.items=cached(); S.online=false; S.err=e.message;
+  }finally{ S.syncing=false; render(); }
+}
+
+async function flushQueue(){
+  if(!S.cfg.api || !S.queue.length) return;
+  const rest=[];
+  for(const q of S.queue){
+    try{ await api(q.action, q.payload); }catch(e){ rest.push(q); }
+  }
+  S.queue=rest; save("queue",S.queue);
+}
+
+async function pushItem(action, item){
+  if(action==="add") S.items.unshift(item);
+  else if(action==="update") S.items=S.items.map(x=>x.id===item.id?item:x);
+  else if(action==="delete") S.items=S.items.filter(x=>x.id!==item.id);
+  setCached(S.items); render();
+  if(!S.cfg.api) return;
+  try{ await api(action,item); S.online=true; }
+  catch(e){ S.queue.push({action,payload:item}); save("queue",S.queue); S.online=false; toast("圏外のため後で送り申す"); }
+}
+
+/* ---------- 期(いつからの決め事か) ---------- */
+
+// 古い形（contrib を直に持っていた頃）で保存されていたら、base/ratio/extra に均す。
+function normPlan(p){
+  if(!p) return {from:"2000-01",base:0,ratio:0.5,extra:{r:0,m:0},fixed:[]};
+  if(p.base==null){
+    const c=p.contrib||{r:0,m:0}, base=250000, ratio=Number(p.ratio)||0.5;
+    p.base=base;
+    p.extra={ r:Math.max(0,(Number(c.r)||0)-base*ratio), m:Math.max(0,(Number(c.m)||0)-base*(1-ratio)) };
+  }
+  p.extra=p.extra||{r:0,m:0};
+  p.base=Number(p.base)||0; p.ratio=Number(p.ratio)||0;
+  return p;
+}
+function contribOf(p){
+  return { r: Math.round(p.base*p.ratio)+(Number(p.extra.r)||0),
+           m: Math.round(p.base*(1-p.ratio))+(Number(p.extra.m)||0) };
+}
+function planFor(m){
+  const ps=(S.cfg.plans||[]).map(normPlan).sort((a,b)=>a.from.localeCompare(b.from));
+  let cur=ps[0]||normPlan(null);
+  for(const p of ps) if(p.from<=m) cur=p;
+  return cur;
+}
+
+function fixedFor(m){
+  return (planFor(m).fixed||[]).filter(f=>f.on!==false).map(f=>({
+    id:"fixed:"+m+":"+f.name, date:m+"-01", cat:f.cat||"住居",
+    amount:Number(f.amount)||0, payer:f.payer||"c", burden:f.burden||"share",
+    shop:f.name, memo:"固定費", fixed:true
+  }));
+}
+
+/* ---------- 集計と精算 ---------- */
+
+function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)===m); }
+
+/**
+ * 精算の考え方（2026-08-18 上様の指図により改訂）
+ *
+ * 按分比が効くのは **毎月の固定額（二人合わせて 25万）だけ**。
+ * そこから足が出た共有の支払いは **折半**。
+ *
+ *   共有の支出 S に対し、はみ出し E = max(0, S − 固定額)
+ *   受け持ち  = 固定額の按分ぶん + E/2
+ *
+ * その人が出した額 = 上乗せ（按分の外で入れている保険ぶんなど）
+ *                  + 自分の財布で払った共有のもの（立替）
+ *                  − 共有カードで払った自分個人のもの（持ち出し）
+ *   ※ 按分ぶんの固定額は受け持ちと打ち消し合うので出てこない。
+ *
+ *   二人のあいだで動く額 = （諒の出し − 万貴の出し）÷ 2      ← 折半なので単純な半分
+ *
+ * この式なら、貸し借りが無い月は必ず 0 になる。
+ * 保険のように「上乗せして入れ、共有カードで自分の分を払う」ものも、
+ * 上乗せと持ち出しが打ち消し合ってちょうど 0 になる。
+ */
+function summary(m){
+  const plan = planFor(m);
+  const list = monthItems(m).concat(fixedFor(m));
+  const amt = x => Number(x.amount)||0;
+
+  const total = list.reduce((a,b)=>a+amt(b),0);
+  const shared = list.filter(x=>x.burden==="share").reduce((a,b)=>a+amt(b),0);
+
+  const paidBy = k => list.filter(x=>x.payer===k).reduce((a,b)=>a+amt(b),0);
+  const lent   = k => list.filter(x=>x.payer===k && x.burden==="share").reduce((a,b)=>a+amt(b),0);
+  const took   = k => list.filter(x=>x.payer==="c" && x.burden===k).reduce((a,b)=>a+amt(b),0);
+  const personal = k => list.filter(x=>x.burden===k).reduce((a,b)=>a+amt(b),0);
+
+  const ratio = Number(plan.ratio);
+  const contrib = contribOf(plan);
+  const extra = {r:Number(plan.extra.r)||0, m:Number(plan.extra.m)||0};
+  const lend = {r:lent("r"), m:lent("m")};
+  const take = {r:took("r"), m:took("m")};
+  const over = Math.max(0, shared - plan.base);              // 固定額から足が出たぶん
+  const put  = {r:extra.r+lend.r-take.r, m:extra.m+lend.m-take.m};
+  const settle = (put.r-put.m)/2;                            // 折半。正 = 万貴 → 諒
+  const due = { r: plan.base*ratio + over/2, m: plan.base*(1-ratio) + over/2 };
+
+  const byCat = {};
+  list.forEach(x=>{ byCat[x.cat]=(byCat[x.cat]||0)+amt(x); });
+
+  /* 上乗せに見合う「共有カード払い・個人負担」がこの月にまだ無いぶん。
+     ⚠ ここが残っていると、貸し借りが無くても精算額が出る。明細をまだ取り込んでいない月の印。 */
+  const gap = {r:Math.max(0,extra.r-take.r), m:Math.max(0,extra.m-take.m)};
+  return {plan,list,total,shared,ratio,base:plan.base,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
+          paid:{c:paidBy("c"),r:paidBy("r"),m:paidBy("m")},
+          personal:{r:personal("r"),m:personal("m")}};
+}
+
+/* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
+   ⚠ 両方を半角へ畳んでから照らすこと。畳まずに toLowerCase だけで比べると、
+     半角で書いた語（Amazon・JR）は全角の店名に一件も当たらず、辞書が黙って死ぬ。 */
+function fold(s){
+  return String(s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/[\s\u3000]/g,"").toLowerCase();
+}
+function guessCat(shop){
+  if(!shop) return "";
+  const s=fold(shop);
+  for(const d of (S.cfg.dict||[])) if(d.kw && s.includes(fold(d.kw))) return d.cat;
+  return "";
+}
+
+/* 共有カードの明細を取り込むとき、個人の負担へ倒すべき店を見分ける。
+   ⚠ `guessCat` と同じく上から順・最初に当たったものを採る。 */
+function guessMine(shop){
+  if(!shop) return "";
+  const s=fold(shop);
+  for(const d of (S.cfg.mine||[])) if(d.kw && s.includes(fold(d.kw))) return d.who;
+  return "";
+}
+
+/* ---------- 重複判定 ----------
+   レシートとカード明細から同じ買い物が二度入るのを防ぐ。
+   金額が一致し、日付が3日以内で、店名が寄っていれば同じものと見立てる。 */
+
+function normShop(s){
+  return String(s||"")
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[\s\-‐－―ー・（）()株式会社有限会社店]/g,"")
+    .toLowerCase();
+}
+function dayDiff(a,b){
+  const t=s=>new Date(s+"T00:00:00").getTime();
+  return Math.abs(t(a)-t(b))/86400000;
+}
+function findDup(it, list){
+  const n=normShop(it.shop);
+  return list.find(x=>{
+    if(x.id===it.id || x.fixed) return false;
+    if(Number(x.amount)!==Number(it.amount)) return false;
+    if(dayDiff(x.date,it.date)>3) return false;
+    const m=normShop(x.shop);
+    if(!n || !m) return true;                       // どちらかに店名が無ければ金額と日付で判じる
+    return n===m || n.includes(m) || m.includes(n);
+  }) || null;
+}
+
+/* ---------- 画面 ---------- */
+
+function render(){
+  document.getElementById("app").innerHTML =
+    ({home:viewHome, stats:viewStats, list:viewList, settings:viewSettings})[S.tab]();
+  document.querySelectorAll(".nb").forEach(b=>b.classList.toggle("on", b.dataset.tab===S.tab));
+  bindAll();
+}
+
+function header(){
+  const cur = S.month===ym(new Date());
+  const st = S.syncing ? '<span class="pill">同期中…</span>'
+    : (!S.cfg.api ? '<span class="pill warn">この端末のみ</span>'
+    : (S.online ? '' : '<span class="pill warn">圏外</span>'));
+  return `<header><div class="wrap"><div class="hrow">
+    <div class="month-pick">
+      <button class="arrowbtn" data-mv="-1">‹</button>
+      <b class="num">${ymLabel(S.month)}</b>
+      <button class="arrowbtn" data-mv="1" ${cur?"disabled":""}>›</button>
+    </div>
+    <div>${cur?'<span class="pill">今月</span>':''}${st}</div>
+  </div></div></header>`;
+}
+
+function viewHome(){
+  const s=summary(S.month), prev=summary(shiftMonth(S.month,-1)), N=S.cfg.names;
+  let cmp="";
+  if(prev.total>0){
+    const d=s.total-prev.total;
+    cmp = d===0 ? "先月と同じ" : "先月より "+yen(Math.abs(d))+(d<0?" 少ない":" 多い");
+  }
+  const recent = s.list.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,6);
+
+  let settle;
+  if(Math.abs(s.settle)<100){
+    settle = `<div class="settle even"><span class="ic">🤝</span><div><div class="lbl">精算</div>
+      <div class="val">貸し借りは無し</div></div></div>`;
+  }else{
+    const from = s.settle>0 ? N.m : N.r, to = s.settle>0 ? N.r : N.m;
+    settle = `<div class="settle"><span class="ic">💰</span><div><div class="lbl">精算</div>
+      <div class="val num">${esc(from)} → ${esc(to)} ${yen(Math.abs(s.settle))}</div></div></div>`;
+  }
+  const side = (k,cls)=>`<div class="tile t-${cls}">
+      <div class="lbl">${esc(N[k])}</div>
+      <div class="val num">${s.put[k]>0?"+":s.put[k]<0?"−":""}${yen(Math.abs(s.put[k])).slice(2)}</div>
+      <div class="sub2 num">立替 ${yenPlain(s.lend[k])}・持ち出し ${yenPlain(s.take[k])}${s.extra[k]?"・上乗せ "+yenPlain(s.extra[k]):""}</div></div>`;
+
+  return header() + `<div class="wrap">
+    <div class="hero">
+      <div class="lbl">今月の出費</div>
+      <div class="big num">${yen(s.total)}</div>
+      <div class="sub num">うち共有 ${yen(s.shared)}${cmp?"・"+cmp:""}</div>
+    </div>
+    <div class="grid2">${side("r","teal")}${side("m","pink")}</div>
+    ${settle}
+    ${(s.gap.r||s.gap.m) ? `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、この月にはまだ
+      ${yen(s.gap.r||s.gap.m)}ぶん足りており申さぬ。<b>カード明細をまだ取り込んでおらぬ月</b>と見え申す。
+      このままでは精算が ${yen((s.gap.r+s.gap.m)/2)} ずれ申すゆえ、設定 → カード明細CSV から取り込んでくだされ。</div>` : ""}
+    <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
+    <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("まだ記録がござらぬ","＋ から入れてくだされ")}</div>
+  </div>`;
+}
+
+function rowHTML(x){
+  const c=catOf(x.cat);
+  const d=String(x.date||"").split("-");
+  const pay = `<span class="tag ${x.payer||"c"}">${esc(payerLabel(x.payer))}</span>`;
+  const bur = x.burden==="share" ? "" : `<span class="tag ${x.burden}">${esc(burdenLabel(x.burden))}</span>`;
+  return `<div class="row" ${x.fixed?"":`data-edit="${esc(x.id)}"`}>
+    <div class="ic-circle" style="background:var(${CVAR[c.c]}-bg)">${c.ic}</div>
+    <div class="body">
+      <div class="t1">${esc(x.shop||x.cat)}${x.fixed?' <span class="tag gray">固定</span>':''}</div>
+      <div class="t2">${d[1]?Number(d[1])+"/"+Number(d[2]):""}・${esc(x.cat)}${pay}${bur}</div>
+    </div>
+    <div class="amt num">${yen(x.amount)}</div>
+  </div>`;
+}
+function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">🌱</span>${esc(a)}<br>${esc(b)}</div>`; }
+
+function viewStats(){
+  const s=summary(S.month), N=S.cfg.names;
+  const cats=Object.entries(s.byCat).sort((a,b)=>b[1]-a[1]);
+  const max=cats.length?cats[0][1]:1;
+  const months=[]; for(let i=5;i>=0;i--) months.push(shiftMonth(S.month,-i));
+  const totals=months.map(m=>summary(m).total);
+  const mmax=Math.max(...totals,1);
+
+  return header() + `<div class="wrap">
+    <div class="sechead"><h2>誰の負担か</h2></div>
+    <div class="card">
+      ${[["共有",s.shared,"purple"],[N.r+" 個人",s.personal.r,"teal"],[N.m+" 個人",s.personal.m,"pink"]].map(([k,v,c])=>{
+        const pc=s.total?Math.round(v/s.total*100):0;
+        return `<div class="barrow"><div class="bh"><span class="nm">${esc(k)}</span>
+          <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
+          <div class="track"><div class="fill" style="width:${s.total?(v/s.total*100).toFixed(1):0}%;background:var(--${c})"></div></div></div>`;
+      }).join("")}
+      <div class="note num">支払元の内訳 ―― 共有カード ${yen(s.paid.c)}／${esc(N.r)} ${yen(s.paid.r)}／${esc(N.m)} ${yen(s.paid.m)}</div>
+      <div class="note num">共有の受け持ち ―― ${esc(N.r)} ${yen(s.due.r)}／${esc(N.m)} ${yen(s.due.m)}。
+      固定額 ${yen(s.base)} を ${Math.round(s.ratio*100)}：${100-Math.round(s.ratio*100)} で按分し、
+      ${s.over>0?`足が出た ${yen(s.over)} を折半`:`足は出ており申さぬ`}。</div>
+      ${(s.gap.r||s.gap.m) ? `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、この月にはまだ
+        ${yen(s.gap.r||s.gap.m)}ぶん足りており申さぬ。<b>カード明細をまだ取り込んでおらぬ月</b>と見え申す。
+        このままだと精算が ${yen((s.gap.r+s.gap.m)/2)} ずれ申すゆえ、明細を取り込んでくだされ。</div>` : ""}
+    </div>
+
+    <div class="sechead"><h2>費目の内訳</h2></div>
+    <div class="card">${cats.length?cats.map(([k,v])=>{
+      const c=catOf(k), pc=s.total?Math.round(v/s.total*100):0;
+      return `<div class="barrow">
+        <div class="bh"><span class="nm">${c.ic} ${esc(k)}</span>
+          <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
+        <div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%;background:var(${CVAR[c.c]})"></div></div>
+      </div>`;
+    }).join(""):emptyHTML("この月の記録がござらぬ","")}</div>
+
+    <div class="sechead"><h2>6ヶ月の推移</h2></div>
+    <div class="card">
+      <div class="mbars">${months.map((m,i)=>{
+        const h=Math.max(4, Math.round(totals[i]/mmax*104));
+        return `<div class="mbar"><div class="bb ${m===S.month?"":"dim"}" style="height:${h}px"></div>
+          <div class="ml">${Number(m.split("-")[1])}月</div></div>`;
+      }).join("")}</div>
+      <div class="note num">最も多い月：${yen(mmax)}</div>
+    </div>
+  </div>`;
+}
+
+function viewList(){
+  const s=summary(S.month);
+  const list=s.list.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const byDate={}; list.forEach(x=>{ (byDate[x.date]=byDate[x.date]||[]).push(x); });
+  const keys=Object.keys(byDate).sort().reverse();
+  return header() + `<div class="wrap">
+    <div class="sechead"><h2>${list.length} 件・${yen(s.total)}</h2></div>
+    ${keys.length?keys.map(d=>{
+      const day=byDate[d], sum=day.reduce((a,b)=>a+(Number(b.amount)||0),0);
+      const dd=d.split("-"), w=["日","月","火","水","木","金","土"][new Date(d).getDay()];
+      return `<div class="sechead"><h2>${Number(dd[1])}/${Number(dd[2])}（${w}）</h2><span class="more num">${yen(sum)}</span></div>
+        <div class="card">${day.map(rowHTML).join("")}</div>`;
+    }).join(""):`<div class="card">${emptyHTML("この月の記録がござらぬ","＋ から入れてくだされ")}</div>`}
+  </div>`;
+}
+
+function viewSettings(){
+  const c=S.cfg, p=planFor(S.month), cb=contribOf(p);
+  const st = !c.api ? '<span class="dot ng"></span>未接続（この端末のみ）'
+    : (S.online ? '<span class="dot ok"></span>繋がっており申す' : '<span class="dot er"></span>'+esc(S.err||"繋がらず"));
+  const fx=(p.fixed||[]).reduce((a,b)=>a+(Number(b.amount)||0),0);
+  return header() + `<div class="wrap">
+    <div class="sechead"><h2>データの置き場</h2></div>
+    <div class="card">
+      <div class="setrow"><div><div class="sl">スプレッドシート</div><div class="sd">${st}</div></div>
+        <button class="mini" data-open="conn">設定</button></div>
+      <div class="setrow"><div><div class="sl">同期</div>
+        <div class="sd num">${c.lastSync?new Date(c.lastSync).toLocaleString("ja-JP"):"まだ"}${S.queue.length?"・未送信 "+S.queue.length+"件":""}</div></div>
+        <button class="mini ghost" data-sync="1">今すぐ</button></div>
+    </div>
+
+    <div class="sechead"><h2>取り込み</h2></div>
+    <div class="card">
+      <div class="setrow"><div><div class="sl">レシートを撮る</div><div class="sd">写真から日付・店・金額を読み取る</div></div>
+        <button class="mini" data-open="receipt">開く</button></div>
+      <div class="setrow"><div><div class="sl">カード明細CSV</div><div class="sd">Vpassから落としたCSVを読み込む</div></div>
+        <button class="mini" data-open="csv">取り込む</button></div>
+    </div>
+
+    <div class="sechead"><h2>暮らしの決め事（${ymLabel(p.from)}から）</h2></div>
+    <div class="card">
+      <div class="setrow"><div><div class="sl">呼び名</div><div class="sd">${esc(c.names.r)}・${esc(c.names.m)}</div></div>
+        <button class="mini ghost" data-open="names">変える</button></div>
+      <div class="setrow"><div><div class="sl">按分する固定額</div>
+        <div class="sd num">${yen(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)} で按分。足が出た分は折半</div></div>
+        <button class="mini ghost" data-open="plan">開く</button></div>
+      <div class="setrow"><div><div class="sl">毎月の拠出</div>
+        <div class="sd num">${esc(c.names.r)} ${yen(cb.r)}／${esc(c.names.m)} ${yen(cb.m)}</div></div>
+        <button class="mini ghost" data-open="plan">開く</button></div>
+      <div class="setrow"><div><div class="sl">固定費</div><div class="sd num">${(p.fixed||[]).length}件・毎月 ${yen(fx)}</div></div>
+        <button class="mini ghost" data-open="fixed">開く</button></div>
+      <div class="setrow"><div><div class="sl">個人の負担に倒す店</div>
+        <div class="sd num">${(c.mine||[]).length}件・取り込みで自動的に個人の負担へ</div></div>
+        <button class="mini ghost" data-open="mine">開く</button></div>
+      <div class="setrow"><div><div class="sl">店名の振り分け</div><div class="sd num">${(c.dict||[]).length}件の言葉を覚えており申す</div></div>
+        <button class="mini ghost" data-open="dict">開く</button></div>
+    </div>
+    <div class="note">決め事は「いつから」を持ってござる。割合や拠出を変えても、過去の月の精算は当時の決め事のまま動き申さぬ。</div>
+  </div>`;
+}
+
+/* ---------- シート ---------- */
+
+let sheetCtx=null;
+
+function openSheet(html, ctx){
+  sheetCtx=ctx||null;
+  document.getElementById("sheetin").innerHTML=html;
+  document.getElementById("sheet").classList.add("open");
+  document.getElementById("sheetbg").classList.add("open");
+  bindSheet();
+}
+function closeSheet(){
+  document.getElementById("sheet").classList.remove("open");
+  document.getElementById("sheetbg").classList.remove("open");
+  sheetCtx=null;
+}
+function sheetShell(title, body){
+  return `<div class="grab"></div><div class="sheet-head"><h3>${esc(title)}</h3><button class="xbtn" data-close="1">✕</button></div>${body}`;
+}
+function chipRow(id, items, cur, key){
+  return `<div class="trio" id="${id}">${items.map(o=>`
+    <button class="chip ${cur===o.k?"on":""}" data-${key}="${o.k}"
+      style="${cur===o.k?chipStyle(o.cls):""}">${esc(o.label)}</button>`).join("")}</div>`;
+}
+function chipStyle(cls){
+  const map={c:"--purple",r:"--teal",m:"--pink"};
+  return `background:var(${map[cls]}-bg);color:var(${map[cls]}-ink)`;
+}
+
+function editorHTML(it, dupWarn){
+  return sheetShell(it.id?"記録を直す":"記録する", `
+    ${dupWarn||""}
+    <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
+    <div class="flabel">費目</div>
+    <div class="chips" id="f-cats">${CATS.map(c=>`
+      <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}"
+        style="${it.cat===c.k?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:""}">${c.ic} ${esc(c.k)}</button>`).join("")}</div>
+    <div class="flabel">どこから払ったか</div>
+    ${chipRow("f-payer", PAYERS(), it.payer, "payer")}
+    <div class="flabel">誰の分か <span class="hint">共有カードで個人のものを買ったら、ここを個人に</span></div>
+    ${chipRow("f-burden", BURDENS(), it.burden, "burden")}
+    <div class="field"><label>店・内容</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="マルエツ"></div>
+    <div class="field"><label>日付</label><input id="f-date" type="date" value="${esc(it.date||today())}"></div>
+    <div class="field"><label>メモ</label><textarea id="f-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
+    <button class="save" id="f-save">保存する</button>
+    ${it.id?'<button class="save del" id="f-del">この記録を消す</button>':""}
+  `);
+}
+
+function openEditor(item, extra){
+  const it = item || {id:"",date:today(),cat:"食費",amount:0,payer:"c",burden:"share",shop:"",memo:""};
+  openSheet(editorHTML(it, extra&&extra.warn), {kind:"edit", it:Object.assign({},it), src:extra&&extra.src});
+  setTimeout(()=>{ const a=document.getElementById("f-amt"); if(!it.id&&!it.amount&&a) a.focus(); },320);
+}
+
+function bindSheet(){
+  const root=document.getElementById("sheetin");
+  root.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheet);
+
+  const amt=root.querySelector("#f-amt");
+  if(amt) amt.oninput=()=>{
+    const n=amt.value.replace(/[^0-9]/g,"");
+    amt.value = n?Number(n).toLocaleString("ja-JP"):"";
+  };
+
+  root.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{
+    sheetCtx.it.cat=b.dataset.cat;
+    root.querySelectorAll("[data-cat]").forEach(x=>{
+      const on=x.dataset.cat===sheetCtx.it.cat, c=catOf(x.dataset.cat);
+      x.classList.toggle("on",on);
+      x.style.cssText = on?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:"";
+    });
+  });
+
+  const pickRow=(sel,key,items)=>root.querySelectorAll(`[data-${key}]`).forEach(b=>b.onclick=()=>{
+    sheetCtx.it[key]=b.dataset[key];
+    root.querySelectorAll(`[data-${key}]`).forEach(x=>{
+      const on=x.dataset[key]===sheetCtx.it[key];
+      x.classList.toggle("on",on);
+      x.style.cssText = on?chipStyle((items.find(o=>o.k===x.dataset[key])||{}).cls):"";
+    });
+  });
+  if(root.querySelector("#f-payer")){ pickRow("#f-payer","payer",PAYERS()); pickRow("#f-burden","burden",BURDENS()); }
+
+  const shop=root.querySelector("#f-shop");
+  if(shop) shop.onblur=()=>{
+    const g=guessCat(shop.value);
+    if(g && g!==sheetCtx.it.cat){
+      const btn=root.querySelector(`[data-cat="${CSS.escape(g)}"]`);
+      if(btn){ btn.click(); toast(g+" と見立て申した"); }
+    }
+  };
+
+  const sv=root.querySelector("#f-save");
+  if(sv) sv.onclick=async ()=>{
+    const it=sheetCtx.it;
+    const n=Number(String(root.querySelector("#f-amt").value).replace(/[^0-9]/g,""));
+    if(!n){ toast("金額を入れてくだされ"); root.querySelector("#f-amt").focus(); return; }
+    it.amount=n;
+    it.shop=root.querySelector("#f-shop").value.trim();
+    it.date=root.querySelector("#f-date").value||today();
+    it.memo=root.querySelector("#f-memo").value.trim();
+    const isNew=!it.id;
+    if(isNew){ it.id=uid(); it.src=sheetCtx.src||"手入力"; }
+    closeSheet();
+    await pushItem(isNew?"add":"update", it);
+    if(it.shop && !guessCat(it.shop)) learnDict(it.shop, it.cat);
+    toast(isNew?"入れ申した":"直し申した");
+  };
+
+  const dl=root.querySelector("#f-del");
+  if(dl) dl.onclick=async ()=>{
+    if(!confirm("この記録を消しまするか。")) return;
+    const it=sheetCtx.it; closeSheet();
+    await pushItem("delete", it); toast("消し申した");
+  };
+
+  bindConfigSheet(root);
+  bindCsvSheet(root);
+  bindReceiptSheet(root);
+}
+
+function learnDict(shop, cat){
+  const kw=String(shop).trim();
+  if(kw.length<2) return;
+  S.cfg.dict.push({kw,cat}); save("cfg",S.cfg);
+}
+
+/* ---------- 設定の各シート ---------- */
+
+function openConfig(kind){
+  const c=S.cfg;
+  if(kind==="conn"){
+    openSheet(sheetShell("スプレッドシートに繋ぐ", `
+      <div class="field"><label>ウェブアプリのURL</label><input id="c-api" value="${esc(c.api)}" placeholder="https://script.google.com/macros/s/..."></div>
+      <div class="field"><label>合言葉</label><input id="c-token" value="${esc(c.token)}" placeholder="二人で決めた言葉"></div>
+      <div class="note">Apps Scriptを配置したあと、そこで出たURLと合言葉をここへ入れると、二人の記録が一つに集まり申す。空のままでもこの端末だけで使えるでござる。</div>
+      <button class="save" id="c-save">繋ぐ</button>`), {kind:"conn"});
+  }
+  if(kind==="names"){
+    openSheet(sheetShell("呼び名", `
+      <div class="field"><label>一人目</label><input id="c-n1" value="${esc(c.names.r)}"></div>
+      <div class="field"><label>二人目</label><input id="c-n2" value="${esc(c.names.m)}"></div>
+      <button class="save" id="c-save">変える</button>`), {kind:"names"});
+  }
+  if(kind==="plan"){
+    const ps=(c.plans||[]).map(normPlan).slice().sort((a,b)=>b.from.localeCompare(a.from));
+    const cur=planFor(S.month);
+    openSheet(sheetShell("按分と拠出", `
+      <div class="note">按分の割合が効くのは<b>この固定額だけ</b>でござる。ここから足が出た共有の支払いは<b>折半</b>。
+      按分の外で上乗せしているもの（共有カード払いの個人保険など）は「上乗せ」に入れてくだされ。</div>
+      ${(cur.extra.r||cur.extra.m)
+        ? `<div class="note">上乗せの相殺は<b>カード明細の取り込み</b>が担い申す。
+           「個人の負担に倒す店」に入っている店は、取り込んだ折に自動でその人の負担になり申す。
+           <b>固定費に同じものを入れてはなり申さぬ</b> ―― 二重に数えて精算が狂い申す。</div>` : ""}
+      <div class="flabel">${ymLabel(S.month)} に効いている決め事</div>
+      <div class="field"><label>按分する固定額（二人合わせて）</label><input id="p-base" type="tel" inputmode="numeric" value="${yenPlain(cur.base)}"></div>
+      <div class="field"><label>${esc(c.names.r)} の割合（％）</label><input id="p-ratio" type="tel" inputmode="numeric" value="${Math.round(cur.ratio*1000)/10}"></div>
+      <div class="field"><label>${esc(c.names.r)} の上乗せ（保険など・無ければ0）</label><input id="p-er" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.r)}"></div>
+      <div class="field"><label>${esc(c.names.m)} の上乗せ（無ければ0）</label><input id="p-em" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.m)}"></div>
+      <div class="warnbox" id="p-calc"></div>
+      <button class="save" id="p-save">この期を直す</button>
+      <button class="save ghost" id="p-new">${ymLabel(S.month)}から新しい期を始める</button>
+      <div class="flabel" style="margin-top:22px">これまでの期</div>
+      ${ps.map(p=>{ const cb=contribOf(p); return `<div class="setrow"><div><div class="sl num">${ymLabel(p.from)} から</div>
+        <div class="sd num">${yenPlain(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)}${p.extra.r||p.extra.m?"＋上乗せ":""}
+        → ${yenPlain(cb.r)} / ${yenPlain(cb.m)}</div></div>
+        ${ps.length>1?`<button class="mini ghost" data-pdel="${esc(p.from)}">消す</button>`:""}</div>`; }).join("")}
+      <div class="note">割合は年に一度ほど見直すものと承ってござる。変えるときは<b>「新しい期を始める」</b>を押されよ ――
+      いま開いている月から先だけが変わり、過去の精算は動き申さぬ。</div>
+      `), {kind:"plan", from:cur.from});
+  }
+  if(kind==="fixed"){
+    const p=planFor(S.month);
+    openSheet(sheetShell("固定費（"+ymLabel(p.from)+"から）", `
+      <div id="fx-list">${(p.fixed||[]).map((f,i)=>`
+        <div class="setrow"><div><div class="sl">${esc(f.name)}</div>
+          <div class="sd num">${yen(f.amount)}・${esc(f.cat)}・${esc(payerLabel(f.payer))}から・${esc(burdenLabel(f.burden))}の分</div></div>
+          <button class="mini ghost" data-fxdel="${i}">消す</button></div>`).join("")
+        || '<div class="empty"><span class="e-ic">📅</span>まだ無し</div>'}</div>
+      <div class="note">毎月かならず出ていくものを入れておくと、ひとりでに数え上げ申す。<b>共有カードで払っている個人の保険</b>のようなものは、払う元を「共有カード」・誰の分かを「個人」にすると正しく精算されるでござる。</div>
+      <div class="field"><label>名前</label><input id="fx-name" placeholder="家賃"></div>
+      <div class="field"><label>金額</label><input id="fx-amt" type="tel" inputmode="numeric" placeholder="133330"></div>
+      <div class="field"><label>費目</label><select id="fx-cat">${CATS.map(x=>`<option ${x.k==="住居"?"selected":""}>${esc(x.k)}</option>`).join("")}</select></div>
+      <div class="field"><label>どこから払うか</label><select id="fx-payer">${PAYERS().map(o=>`<option value="${o.k}">${esc(o.label)}</option>`).join("")}</select></div>
+      <div class="field"><label>誰の分か</label><select id="fx-burden">${BURDENS().map(o=>`<option value="${o.k}">${esc(o.label)}</option>`).join("")}</select></div>
+      <button class="save" id="fx-add">足す</button>`), {kind:"fixed", from:p.from});
+  }
+  if(kind==="mine"){
+    const who=k=>esc(k==="r"?c.names.r:c.names.m);
+    openSheet(sheetShell("個人の負担に倒す店", `
+      <div class="note">共有カードで払ってはいるが、<b>共有すべきでない個人の支出</b>の店。
+      明細を取り込んだ折に、この言葉が店名に含まれていれば自動でその人の負担になり申す。
+      旧Excelで負の数を書いていたものが、これにあたる。</div>
+      <div class="warnbox">上乗せを入れておられるなら、<b>それに見合う額がここで倒れるようにしておくこと。</b>
+      倒れぬと、貸し借りの無い月にも上乗せの半分が精算として出てしまい申す。</div>
+      <div id="mn-list">${(c.mine||[]).map((d,i)=>`
+        <div class="setrow"><div><div class="sl">${esc(d.kw)}</div><div class="sd">${who(d.who)}の負担</div></div>
+        <button class="mini ghost" data-mndel="${i}">消す</button></div>`).join("")}</div>
+      <div class="field"><label>言葉</label><input id="mn-kw" placeholder="ＡＦ戸越公園"></div>
+      <div class="field"><label>誰の負担か</label><select id="mn-who">
+        <option value="r">${esc(c.names.r)}</option><option value="m">${esc(c.names.m)}</option></select></div>
+      <button class="save" id="mn-add">足す</button>`), {kind:"mine"});
+  }
+  if(kind==="dict"){
+    openSheet(sheetShell("店名の振り分け", `
+      <div class="note">この言葉が店名に含まれていたら、その費目と見立て申す。手で入れた店も覚えてゆく。</div>
+      <div id="dc-list">${(c.dict||[]).map((d,i)=>`
+        <div class="setrow"><div><div class="sl">${esc(d.kw)}</div><div class="sd">${esc(d.cat)}</div></div>
+        <button class="mini ghost" data-dcdel="${i}">消す</button></div>`).join("")}</div>
+      <div class="field"><label>言葉</label><input id="dc-kw" placeholder="マルエツ"></div>
+      <div class="field"><label>費目</label><select id="dc-cat">${CATS.map(x=>`<option>${esc(x.k)}</option>`).join("")}</select></div>
+      <button class="save" id="dc-add">足す</button>`), {kind:"dict"});
+  }
+}
+
+function bindConfigSheet(root){
+  const c=S.cfg;
+  const num = el => Number(String(el.value).replace(/[^0-9.]/g,""))||0;
+
+  const sv=root.querySelector("#c-save");
+  if(sv) sv.onclick=async ()=>{
+    const k=sheetCtx.kind;
+    if(k==="conn"){
+      c.api=root.querySelector("#c-api").value.trim().replace(/\/exec.*$/,"/exec");
+      c.token=root.querySelector("#c-token").value.trim();
+      save("cfg",c); closeSheet(); toast("繋ぎにゆき申す"); await pullAll();
+      toast(S.online?"繋がり申した":"繋がらず："+S.err); return;
+    }
+    if(k==="names"){
+      c.names.r=root.querySelector("#c-n1").value.trim()||"諒";
+      c.names.m=root.querySelector("#c-n2").value.trim()||"万貴";
+    }
+    save("cfg",c); closeSheet(); render(); toast("変え申した");
+  };
+
+  const readPlan = ()=>({
+    base: num(root.querySelector("#p-base")),
+    ratio: Math.min(100,Math.max(0,num(root.querySelector("#p-ratio"))))/100,
+    extra:{ r:num(root.querySelector("#p-er")), m:num(root.querySelector("#p-em")) }
+  });
+  const calc=root.querySelector("#p-calc");
+  if(calc){
+    const show=()=>{
+      const v=readPlan(), cb=contribOf(v);
+      calc.innerHTML = `毎月 共有の財布へ入れる額 ―― <b>${esc(c.names.r)} ${yen(cb.r)}</b>／<b>${esc(c.names.m)} ${yen(cb.m)}</b>`;
+    };
+    ["p-base","p-ratio","p-er","p-em"].forEach(id=>{ const el=root.querySelector("#"+id); if(el) el.oninput=show; });
+    show();
+  }
+  const psv=root.querySelector("#p-save");
+  if(psv) psv.onclick=()=>{
+    const v=readPlan(), p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
+    if(p){ p.base=v.base; p.ratio=v.ratio; p.extra=v.extra; }
+    save("cfg",c); closeSheet(); render(); toast("直し申した");
+  };
+  const pnew=root.querySelector("#p-new");
+  if(pnew) pnew.onclick=()=>{
+    const v=readPlan(), src=planFor(S.month);
+    const exist=c.plans.map(normPlan).find(x=>x.from===S.month);
+    if(exist){ exist.base=v.base; exist.ratio=v.ratio; exist.extra=v.extra; }
+    else c.plans.push({from:S.month, base:v.base, ratio:v.ratio, extra:v.extra, fixed:structuredClone(src.fixed||[])});
+    save("cfg",c); closeSheet(); render(); toast(ymLabel(S.month)+"から新しい期にいたした");
+  };
+  root.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
+    c.plans=c.plans.filter(x=>x.from!==b.dataset.pdel);
+    save("cfg",c); openConfig("plan"); render();
+  });
+
+  const fxa=root.querySelector("#fx-add");
+  if(fxa) fxa.onclick=()=>{
+    const name=root.querySelector("#fx-name").value.trim();
+    const amt=num(root.querySelector("#fx-amt"));
+    if(!name||!amt){ toast("名前と金額を入れてくだされ"); return; }
+    const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
+    (p.fixed=p.fixed||[]).push({name,amount:amt,cat:root.querySelector("#fx-cat").value,
+      payer:root.querySelector("#fx-payer").value, burden:root.querySelector("#fx-burden").value, on:true});
+    save("cfg",c); closeSheet(); render(); toast("足し申した");
+  };
+  root.querySelectorAll("[data-fxdel]").forEach(b=>b.onclick=()=>{
+    const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
+    p.fixed.splice(Number(b.dataset.fxdel),1);
+    save("cfg",c); openConfig("fixed"); render();
+  });
+
+  const mna=root.querySelector("#mn-add");
+  if(mna) mna.onclick=()=>{
+    const kw=root.querySelector("#mn-kw").value.trim();
+    if(!kw){ toast("言葉を入れてくだされ"); return; }
+    (c.mine=c.mine||[]).push({kw,who:root.querySelector("#mn-who").value});
+    save("cfg",c); openConfig("mine"); toast("覚え申した");
+  };
+  root.querySelectorAll("[data-mndel]").forEach(b=>b.onclick=()=>{
+    c.mine.splice(Number(b.dataset.mndel),1); save("cfg",c); openConfig("mine");
+  });
+  const dca=root.querySelector("#dc-add");
+  if(dca) dca.onclick=()=>{
+    const kw=root.querySelector("#dc-kw").value.trim();
+    if(!kw){ toast("言葉を入れてくだされ"); return; }
+    c.dict.push({kw,cat:root.querySelector("#dc-cat").value});
+    save("cfg",c); openConfig("dict"); toast("覚え申した");
+  };
+  root.querySelectorAll("[data-dcdel]").forEach(b=>b.onclick=()=>{
+    c.dict.splice(Number(b.dataset.dcdel),1); save("cfg",c); openConfig("dict");
+  });
+}
+
+/* ---------- レシート取り込み ---------- */
+
+function openReceipt(){
+  openSheet(sheetShell("レシートを撮る", `
+    <div class="note">レシートを1枚まるごと写してくだされ。日付・店名・合計を読み取り、入力の画面に載せ申す。
+    カード明細に同じ買い物がすでに入っておれば、その場でお知らせいたす。</div>
+    ${S.cfg.api?"":'<div class="warnbox">スプレッドシートに繋いでおらぬため、この機能は使えませぬ。先に「データの置き場」を設定してくだされ。</div>'}
+    <div class="field"><label>レシートの写真</label><input id="rc-file" type="file" accept="image/*" capture="environment" ${S.cfg.api?"":"disabled"}></div>
+    <div id="rc-body"></div>`), {kind:"receipt"});
+}
+
+// 写真は長辺1600pxまで縮める。原寸のままだと送るのに時間がかかり、読み取りの精度も上がらぬ。
+function shrinkImage(file, maxEdge){
+  return new Promise((resolve,reject)=>{
+    const rd=new FileReader();
+    rd.onerror=()=>reject(new Error("写真が読めず"));
+    rd.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("写真が開けず"));
+      img.onload=()=>{
+        const sc=Math.min(1, maxEdge/Math.max(img.width,img.height));
+        const w=Math.round(img.width*sc), h=Math.round(img.height*sc);
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        const url=cv.toDataURL("image/jpeg",0.82);
+        resolve({dataUrl:url, base64:url.split(",")[1]});
+      };
+      img.src=rd.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
+
+function bindReceiptSheet(root){
+  const f=root.querySelector("#rc-file");
+  if(!f) return;
+  f.onchange=async ()=>{
+    const file=f.files[0]; if(!file) return;
+    const body=document.getElementById("rc-body");
+    body.innerHTML=`<div class="note"><span class="spin"></span>写真を整えており申す…</div>`;
+    let img;
+    try{ img=await shrinkImage(file, 1600); }
+    catch(e){ body.innerHTML=`<div class="warnbox">${esc(e.message)}</div>`; return; }
+
+    body.innerHTML=`<img class="thumb" src="${img.dataUrl}" alt="">
+      <div class="note"><span class="spin"></span>読み取っており申す。しばしお待ちを…</div>`;
+    try{
+      const j=await api("receipt", {image:img.base64, mime:"image/jpeg"});
+      const r=j.receipt||{};
+      const amount=Number(r.total)||0;
+      if(!amount) throw new Error("合計が読み取れ申さず");
+      const it={ id:"", date:r.date||today(), cat:guessCat(r.shop)||"食費",
+                 amount, payer:"c", burden:"share", shop:r.shop||"",
+                 memo:(r.items||[]).slice(0,4).map(x=>x.name).filter(Boolean).join("・") };
+      const dup=findDup(it, S.items);
+      const warn = dup
+        ? `<div class="warnbox">同じ買い物がすでに入っておるやもしれませぬ ――
+             <b>${esc(dup.shop||dup.cat)} ${yen(dup.amount)}（${esc(dup.date)}）</b>。
+             重ねて入れると二重に数えられ申す。閉じるか、金額を確かめてくだされ。</div>`
+        : "";
+      closeSheet();
+      setTimeout(()=>openEditor(it, {warn, src:"レシート"}), 260);
+      if(!dup) toast("読み取り申した");
+    }catch(e){
+      body.innerHTML=`<div class="warnbox">読み取れ申さず：${esc(e.message)}</div>
+        <div class="note">明るいところで、レシート全体が入るように撮り直してくだされ。それでも駄目なら ＋ から手で入れられ申す。</div>`;
+    }
+  };
+}
+
+/* ---------- CSV取り込み ---------- */
+
+function parseCSV(text){
+  const rows=[]; let row=[], cell="", q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){
+      if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; }
+      else cell+=ch;
+    }else{
+      if(ch==='"') q=true;
+      else if(ch===","){ row.push(cell); cell=""; }
+      else if(ch==="\n"){ row.push(cell); rows.push(row); row=[]; cell=""; }
+      else if(ch!=="\r") cell+=ch;
+    }
+  }
+  if(cell!==""||row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r=>r.some(c=>String(c).trim()!==""));
+}
+
+function openCsv(){
+  openSheet(sheetShell("カード明細を取り込む", `
+    <div class="note">Vpass（パソコン）で明細を開き「CSV形式で保存する」で落としたファイルを選んでくだされ。
+    どの列が何かは、この後この画面で選び申す。一度選べば次から覚えており申す。
+    取り込んだ分はすべて<b>共有カード払い・共有の負担</b>として入り申すゆえ、個人のものは後から履歴で振り分けてくだされ。</div>
+    <div class="field"><label>CSVファイル</label><input id="cv-file" type="file" accept=".csv,text/csv"></div>
+    <div id="cv-body"></div>`), {kind:"csv"});
+}
+
+function bindCsvSheet(root){
+  const f=root.querySelector("#cv-file");
+  if(!f) return;
+  f.onchange=()=>{
+    const file=f.files[0]; if(!file) return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const txt=rd.result;
+      if(/�/.test(txt.slice(0,400))){      // 化けを見て読み直す(Shift_JISで落ちてくることが多い)
+        const rd2=new FileReader();
+        rd2.onload=()=>showCsvMap(parseCSV(rd2.result));
+        rd2.readAsText(file,"Shift_JIS");
+        return;
+      }
+      showCsvMap(parseCSV(txt));
+    };
+    rd.readAsText(file,"UTF-8");
+  };
+}
+
+function showCsvMap(rows){
+  if(!rows.length){ toast("中身が読めず"); return; }
+  const width=Math.max(...rows.map(r=>r.length));
+  const head=rows[0], saved=S.cfg.csvMap||{};
+  const colOpts=sel=>Array.from({length:width},(_,i)=>
+    `<option value="${i}" ${String(saved[sel])===String(i)?"selected":""}>${i+1}列目：${esc(String(head[i]||"").slice(0,12))}</option>`).join("");
+
+  document.getElementById("cv-body").innerHTML=`
+    <div class="scroller"><table class="csv"><tbody>${rows.slice(0,4).map(r=>
+      `<tr>${Array.from({length:width},(_,i)=>`<td>${esc(String(r[i]||"").slice(0,14))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="flabel">どの列が何か</div>
+    <div class="maprow"><span class="mk">日付</span><select id="m-date">${colOpts("date")}</select></div>
+    <div class="maprow"><span class="mk">店名</span><select id="m-shop">${colOpts("shop")}</select></div>
+    <div class="maprow"><span class="mk">金額</span><select id="m-amt">${colOpts("amt")}</select></div>
+    <div class="maprow"><span class="mk">飛ばす行</span><select id="m-skip">
+      ${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${String(saved.skip)===String(n)?"selected":""}>先頭 ${n} 行</option>`).join("")}</select></div>
+    <div id="cv-prev"></div>
+    <button class="save" id="cv-go">取り込む</button>`;
+
+  const readMap=()=>({
+    date:Number(document.getElementById("m-date").value),
+    shop:Number(document.getElementById("m-shop").value),
+    amt:Number(document.getElementById("m-amt").value),
+    skip:Number(document.getElementById("m-skip").value)
+  });
+  const refresh=()=>{
+    const list=csvToItems(rows,readMap());
+    const fresh=list.filter(x=>!findDup(x,S.items));
+    const sum=fresh.reduce((a,b)=>a+b.amount,0);
+    /* ⚠ 見張り ―― 取り込む行が、その月の固定費と同じものを指していないか。
+       ジムや保険を固定費にも入れたままだと二重に数え、精算が狂う（2026-08-18 に踏んだ）。 */
+    const clash=[]; const seen={};
+    fresh.forEach(x=>{
+      const m=String(x.date).slice(0,7);
+      (seen[m]=seen[m]||fixedFor(m)).forEach(f=>{
+        if(f.payer==="c" && Number(f.amount)===Number(x.amount) && !clash.some(v=>v.f===f.shop))
+          clash.push({f:f.shop, s:x.shop});
+      });
+    });
+    const mine=fresh.filter(x=>x.burden!=="share").length;
+    document.getElementById("cv-prev").innerHTML = list.length
+      ? `<div class="card" style="margin-top:14px">${fresh.slice(0,5).map(rowHTML).join("")||emptyHTML("新しいものは無し","")}</div>
+         <div class="note num">読めたもの ${list.length} 件のうち、新しいものは <b>${fresh.length} 件・${yen(sum)}</b>。
+         ${list.length-fresh.length?`残り ${list.length-fresh.length} 件はすでに入っており申す。`:""}
+         ${mine?`<br>うち <b>${mine}件</b>は「個人の負担に倒す店」に当たったゆえ、自動で個人の負担にいたす。`:""}</div>
+         ${clash.length?`<div class="warnbox">取り込む行と<b>同じ額の固定費</b>がござる ――
+           ${clash.slice(0,4).map(v=>esc(v.f)+"（明細では「"+esc(v.s)+"」）").join("、")}。
+           <b>二重に数えて精算が狂い申す。</b>設定 → 固定費 から、その固定費を外してくだされ。</div>`:""}`
+      : `<div class="note">その組み合わせでは1件も読めており申さぬ。列か、飛ばす行を変えてくだされ。</div>`;
+    document.getElementById("cv-go").disabled = !fresh.length;
+  };
+  ["m-date","m-shop","m-amt","m-skip"].forEach(id=>document.getElementById(id).onchange=refresh);
+
+  if(!S.cfg.csvMap) autoGuess();
+  refresh();
+
+  document.getElementById("cv-go").onclick=async ()=>{
+    const map=readMap();
+    S.cfg.csvMap=map; save("cfg",S.cfg);
+    const fresh=csvToItems(rows,map).filter(x=>!findDup(x,S.items));
+    closeSheet();
+    for(const it of fresh) await pushItem("add", it);
+    toast(fresh.length+"件を取り込み申した");
+  };
+
+  function autoGuess(){
+    const sample=rows.slice(0,12);
+    let best={date:0, amt:width>1?width-1:0, shop:1}, dS=-1,aS=-1,sS=-1;
+    for(let i=0;i<width;i++){
+      let d=0,a=0,s=0;
+      sample.forEach(r=>{
+        const v=String(r[i]||"").trim(); if(!v) return;
+        if(/^\d{4}[\/\-年]\d{1,2}[\/\-月]\d{1,2}/.test(v)) d++;
+        if(/^[\-\d,]+$/.test(v) && v.replace(/[^0-9]/g,"").length>=2) a++;
+        if(v.length>=3 && !/^[\d,\/\-]+$/.test(v)) s++;
+      });
+      if(d>dS){dS=d;best.date=i;} if(a>aS){aS=a;best.amt=i;} if(s>sS){sS=s;best.shop=i;}
+    }
+    document.getElementById("m-date").value=best.date;
+    document.getElementById("m-amt").value=best.amt;
+    document.getElementById("m-shop").value=best.shop;
+    document.getElementById("m-skip").value = /^\d{4}/.test(String(rows[0][best.date]||""))?0:1;
+  }
+}
+
+function csvToItems(rows,map){
+  const out=[];
+  rows.slice(map.skip).forEach(r=>{
+    const m=String(r[map.date]||"").trim().match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);
+    if(!m) return;
+    const amt=Number(String(r[map.amt]||"").replace(/[^0-9\-]/g,""));
+    if(!amt||amt<0) return;
+    const shop=String(r[map.shop]||"").trim();
+    out.push({ id:uid(),
+      date:m[1]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[3]).padStart(2,"0"),
+      cat:guessCat(shop)||"その他", amount:amt,
+      payer:"c", burden:guessMine(shop)||"share", shop, memo:"", src:"CSV" });
+  });
+  return out;
+}
+
+/* ---------- 繋ぎこみ ---------- */
+
+function bindAll(){
+  document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{
+    S.month=shiftMonth(S.month,Number(b.dataset.mv)); render();
+  });
+  document.querySelectorAll("[data-edit]").forEach(r=>r.onclick=()=>{
+    const it=S.items.find(x=>x.id===r.dataset.edit); if(it) openEditor(it);
+  });
+  document.querySelectorAll(".more[data-tab]").forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); });
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.open;
+    if(k==="csv") openCsv(); else if(k==="receipt") openReceipt(); else openConfig(k);
+  });
+  document.querySelectorAll("[data-sync]").forEach(b=>b.onclick=()=>pullAll());
+}
+
+document.querySelectorAll(".nb").forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); window.scrollTo(0,0); });
+document.getElementById("fab").onclick=()=>openEditor(null);
+document.getElementById("sheetbg").onclick=closeSheet;
+
+S.items=cached();
+render();
+pullAll();
+window.addEventListener("online",()=>pullAll());
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
