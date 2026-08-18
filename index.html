@@ -79,6 +79,14 @@ header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
 .settle .lbl{font-size:11px;font-weight:700;opacity:.85}
 .settle .val{font-size:16px;font-weight:800}
 .settle.even{background:var(--teal-bg);color:var(--teal-ink)}
+.send{background:var(--purple-bg);color:var(--purple-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px}
+.send .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.send .hd .ic{font-size:20px}
+.send .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
+.send .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.send .who{font-size:11px;font-weight:700;opacity:.8;margin-bottom:2px}
+.send .amt{font-size:19px;font-weight:800;letter-spacing:-.4px}
+.send .memo{font-size:11px;line-height:1.6;margin-top:10px;opacity:.85}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}
 .sechead h2{font-size:13px;font-weight:700;color:var(--sub);margin:0;letter-spacing:.04em}
@@ -404,7 +412,21 @@ function fixedFor(m){
 
 /* ---------- 集計と精算 ---------- */
 
+/**
+ * 二つの時計（2026-08-19 上様の指図により追加）
+ *
+ * この帳面は月を二通りに数える。**混ぜてはならぬ。**
+ *
+ *   利用月 (`date` の月)  … 「その月にいくら使ったか」を見るための月
+ *   引落月 (`pay`)        … 「共有口座からいつ出ていくか」＝振り込むべき月
+ *
+ * 共有カードは使った日と引き落とされる日がひと月ずれる（7月利用 → 8月26日引落）。
+ * ゆえに取り込んだ明細には、明細ごとの引落月を `pay` として持たせる。
+ * 現金や各自のキャッシュレスの立替は、その月のうちに精算するので `pay` は使った月と同じ。
+ */
+function payOf(x){ return x.pay || String(x.date||"").slice(0,7); }
 function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)===m); }
+function payItems(m){ return S.items.filter(x=>payOf(x)===m); }
 
 /**
  * 精算の考え方（2026-08-18 上様の指図により改訂）
@@ -426,9 +448,10 @@ function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)==
  * 保険のように「上乗せして入れ、共有カードで自分の分を払う」ものも、
  * 上乗せと持ち出しが打ち消し合ってちょうど 0 になる。
  */
-function summary(m){
+/* 精算の勘定そのもの。渡された一覧に対して同じ算を行う。
+   `summary()` は利用月の一覧を、`transfer()` は引落月の一覧を渡す。 */
+function calcOn(m, list){
   const plan = planFor(m);
-  const list = monthItems(m).concat(fixedFor(m));
   const amt = x => Number(x.amount)||0;
 
   const total = list.reduce((a,b)=>a+amt(b),0);
@@ -458,6 +481,32 @@ function summary(m){
   return {plan,list,total,shared,ratio,base:plan.base,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
           paid:{c:paidBy("c"),r:paidBy("r"),m:paidBy("m")},
           personal:{r:personal("r"),m:personal("m")}};
+}
+
+/* 利用月で見た姿 ―― 「その月にいくら使ったか」 */
+function summary(m){ return calcOn(m, monthItems(m).concat(fixedFor(m))); }
+
+/**
+ * 引落月で見た姿 ―― 「その月、共有口座へいくら振り込むか」（2026-08-19 追加）
+ *
+ * 共有口座から出ていくのは **その月に引き落とされるカードの請求（個人の買い物も含む全額）＋ 家賃。**
+ * 個人の買い物も口座からは出ていくので、その人が自分で埋めねばならぬ。
+ *
+ *   振込額 = 共有の受け持ち（25万の按分＋はみ出しの折半）
+ *          + 自分が共有カードで買った個人のもの（持ち出し）
+ *          − 自分の財布から出した共有のもの（立替。もう払っているぶん）
+ *
+ * 二人の振込額を足すと、口座から出ていく額にちょうど一致する（`out` で確かめている）。
+ */
+function transfer(m){
+  const c = calcOn(m, payItems(m).concat(fixedFor(m)));
+  const out = c.shared - c.lend.r - c.lend.m + c.take.r + c.take.m;   // 口座から実際に出ていく額
+  /* ⚠ はみ出しの折半で半円が出る。振込に小数は使えぬゆえ、
+     諒のぶんを円に丸め、**残りをまるごと万貴のぶんにする。**
+     こうしないと、両方を丸めたときに合計が口座から出る額と1円ずれる。 */
+  const sr = Math.round(c.due.r + c.take.r - c.lend.r);
+  const send = { r: sr, m: Math.round(out) - sr };
+  return Object.assign(c, {send, out, diff: (send.r+send.m) - Math.round(out)});
 }
 
 /* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
@@ -532,6 +581,33 @@ function header(){
   </div></div></header>`;
 }
 
+/* 「今月、共有口座へいくら振り込むか」の札（2026-08-19 追加）
+   ⚠ ここだけは**引落月**で数える。まとめの他の数字は利用月ゆえ、額は一致しない。それが正しい。 */
+/* 上乗せの見張り。⚠ **引落月で見ること。**
+   利用月で見ると、カードの利用日と引落月がずれている当月はいつも鳴ってしまう。 */
+function gapWarn(m){
+  const t=transfer(m);
+  if(!(t.gap.r||t.gap.m)) return "";
+  return `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、
+    ${ymLabel(m)}引落のぶんにまだ ${yen(t.gap.r||t.gap.m)} 足りており申さぬ。
+    <b>この月に引き落とされる明細をまだ取り込んでおらぬ</b>と見え申す。
+    このままでは振込額が ${yen((t.gap.r+t.gap.m)/2)} ずれ申すゆえ、設定 → カード明細CSV から取り込んでくだされ。</div>`;
+}
+
+function sendCard(m){
+  const t=transfer(m), N=S.cfg.names;
+  if(!t.list.length) return "";
+  const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,t.send[k]))}</div></div>`;
+  const back=(k)=>t.send[k]<0 ? `${esc(N[k])}は ${yen(-t.send[k])} 受け取る側にござる。` : "";
+  return `<div class="send">
+    <div class="hd"><span class="ic">🏦</span><div class="lbl">${ymLabel(m)}26日までに 共有口座へ振り込む額</div></div>
+    <div class="two">${one("r")}${one("m")}</div>
+    <div class="memo num">口座から出ていくのは ${yen(t.out)}
+      ―― この月に引き落とされるカードと家賃。二人の振込を足すとちょうど同じ額になり申す。
+      ${back("r")}${back("m")}</div>
+  </div>`;
+}
+
 function viewHome(){
   const s=summary(S.month), prev=summary(shiftMonth(S.month,-1)), N=S.cfg.names;
   let cmp="";
@@ -541,15 +617,6 @@ function viewHome(){
   }
   const recent = s.list.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,6);
 
-  let settle;
-  if(Math.abs(s.settle)<100){
-    settle = `<div class="settle even"><span class="ic">🤝</span><div><div class="lbl">精算</div>
-      <div class="val">貸し借りは無し</div></div></div>`;
-  }else{
-    const from = s.settle>0 ? N.m : N.r, to = s.settle>0 ? N.r : N.m;
-    settle = `<div class="settle"><span class="ic">💰</span><div><div class="lbl">精算</div>
-      <div class="val num">${esc(from)} → ${esc(to)} ${yen(Math.abs(s.settle))}</div></div></div>`;
-  }
   const side = (k,cls)=>`<div class="tile t-${cls}">
       <div class="lbl">${esc(N[k])}</div>
       <div class="val num">${s.put[k]>0?"+":s.put[k]<0?"−":""}${yen(Math.abs(s.put[k])).slice(2)}</div>
@@ -562,10 +629,8 @@ function viewHome(){
       <div class="sub num">うち共有 ${yen(s.shared)}${cmp?"・"+cmp:""}</div>
     </div>
     <div class="grid2">${side("r","teal")}${side("m","pink")}</div>
-    ${settle}
-    ${(s.gap.r||s.gap.m) ? `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、この月にはまだ
-      ${yen(s.gap.r||s.gap.m)}ぶん足りており申さぬ。<b>カード明細をまだ取り込んでおらぬ月</b>と見え申す。
-      このままでは精算が ${yen((s.gap.r+s.gap.m)/2)} ずれ申すゆえ、設定 → カード明細CSV から取り込んでくだされ。</div>` : ""}
+    ${sendCard(S.month)}
+    ${gapWarn(S.month)}
     <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
     <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("まだ記録がござらぬ","＋ から入れてくだされ")}</div>
   </div>`;
@@ -739,6 +804,8 @@ function editorHTML(it, dupWarn){
     ${chipRow("f-burden", BURDENS(), it.burden, "burden")}
     <div class="field"><label>店・内容</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="マルエツ"></div>
     <div class="field"><label>日付</label><input id="f-date" type="date" value="${esc(it.date||today())}"></div>
+    <div class="field"><label>引落月 <span class="hint">共有口座から出ていく月。カードは利用のひと月あと</span></label>
+      <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>
     <div class="field"><label>メモ</label><textarea id="f-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
     <button class="save" id="f-save">保存する</button>
     ${it.id?'<button class="save del" id="f-del">この記録を消す</button>':""}
@@ -797,6 +864,9 @@ function bindSheet(){
     it.amount=n;
     it.shop=root.querySelector("#f-shop").value.trim();
     it.date=root.querySelector("#f-date").value||today();
+    // 利用月と同じなら持たせない（既定に任せる）。ずれているときだけ刻む。
+    const pv=(root.querySelector("#f-pay")||{}).value||"";
+    it.pay = (pv && pv!==it.date.slice(0,7)) ? pv : undefined;
     it.memo=root.querySelector("#f-memo").value.trim();
     const isNew=!it.id;
     if(isNew){ it.id=uid(); it.src=sheetCtx.src||"手入力"; }
@@ -1138,6 +1208,11 @@ function showCsvMap(rows){
     <div class="maprow"><span class="mk">金額</span><select id="m-amt">${colOpts("amt")}</select></div>
     <div class="maprow"><span class="mk">飛ばす行</span><select id="m-skip">
       ${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${String(saved.skip)===String(n)?"selected":""}>先頭 ${n} 行</option>`).join("")}</select></div>
+    <div class="flabel">いつ共有口座から引き落とされる分か</div>
+    <div class="maprow"><span class="mk">引落月</span><input id="m-pay" type="month" value="${guessPay(rows)}"></div>
+    <div class="note">明細に載っている<b>利用日</b>と、口座から<b>出ていく日</b>はひと月ずれ申す（毎月26日引落）。
+    振込額はこの引落月で数え申すゆえ、ここを違えると振込が合わなくなり申す。
+    <b>Vpassで開いていた「◯年◯月お支払い分」と同じ月</b>を選んでくだされ。</div>
     <div id="cv-prev"></div>
     <button class="save" id="cv-go">取り込む</button>`;
 
@@ -1145,7 +1220,8 @@ function showCsvMap(rows){
     date:Number(document.getElementById("m-date").value),
     shop:Number(document.getElementById("m-shop").value),
     amt:Number(document.getElementById("m-amt").value),
-    skip:Number(document.getElementById("m-skip").value)
+    skip:Number(document.getElementById("m-skip").value),
+    pay:String(document.getElementById("m-pay").value||"")
   });
   const refresh=()=>{
     const list=csvToItems(rows,readMap());
@@ -1173,14 +1249,15 @@ function showCsvMap(rows){
       : `<div class="note">その組み合わせでは1件も読めており申さぬ。列か、飛ばす行を変えてくだされ。</div>`;
     document.getElementById("cv-go").disabled = !fresh.length;
   };
-  ["m-date","m-shop","m-amt","m-skip"].forEach(id=>document.getElementById(id).onchange=refresh);
+  ["m-date","m-shop","m-amt","m-skip","m-pay"].forEach(id=>document.getElementById(id).onchange=refresh);
 
   if(!S.cfg.csvMap) autoGuess();
   refresh();
 
   document.getElementById("cv-go").onclick=async ()=>{
     const map=readMap();
-    S.cfg.csvMap=map; save("cfg",S.cfg);
+    // ⚠ 引落月は覚えない。覚えると次の取り込みに古い月が紛れ込む。列と飛ばす行だけ。
+    S.cfg.csvMap={date:map.date, shop:map.shop, amt:map.amt, skip:map.skip}; save("cfg",S.cfg);
     const fresh=csvToItems(rows,map).filter(x=>!findDup(x,S.items));
     closeSheet();
     for(const it of fresh) await pushItem("add", it);
@@ -1207,6 +1284,17 @@ function showCsvMap(rows){
   }
 }
 
+
+/* 明細のいちばん新しい利用日から、引き落とし月を当てる。
+   月末締め・翌月26日払いゆえ「いちばん新しい利用日の翌月」。上様が画面で直せる。 */
+function guessPay(rows){
+  let mx="";
+  rows.forEach(r=>r.forEach(v=>{
+    const g=String(v||"").match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);
+    if(g){ const s=g[1]+"-"+String(g[2]).padStart(2,"0")+"-"+String(g[3]).padStart(2,"0"); if(s>mx) mx=s; }
+  }));
+  return mx ? shiftMonth(mx.slice(0,7),1) : ym(new Date());
+}
 function csvToItems(rows,map){
   const out=[];
   rows.slice(map.skip).forEach(r=>{
@@ -1218,7 +1306,8 @@ function csvToItems(rows,map){
     out.push({ id:uid(),
       date:m[1]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[3]).padStart(2,"0"),
       cat:guessCat(shop)||"その他", amount:amt,
-      payer:"c", burden:guessMine(shop)||"share", shop, memo:"", src:"CSV" });
+      payer:"c", burden:guessMine(shop)||"share", shop, memo:"", src:"CSV",
+      pay: map.pay || undefined });
   });
   return out;
 }
