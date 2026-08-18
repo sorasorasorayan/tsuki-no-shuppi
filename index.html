@@ -79,6 +79,14 @@ header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
 .settle .lbl{font-size:11px;font-weight:700;opacity:.85}
 .settle .val{font-size:16px;font-weight:800}
 .settle.even{background:var(--teal-bg);color:var(--teal-ink)}
+.bill{background:var(--blue-bg);color:var(--blue-ink);border-radius:20px;padding:14px 16px;margin-bottom:12px}
+.bill .hd{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.bill .hd .ic{font-size:20px}
+.bill .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
+.bill .big{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.bill .brk{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.bill .chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--card)}
+.bill .memo{font-size:11px;line-height:1.6;margin-top:9px;opacity:.85}
 .send{background:var(--purple-bg);color:var(--purple-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px}
 .send .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .send .hd .ic{font-size:20px}
@@ -470,7 +478,13 @@ function calcOn(m, list){
   const over = Math.max(0, shared - plan.base);              // 固定額から足が出たぶん
   const put  = {r:extra.r+lend.r-take.r, m:extra.m+lend.m-take.m};
   const settle = (put.r-put.m)/2;                            // 折半。正 = 万貴 → 諒
-  const due = { r: plan.base*ratio + over/2, m: plan.base*(1-ratio) + over/2 };
+  /* 共有の支払いが固定額（25万）に届かぬ月は、按分の元を**実額まで下げる**（2026-08-19）。
+     下げずに 25万 をそのまま按分すると、受け持ちが口座から出ていく額を上回り、
+     余りがまるごともう一方へ寄って「諒 120,000／万貴 13,330」のような歪んだ額が出る。
+     ―― 明細を取り込む前はどの月も家賃だけになるゆえ、必ずこれを踏む。
+     足が出ている月は cap＝25万ゆえ、これまでと1円も変わらぬ。 */
+  const cap  = Math.min(shared, plan.base);
+  const due = { r: cap*ratio + over/2, m: cap*(1-ratio) + over/2 };
 
   const byCat = {};
   list.forEach(x=>{ byCat[x.cat]=(byCat[x.cat]||0)+amt(x); });
@@ -478,7 +492,7 @@ function calcOn(m, list){
   /* 上乗せに見合う「共有カード払い・個人負担」がこの月にまだ無いぶん。
      ⚠ ここが残っていると、貸し借りが無くても精算額が出る。明細をまだ取り込んでいない月の印。 */
   const gap = {r:Math.max(0,extra.r-take.r), m:Math.max(0,extra.m-take.m)};
-  return {plan,list,total,shared,ratio,base:plan.base,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
+  return {plan,list,total,shared,ratio,base:plan.base,cap,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
           paid:{c:paidBy("c"),r:paidBy("r"),m:paidBy("m")},
           personal:{r:personal("r"),m:personal("m")}};
 }
@@ -506,7 +520,22 @@ function transfer(m){
      こうしないと、両方を丸めたときに合計が口座から出る額と1円ずれる。 */
   const sr = Math.round(c.due.r + c.take.r - c.lend.r);
   const send = { r: sr, m: Math.round(out) - sr };
-  return Object.assign(c, {send, out, diff: (send.r+send.m) - Math.round(out)});
+
+  /* この月に共有カードから引き落とされる請求の内訳（2026-08-19 上様の求めにより追加）。
+     家賃は共有口座から出るがカード払いではないゆえ、fixed を除いて数える。
+     除かねば「カードのご請求」に家賃が紛れ込み、Vpassの請求額と合わなくなる。 */
+  const amt2 = x => Number(x.amount)||0;
+  const isCard = x => x.payer==="c" && !x.fixed;
+  const sum = f => c.list.filter(f).reduce((a,b)=>a+amt2(b),0);
+  const bill = {
+    total: sum(isCard),
+    share: sum(x=>isCard(x)&&x.burden==="share"),
+    r:     sum(x=>isCard(x)&&x.burden==="r"),
+    m:     sum(x=>isCard(x)&&x.burden==="m"),
+    n:     c.list.filter(isCard).length,
+    other: sum(x=>x.payer==="c"&&x.fixed)
+  };
+  return Object.assign(c, {send, out, bill, diff: (send.r+send.m) - Math.round(out)});
 }
 
 /* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
@@ -594,9 +623,31 @@ function gapWarn(m){
     このままでは振込額が ${yen((t.gap.r+t.gap.m)/2)} ずれ申すゆえ、設定 → カード明細CSV から取り込んでくだされ。</div>`;
 }
 
+/* 「この月、共有カードからいくら引き落とされるか」の札（2026-08-19 追加）
+   ⚠ **引落月**で数える。まとめの他の数字は利用月ゆえ、額は一致せぬ。それが正しい。 */
+function billCard(m){
+  const t=transfer(m), N=S.cfg.names;
+  if(!t.bill.n){
+    return `<div class="warnbox">${ymLabel(m)}26日に引き落とされる<b>カード明細がまだ1件もござらぬ。</b>
+      共有カードは使った月の翌月に引き落とされ申すゆえ、${ymLabel(shiftMonth(m,-1))}利用ぶんの明細を
+      設定 → カード明細CSV から取り込んでくだされ。取り込むまで振込額は出せ申さぬ。</div>`;
+  }
+  const b=t.bill;
+  const chip=(lbl,v)=>v>0?`<span class="chip num">${esc(lbl)} ${yenPlain(v)}</span>`:"";
+  return `<div class="bill">
+    <div class="hd"><span class="ic">💳</span><div class="lbl">${ymLabel(m)}26日 引き落とし ―― 共有カードのご請求</div></div>
+    <div class="big num">${yen(b.total)}</div>
+    <div class="brk">${chip("共有",b.share)}${chip(N.r,b.r)}${chip(N.m,b.m)}<span class="chip num">${b.n}件</span></div>
+    <div class="memo num">これに家賃ほか ${yen(b.other)} を足した <b>${yen(t.out)}</b> が、この日に共有口座から出ていき申す。</div>
+  </div>`;
+}
+
 function sendCard(m){
   const t=transfer(m), N=S.cfg.names;
-  if(!t.list.length) return "";
+  /* ⚠ その月に引き落とされるカード明細が1件も無いなら、まだ取り込んでおらぬ月。
+     家賃だけで按分すると嘘の額（歪んだ片寄り）が出るゆえ、**黙って見せぬ。**
+     代わりに billCard() が「取り込んでくだされ」と告げる。 */
+  if(!t.list.length || !t.bill.n) return "";
   const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,t.send[k]))}</div></div>`;
   const back=(k)=>t.send[k]<0 ? `${esc(N[k])}は ${yen(-t.send[k])} 受け取る側にござる。` : "";
   return `<div class="send">
@@ -629,6 +680,7 @@ function viewHome(){
       <div class="sub num">うち共有 ${yen(s.shared)}${cmp?"・"+cmp:""}</div>
     </div>
     <div class="grid2">${side("r","teal")}${side("m","pink")}</div>
+    ${billCard(S.month)}
     ${sendCard(S.month)}
     ${gapWarn(S.month)}
     <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
@@ -671,7 +723,7 @@ function viewStats(){
       }).join("")}
       <div class="note num">支払元の内訳 ―― 共有カード ${yen(s.paid.c)}／${esc(N.r)} ${yen(s.paid.r)}／${esc(N.m)} ${yen(s.paid.m)}</div>
       <div class="note num">共有の受け持ち ―― ${esc(N.r)} ${yen(s.due.r)}／${esc(N.m)} ${yen(s.due.m)}。
-      固定額 ${yen(s.base)} を ${Math.round(s.ratio*100)}：${100-Math.round(s.ratio*100)} で按分し、
+      ${s.cap<s.base?`この月の共有 ${yen(s.cap)}`:`固定額 ${yen(s.base)}`} を ${Math.round(s.ratio*100)}：${100-Math.round(s.ratio*100)} で按分し、
       ${s.over>0?`足が出た ${yen(s.over)} を折半`:`足は出ており申さぬ`}。</div>
       ${(s.gap.r||s.gap.m) ? `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、この月にはまだ
         ${yen(s.gap.r||s.gap.m)}ぶん足りており申さぬ。<b>カード明細をまだ取り込んでおらぬ月</b>と見え申す。
