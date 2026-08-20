@@ -432,7 +432,30 @@ function fixedFor(m){
  * ゆえに取り込んだ明細には、明細ごとの引落月を `pay` として持たせる。
  * 現金や各自のキャッシュレスの立替は、その月のうちに精算するので `pay` は使った月と同じ。
  */
-function payOf(x){ return x.pay || String(x.date||"").slice(0,7); }
+/* ⚠ 引落月は「2026-08」の文字列のはずだが、**スプレッドシートを一度往復すると化ける。**
+   Googleスプレッドシートは "2026-08" を日付と解して勝手に Date に直してしまうため、
+   GASから返ってくるときには "Sat Aug 01 2026 00:00:00 GMT+0900 (JST)" になっている。
+   （2026-08-20 に踏んだ ―― 明細を取り込んだのに「1件もござらぬ」と警告が出続けた正体がこれ）
+   GAS側でも直したが、**すでにシートへ日付として書かれてしまった行**があるので、
+   受け取る側でも必ず yyyy-MM へ均す。時差でひと月ずれぬよう、文字列のまま読むこと。 */
+const MONNM = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+function normYM(v){
+  if(!v) return "";
+  const s=String(v).trim();
+  let g=s.match(/^(\d{4})[-\/.年](\d{1,2})/);                       // 2026-08 / 2026/08/01 / 2026年8月
+  if(g) return g[1]+"-"+String(Number(g[2])).padStart(2,"0");
+  g=s.match(/\b([A-Za-z]{3})[a-z]*\s+\d{1,2}\s+(\d{4})\b/);       // Sat Aug 01 2026 …（Dateの文字列）
+  if(g && MONNM[g[1].toLowerCase()]) return g[2]+"-"+String(MONNM[g[1].toLowerCase()]).padStart(2,"0");
+  return "";
+}
+function payOf(x){ return normYM(x.pay) || String(x.date||"").slice(0,7); }
+/* 引落月が抜け落ちたまま入っている、取り込み済みの共有カード明細。
+   ―― GAS側が古いまま（引落月の列を知らぬ版）で動いていると、送っても K列に残らず、
+      取り込んだはずの月に「明細が1件もござらぬ」と鳴り続ける。設定から振り直せるようにした。 */
+function needPay(){
+  return S.items.filter(x => x.payer==="c" && !x.fixed && x.src==="CSV"
+    && !normYM(x.pay) && String(x.date||"").length>=7);
+}
 function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)===m); }
 function payItems(m){ return S.items.filter(x=>payOf(x)===m); }
 
@@ -617,6 +640,10 @@ function header(){
 function gapWarn(m){
   const t=transfer(m);
   if(!(t.gap.r||t.gap.m)) return "";
+  /* ⚠ 引落月が抜けているだけで、明細そのものは入っている月では黙る。
+     billCard() が「引落月を振り直してくだされ」と告げるゆえ、ここで重ねて
+     「まだ取り込んでおらぬ」と言うと、取り込んだ上様を惑わせる（2026-08-20 に実際そうなった）。 */
+  if(needPay().some(x=>shiftMonth(String(x.date).slice(0,7),1)===m)) return "";
   return `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、
     ${ymLabel(m)}引落のぶんにまだ ${yen(t.gap.r||t.gap.m)} 足りており申さぬ。
     <b>この月に引き落とされる明細をまだ取り込んでおらぬ</b>と見え申す。
@@ -630,7 +657,10 @@ function billCard(m){
   if(!t.bill.n){
     return `<div class="warnbox">${ymLabel(m)}26日に引き落とされる<b>カード明細がまだ1件もござらぬ。</b>
       共有カードは使った月の翌月に引き落とされ申すゆえ、${ymLabel(shiftMonth(m,-1))}利用ぶんの明細を
-      設定 → カード明細CSV から取り込んでくだされ。取り込むまで振込額は出せ申さぬ。</div>`;
+      設定 → カード明細CSV から取り込んでくだされ。取り込むまで振込額は出せ申さぬ。
+      ${needPay().some(x=>shiftMonth(String(x.date).slice(0,7),1)===m)
+        ? `<br><br><b>いや、取り込みは済んでおり申す。</b>ただ、その明細に<b>引落月が入っており申さぬ。</b>
+           設定 → <b>引落月の振り直し</b> から当て直してくだされ。` : ""}</div>`;
   }
   const b=t.bill;
   const chip=(lbl,v)=>v>0?`<span class="chip num">${esc(lbl)} ${yenPlain(v)}</span>`:"";
@@ -789,6 +819,9 @@ function viewSettings(){
         <button class="mini" data-open="receipt">開く</button></div>
       <div class="setrow"><div><div class="sl">カード明細CSV</div><div class="sd">Vpassから落としたCSVを読み込む</div></div>
         <button class="mini" data-open="csv">取り込む</button></div>
+      <div class="setrow"><div><div class="sl">引落月の振り直し</div>
+        <div class="sd num">${needPay().length ? needPay().length+"件に引落月が入っており申さぬ" : "抜けはござらぬ"}</div></div>
+        <button class="mini ${needPay().length?"":"ghost"}" data-open="fixpay">開く</button></div>
     </div>
 
     <div class="sechead"><h2>暮らしの決め事（${ymLabel(p.from)}から）</h2></div>
@@ -1032,6 +1065,26 @@ function openConfig(kind){
       <div class="field"><label>費目</label><select id="dc-cat">${CATS.map(x=>`<option>${esc(x.k)}</option>`).join("")}</select></div>
       <button class="save" id="dc-add">足す</button>`), {kind:"dict"});
   }
+  /* 引落月の振り直し（2026-08-20 追加）
+     共有カードは月末締め・翌月26日払いゆえ、引落月＝**利用月の翌月**で一意に決まる。
+     ⚠ 当て直すのは「共有カード払い・CSVから取り込んだ・引落月を持たぬ」ものだけ。
+       手で入れた記録や、既に引落月を持つものには触れぬ。 */
+  if(kind==="fixpay"){
+    const bad=needPay(), byM={};
+    bad.forEach(x=>{ const k=String(x.date).slice(0,7); (byM[k]=byM[k]||[]).push(x); });
+    const keys=Object.keys(byM).sort();
+    openSheet(sheetShell("引落月を振り直す", `
+      <div class="note">共有カードは<b>月末締め・翌月26日払い</b>にござる。
+      取り込んだ明細に引落月が入っておらぬと、振込の札が出ぬまま
+      「明細がまだ1件もござらぬ」と鳴り続け申す。ここで<b>利用月の翌月</b>を当て直せまする。</div>
+      ${keys.length ? keys.map(k=>{
+        const sum=byM[k].reduce((a,b)=>a+(Number(b.amount)||0),0);
+        return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}利用・${byM[k].length}件</div>
+          <div class="sd num">${yen(sum)} → <b>${ymLabel(shiftMonth(k,1))}</b>引落へ</div></div></div>`;
+        }).join("")
+      : `<div class="empty"><span class="e-ic">✅</span>引落月の抜けはござらぬ</div>`}
+      ${keys.length?`<button class="save" id="fp-go">${bad.length}件に振り直す</button>`:""}`), {kind:"fixpay"});
+  }
 }
 
 function bindConfigSheet(root){
@@ -1086,6 +1139,14 @@ function bindConfigSheet(root){
     c.plans=c.plans.filter(x=>x.from!==b.dataset.pdel);
     save("cfg",c); openConfig("plan"); render();
   });
+
+  const fpg=root.querySelector("#fp-go");
+  if(fpg) fpg.onclick=async ()=>{
+    const bad=needPay(); closeSheet();
+    for(const x of bad) await pushItem("update", Object.assign({}, x,
+      {pay: shiftMonth(String(x.date).slice(0,7), 1)}));
+    render(); toast(bad.length+"件の引落月を振り直し申した");
+  };
 
   const fxa=root.querySelector("#fx-add");
   if(fxa) fxa.onclick=()=>{
