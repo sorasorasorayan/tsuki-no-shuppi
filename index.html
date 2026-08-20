@@ -95,6 +95,25 @@ header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
 .send .who{font-size:11px;font-weight:700;opacity:.8;margin-bottom:2px}
 .send .amt{font-size:19px;font-weight:800;letter-spacing:-.4px}
 .send .memo{font-size:11px;line-height:1.6;margin-top:10px;opacity:.85}
+/* 精算を締める札。済んだ月は緑に沈める（2026-08-21） */
+.send.done{background:var(--teal-bg);color:var(--teal-ink)}
+.send .settle{width:100%;background:var(--purple);color:#fff;font-size:14px;font-weight:700;padding:12px;border-radius:999px;margin-top:12px}
+.send .settle.ghost{background:transparent;color:inherit;opacity:.7;box-shadow:inset 0 0 0 1.5px currentColor}
+.send .memo .mini{margin-left:6px;vertical-align:middle}
+.sumrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 2px;border-bottom:1px solid var(--card2)}
+.sumrow b{font-weight:800}
+.sumrow.big{font-size:16px;border-bottom:none;padding-top:13px}
+/* 🤝 二人のあいだの貸し借り（2026-08-21）。口座の話ではないゆえ、🏦 とは別の色に置く */
+.loan{background:var(--amber-bg);color:var(--amber-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px}
+.loan .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.loan .hd .ic{font-size:20px}
+.loan .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
+.loan .big{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.loan .memo{font-size:11px;line-height:1.6;margin-top:9px;opacity:.9}
+.loan .memo .mini{margin-left:6px;vertical-align:middle}
+.tag.in{background:var(--teal-bg);color:var(--teal-ink)}
+.amt.plus{color:var(--teal-ink)}
+.trio.kinds{margin-bottom:14px}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}
 .sechead h2{font-size:13px;font-weight:700;color:var(--sub);margin:0;letter-spacing:.04em}
@@ -306,14 +325,29 @@ const DEFAULT_CFG = {
     {kw:"エネオス",cat:"交通"},{kw:"駐車",cat:"交通"},{kw:"パーキング",cat:"交通"},
     {kw:"GOOGLE ONE",cat:"通信"}
   ],
+  /* 精算日 ―― 二人が共有口座へ振り込む日（2026-08-21 上様の指図により制定）。
+     ⚠ これは**決まりではなく見込み**である。真は `closed`（締めた記録）のほう。
+       この日を過ぎたら「精算した」の札を出す、という合図に使う。 */
+  settleDay: 20,
+  /* 締めた月 ―― 「もう振り込んだ」という**出来事**の記録（2026-08-21 追加）。
+       closed["2026-08"] = {on:"2026-08-22", r:124808, m:144807, out:269615, n:43}
+     ⚠ 締めた月の振込額は**この控えを見せる。** 算し直さない。
+       あとから按分比や固定費を直しても、既に振り込んだ額は動かぬのが道理ゆえ。
+     ⚠ 締めた月へは、以後どの記録も入らぬ（`defaultPay()` が飛び越える）。 */
+  closed:{},
   csvMap:null,
   lastSync:""
 };
 
+/* 二人で揃える決め事。これだけがスプレッドシートの `設定` シートへ行き来する。
+   ⚠ `api`・`token`・`csvMap`・`lastSync` は**端末ごと**ゆえ、決してここへ入れない。 */
+const SHARED_KEYS = ["names","plans","mine","dict","settleDay","closed"];
+function sharedCfg(){ const o={}; SHARED_KEYS.forEach(k=>{ if(S.cfg[k]!==undefined) o[k]=S.cfg[k]; }); return o; }
+
 const S = {
   tab:"home", month:ym(new Date()),
   items:[], cfg:load("cfg", DEFAULT_CFG), queue:load("queue", []),
-  online:false, syncing:false, err:""
+  online:false, syncing:false, err:"", cfgStale:false
 };
 
 function load(k,def){ try{ const v=localStorage.getItem("shuppi."+k); return v?Object.assign(structuredClone(def),JSON.parse(v)):structuredClone(def); }catch(e){ return structuredClone(def); } }
@@ -331,6 +365,9 @@ function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg
 const PAYERS = ()=>[{k:"c",label:"共有カード",cls:"c"},{k:"r",label:S.cfg.names.r,cls:"r"},{k:"m",label:S.cfg.names.m,cls:"m"}];
 const BURDENS = ()=>[{k:"share",label:"共有",cls:"c"},{k:"r",label:S.cfg.names.r+" 個人",cls:"r"},{k:"m",label:S.cfg.names.m+" 個人",cls:"m"}];
 const payerLabel = k => (PAYERS().find(p=>p.k===k)||{label:"?"}).label;
+/* 入金のとき、支払元の列は「どこへ入ったか」と読む。共有カードではなく**共有口座**である。 */
+const IN_TO = ()=>[{k:"c",label:"共有口座へ",cls:"c"},{k:"r",label:S.cfg.names.r+"へ",cls:"r"},{k:"m",label:S.cfg.names.m+"へ",cls:"m"}];
+const inLabel = k => (IN_TO().find(p=>p.k===k)||{label:"?"}).label;
 const burdenLabel = k => (BURDENS().find(b=>b.k===k)||{label:"?"}).label;
 
 /* ---------- データ層 ---------- */
@@ -357,6 +394,7 @@ async function pullAll(){
   S.syncing=true; render();
   try{
     await flushQueue();
+    await pullConfig();
     const j = await api("list");
     S.items = j.items||[]; setCached(S.items);
     S.online=true; S.err="";
@@ -373,6 +411,54 @@ async function flushQueue(){
     try{ await api(q.action, q.payload); }catch(e){ rest.push(q); }
   }
   S.queue=rest; save("queue",S.queue);
+}
+
+/* ---------- 二人で揃える決め事（2026-08-21 追加） ----------
+ *
+ * 呼び名・按分・固定費・店名辞書・精算日・締めた月は**スプレッドシートに置く。**
+ * これらは金の額に効くゆえ、端末ごとに散らばっていると
+ * **同じ月を開いた二人に違う振込額が出る。** それを避けるためである。
+ *
+ * ⚠ 接続先URLと合言葉は端末ごと。決してシートへ送らない（`SHARED_KEYS` に入れない）。
+ * ⚠ 後勝ちである。二人が同時に設定を触れば、あとに保存したほうが残る。
+ */
+async function pullConfig(){
+  /* ⚠ 古い `Code.gs` のままだと「知らぬ用向き: config」で断られる。
+     ここで throw させると pullAll ごと落ちて、**明細まで圏外扱いになる。**
+     決め事が取れずとも明細は取れるゆえ、黙って見送り、控えを正とする。 */
+  let j;
+  try{ j = await api("config"); }catch(e){ S.cfgStale=true; return; }
+  S.cfgStale=false;
+  if(!j.config) return;                       // シートがまだ空。こちらの控えを正とする
+  SHARED_KEYS.forEach(k=>{ if(j.config[k]!=null) S.cfg[k]=j.config[k]; });
+  save("cfg", S.cfg);
+}
+
+/* 決め事を控えて、シートへも送る。**共有の決め事を変えたら必ずこれを通すこと。**
+   `save("cfg",…)` だけで済ますと、その端末にしか残らず相手と食い違う。 */
+function saveCfg(){
+  save("cfg", S.cfg);
+  if(!S.cfg.api) return;
+  api("saveConfig", sharedCfg())
+    .then(()=>{ S.online=true; })
+    .catch(()=>{
+      /* ⚠ 決め事の送りは**溜めない。最後の一つだけ持つ。**
+         古い帳面へ送り続けると失敗するたびに積み上がり、繋がった折に古い決め事まで送り直してしまう。 */
+      S.queue = S.queue.filter(q=>q.action!=="saveConfig");
+      S.queue.push({action:"saveConfig", payload:sharedCfg()});
+      save("queue",S.queue); S.online=false;
+    });
+}
+
+/* まとめて送る。1件ずつだと40件で40往復して待たされるゆえ。 */
+async function pushMany(action, list){
+  if(!list.length) return;
+  if(action==="add") S.items=list.concat(S.items);
+  else S.items=S.items.map(x=>{ const n=list.find(v=>v.id===x.id); return n||x; });
+  setCached(S.items); render();
+  if(!S.cfg.api) return;
+  try{ await api("bulk",{items:list}); S.online=true; }
+  catch(e){ S.queue.push({action:"bulk", payload:{items:list}}); save("queue",S.queue); S.online=false; toast("圏外のため後で送り申す"); }
 }
 
 async function pushItem(action, item){
@@ -448,7 +534,61 @@ function normYM(v){
   if(g && MONNM[g[1].toLowerCase()]) return g[2]+"-"+String(MONNM[g[1].toLowerCase()]).padStart(2,"0");
   return "";
 }
-function payOf(x){ return normYM(x.pay) || String(x.date||"").slice(0,7); }
+/* 精算日（既定20日）。二人が共有口座へ振り込む日。カードの引き落としは26日ゆえ、その前に入れておく。 */
+function settleDay(){ return Number(S.cfg.settleDay)||20; }
+function closedCount(){ return Object.keys(S.cfg.closed||{}).length; }
+function closedOf(m){ return (S.cfg.closed||{})[m]||null; }
+function isClosed(m){ return !!closedOf(m); }
+
+/* 引落月を持たぬものの既定 ―― どの精算に乗るか。
+   1. **共有カード以外**は、精算日を過ぎて使ったぶんはその月の振り込みに間に合わぬゆえ翌月へ回す。
+      （共有カードはこの締めと関わりない。月末締め・翌26日払いで、取り込みが `pay` を刻む）
+   2. そのうえで、**既に締めた月は飛び越える。** 金はもう動いたのだから、後から差し込めぬ。
+   ⚠ 締めるときに、その月に乗っていたものへは `pay` を刻んで凍らせる。
+     ゆえにこの既定が効くのは「まだ締めておらぬ月ぶん」だけである。 */
+function defaultPay(x){
+  const d = String(x.date||"");
+  let m = d.slice(0,7);
+  if(!m) return "";
+  if(x.payer !== "c" && Number(d.slice(8,10)) >= settleDay()) m = shiftMonth(m,1);
+  for(let i=0; i<60 && isClosed(m); i++) m = shiftMonth(m,1);   // 締めた月は飛ばす
+  return m;
+}
+function payOf(x){ return normYM(x.pay) || defaultPay(x); }
+
+/* ---------- 種別 ―― 出費 / 入金 / 貸借（2026-08-21 上様の指図により追加） ----------
+ *
+ * この帳面が扱う金の動きは三通りある。**混ぜると出費の額が嘘になる。**
+ *
+ *   出費（既定・空欄）… 家から金が出る。今月の出費に数える
+ *   入金             … 家に金が入る（保険金・助成金・還付・カードの返金）。
+ *                      **出費には数えぬが、精算には効く** ―― 出費の逆向きとして
+ *   貸借             … 二人のあいだで金が移っただけ。家の金は動いておらぬ。
+ *                      **出費にも精算にも一切効かぬ。**効くのは 🤝 の残高だけ
+ *
+ * ⚠ **金額は種別によらず常に正の整数で持つ。** 入金を負の数で保存しない。
+ *   符号は `signed()` が種別から決める ―― 数の符号に意味を持たせると、
+ *   旧Excelの「負の数で個人の支出を表す」と同じ混乱に戻る。
+ */
+function kindOf(x){ const k=String((x&&x.kind)||""); return (k==="入金"||k==="貸借") ? k : ""; }
+function isIn(x){ return kindOf(x)==="入金"; }
+function isLoan(x){ return kindOf(x)==="貸借"; }
+function signed(x){ return (Number(x.amount)||0) * (isIn(x) ? -1 : 1); }
+
+/* 二人のあいだの貸し借りの残高。**月に紐づかぬ通算の値。**
+   正なら「万貴 → 諒」（諒が貸している側）。 */
+function loanBalance(){
+  let bal=0;
+  S.items.forEach(x=>{
+    if(!isLoan(x)) return;
+    const a=Number(x.amount)||0;
+    if(x.payer==="r" && x.burden==="m") bal+=a;
+    else if(x.payer==="m" && x.burden==="r") bal-=a;
+  });
+  return bal;
+}
+/* 20日の締めで翌月へ送られたか（画面に印を出すため）。 */
+function pushedOut(x){ return !normYM(x.pay) && x.payer!=="c" && !x.fixed && payOf(x)!==String(x.date||"").slice(0,7); }
 /* 引落月が抜け落ちたまま入っている、取り込み済みの共有カード明細。
    ―― GAS側が古いまま（引落月の列を知らぬ版）で動いていると、送っても K列に残らず、
       取り込んだはずの月に「明細が1件もござらぬ」と鳴り続ける。設定から振り直せるようにした。 */
@@ -458,6 +598,11 @@ function needPay(){
 }
 function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)===m); }
 function payItems(m){ return S.items.filter(x=>payOf(x)===m); }
+
+/* 精算は毎月20日。ゆえに引落月は次のように決まる。
+     共有カード          … 取り込みが刻んだ請求月（月末締め・翌26日払い）
+     それ以外の20日より前 … その月の精算
+     それ以外の20日以降   … **翌月の精算**（その月の振り込みにはもう間に合わぬ） */
 
 /**
  * 精算の考え方（2026-08-18 上様の指図により改訂）
@@ -483,15 +628,19 @@ function payItems(m){ return S.items.filter(x=>payOf(x)===m); }
    `summary()` は利用月の一覧を、`transfer()` は引落月の一覧を渡す。 */
 function calcOn(m, list){
   const plan = planFor(m);
-  const amt = x => Number(x.amount)||0;
+  /* ⚠ **貸借は勘定に入れぬ。** 家の金は動いておらぬゆえ、出費にも精算にも効かせない。
+     ただし `list` そのものからは外さない ―― 履歴と最近の記録に出す要があるため。 */
+  const fin = list.filter(x=>!isLoan(x));
+  const amt = x => signed(x);            // ⚠ 入金は負として効く。ここが要
 
-  const total = list.reduce((a,b)=>a+amt(b),0);
-  const shared = list.filter(x=>x.burden==="share").reduce((a,b)=>a+amt(b),0);
+  const total  = fin.filter(x=>!isIn(x)).reduce((a,b)=>a+amt(b),0);   // 出費だけ。入金を差し引かぬ
+  const income = fin.filter(x=>isIn(x)).reduce((a,b)=>a-amt(b),0);    // 入金（見せるため正の数で）
+  const shared = fin.filter(x=>x.burden==="share").reduce((a,b)=>a+amt(b),0);
 
-  const paidBy = k => list.filter(x=>x.payer===k).reduce((a,b)=>a+amt(b),0);
-  const lent   = k => list.filter(x=>x.payer===k && x.burden==="share").reduce((a,b)=>a+amt(b),0);
-  const took   = k => list.filter(x=>x.payer==="c" && x.burden===k).reduce((a,b)=>a+amt(b),0);
-  const personal = k => list.filter(x=>x.burden===k).reduce((a,b)=>a+amt(b),0);
+  const paidBy = k => fin.filter(x=>x.payer===k).reduce((a,b)=>a+amt(b),0);
+  const lent   = k => fin.filter(x=>x.payer===k && x.burden==="share").reduce((a,b)=>a+amt(b),0);
+  const took   = k => fin.filter(x=>x.payer==="c" && x.burden===k).reduce((a,b)=>a+amt(b),0);
+  const personal = k => fin.filter(x=>x.burden===k).reduce((a,b)=>a+amt(b),0);
 
   const ratio = Number(plan.ratio);
   const contrib = contribOf(plan);
@@ -509,13 +658,14 @@ function calcOn(m, list){
   const cap  = Math.min(shared, plan.base);
   const due = { r: cap*ratio + over/2, m: cap*(1-ratio) + over/2 };
 
+  /* 分析は出費の内訳を見るためのもの。入金と貸借は混ぜぬ。 */
   const byCat = {};
-  list.forEach(x=>{ byCat[x.cat]=(byCat[x.cat]||0)+amt(x); });
+  fin.filter(x=>!isIn(x)).forEach(x=>{ byCat[x.cat]=(byCat[x.cat]||0)+amt(x); });
 
   /* 上乗せに見合う「共有カード払い・個人負担」がこの月にまだ無いぶん。
      ⚠ ここが残っていると、貸し借りが無くても精算額が出る。明細をまだ取り込んでいない月の印。 */
   const gap = {r:Math.max(0,extra.r-take.r), m:Math.max(0,extra.m-take.m)};
-  return {plan,list,total,shared,ratio,base:plan.base,cap,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
+  return {plan,list,fin,total,income,shared,ratio,base:plan.base,cap,contrib,extra,lend,take,over,put,settle,due,byCat,gap,
           paid:{c:paidBy("c"),r:paidBy("r"),m:paidBy("m")},
           personal:{r:personal("r"),m:personal("m")}};
 }
@@ -547,15 +697,26 @@ function transfer(m){
   /* この月に共有カードから引き落とされる請求の内訳（2026-08-19 上様の求めにより追加）。
      家賃は共有口座から出るがカード払いではないゆえ、fixed を除いて数える。
      除かねば「カードのご請求」に家賃が紛れ込み、Vpassの請求額と合わなくなる。 */
+  /* ⚠ 三つを混ぜてはならぬ。
+       bill.total  … カードの請求（Vpassの請求額と突き合わせる数）。**返金を差し引いた正味**
+       bill.refund … カード明細の返金行（マイナス行）。請求を減らす
+       bill.in     … 共有口座への入金（保険金・助成金）。**カードの請求ではない**
+     混ぜるとVpassの請求額と照らし合わせられなくなる。
+     常に成り立つ検算： bill.total + bill.other − bill.in === out              */
   const amt2 = x => Number(x.amount)||0;
-  const isCard = x => x.payer==="c" && !x.fixed;
-  const sum = f => c.list.filter(f).reduce((a,b)=>a+amt2(b),0);
+  const isCard = x => x.payer==="c" && !x.fixed && !isIn(x);
+  const isRefund = x => x.payer==="c" && !x.fixed && isIn(x) && x.src==="CSV";
+  const isInflow = x => x.payer==="c" && !x.fixed && isIn(x) && x.src!=="CSV";
+  const sum = f => c.fin.filter(f).reduce((a,b)=>a+amt2(b),0);
+  const refund = sum(isRefund);
   const bill = {
-    total: sum(isCard),
+    total: sum(isCard) - refund,
     share: sum(x=>isCard(x)&&x.burden==="share"),
     r:     sum(x=>isCard(x)&&x.burden==="r"),
     m:     sum(x=>isCard(x)&&x.burden==="m"),
-    n:     c.list.filter(isCard).length,
+    n:     c.fin.filter(x=>isCard(x)||isRefund(x)).length,
+    refund,
+    in:    sum(isInflow),
     other: sum(x=>x.payer==="c"&&x.fixed)
   };
   return Object.assign(c, {send, out, bill, diff: (send.r+send.m) - Math.round(out)});
@@ -668,24 +829,64 @@ function billCard(m){
     <div class="hd"><span class="ic">💳</span><div class="lbl">${ymLabel(m)}26日 引き落とし ―― 共有カードのご請求</div></div>
     <div class="big num">${yen(b.total)}</div>
     <div class="brk">${chip("共有",b.share)}${chip(N.r,b.r)}${chip(N.m,b.m)}<span class="chip num">${b.n}件</span></div>
-    <div class="memo num">これに家賃ほか ${yen(b.other)} を足した <b>${yen(t.out)}</b> が、この日に共有口座から出ていき申す。</div>
+    <div class="memo num">${b.refund?`返金 ${yen(b.refund)} を差し引いた正味の請求にござる。<br>`:""}これに家賃ほか ${yen(b.other)} を足し${b.in?`、共有口座への入金 ${yen(b.in)} を差し引い`:""}た <b>${yen(t.out)}</b> が、この日に共有口座から出ていき申す。</div>
   </div>`;
 }
 
+/* 🏦 精算の札。
+ *
+ * 締めた月（`cfg.closed[m]`）は**控えた額をそのまま見せる。算し直さない。**
+ * ―― 振り込んだ後で按分比や固定費を直しても、既に動いた金は変わらぬのが道理ゆえ。
+ * 締めておらぬ月は、いま乗っているもので算した見込みを見せ、「精算した」の札を出す。
+ */
 function sendCard(m){
-  const t=transfer(m), N=S.cfg.names;
+  const N=S.cfg.names, done=closedOf(m);
+
+  if(done){
+    const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,done[k]||0))}</div></div>`;
+    return `<div class="send done">
+      <div class="hd"><span class="ic">✅</span><div class="lbl">${ymLabel(m)}の精算 ―― 済んでござる</div></div>
+      <div class="two">${one("r")}${one("m")}</div>
+      <div class="memo num">${esc(String(done.on||"").replace(/-/g,"/"))} に締め申した。
+        口座から出るのは ${yen(done.out||0)}。この月の記録は凍らせてあり、
+        あとから足したものは次の精算へ回り申す。
+        <button class="mini ghost" data-open="reopen">締めを解く</button></div>
+    </div>`;
+  }
+
+  const t=transfer(m);
   /* ⚠ その月に引き落とされるカード明細が1件も無いなら、まだ取り込んでおらぬ月。
      家賃だけで按分すると嘘の額（歪んだ片寄り）が出るゆえ、**黙って見せぬ。**
      代わりに billCard() が「取り込んでくだされ」と告げる。 */
   if(!t.list.length || !t.bill.n) return "";
   const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,t.send[k]))}</div></div>`;
   const back=(k)=>t.send[k]<0 ? `${esc(N[k])}は ${yen(-t.send[k])} 受け取る側にござる。` : "";
+  /* 精算日を過ぎており、かつ前の月まで締んでいるなら、締めを促す。 */
+  const due = today() >= m+"-"+String(settleDay()).padStart(2,"0");
   return `<div class="send">
-    <div class="hd"><span class="ic">🏦</span><div class="lbl">${ymLabel(m)}26日までに 共有口座へ振り込む額</div></div>
+    <div class="hd"><span class="ic">🏦</span><div class="lbl">${ymLabel(m)}${settleDay()}日 精算 ―― 共有口座へ振り込む額</div></div>
     <div class="two">${one("r")}${one("m")}</div>
-    <div class="memo num">口座から出ていくのは ${yen(t.out)}
+    <div class="memo num">この口座からは、のちの26日に ${yen(t.out)} が出てゆき申す
       ―― この月に引き落とされるカードと家賃。二人の振込を足すとちょうど同じ額になり申す。
       ${back("r")}${back("m")}</div>
+    <button class="settle ${due?"":"ghost"}" data-open="close">${due?"振り込んだ ―― この月を締める":"先んじて締める"}</button>
+  </div>`;
+}
+
+/* 🤝 二人のあいだの貸し借り（2026-08-21 上様の指図により追加）
+   ⚠ **口座への振込額とは決して混ぜぬ。** 混ぜると
+     「二人の振込を足すと口座から出る額に一致する」という検算の要が崩れ、壊れに気づけなくなる。
+   月に紐づかぬ通算の残高ゆえ、どの月を開いていても同じものが出る。 */
+function loanCard(){
+  const bal=loanBalance(), N=S.cfg.names;
+  if(!bal) return "";
+  const from = bal>0 ? N.m : N.r, to = bal>0 ? N.r : N.m;
+  return `<div class="loan">
+    <div class="hd"><span class="ic">🤝</span><div class="lbl">二人のあいだの貸し借り</div></div>
+    <div class="big num">${esc(from)} → ${esc(to)}　${yen(Math.abs(bal))}</div>
+    <div class="memo">これは<b>今月の出費にも、口座への振込にも入っており申さぬ。</b>
+      二人で直にやり取りするぶんにござる。
+      <button class="mini ghost" data-open="clear">清算した</button></div>
   </div>`;
 }
 
@@ -697,6 +898,8 @@ function viewHome(){
     cmp = d===0 ? "先月と同じ" : "先月より "+yen(Math.abs(d))+(d<0?" 少ない":" 多い");
   }
   const recent = s.list.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,6);
+  /* 入金は出費と足し引きせず、別行で添える。**差引の純額を出すと実際の出費が分からなくなる。** */
+  const inc = s.income ? `・入金 ${yen(s.income)}` : "";
 
   const side = (k,cls)=>`<div class="tile t-${cls}">
       <div class="lbl">${esc(N[k])}</div>
@@ -707,11 +910,12 @@ function viewHome(){
     <div class="hero">
       <div class="lbl">今月の出費</div>
       <div class="big num">${yen(s.total)}</div>
-      <div class="sub num">うち共有 ${yen(s.shared)}${cmp?"・"+cmp:""}</div>
+      <div class="sub num">うち共有 ${yen(s.shared)}${inc}${cmp?"・"+cmp:""}</div>
     </div>
     <div class="grid2">${side("r","teal")}${side("m","pink")}</div>
     ${billCard(S.month)}
     ${sendCard(S.month)}
+    ${loanCard()}
     ${gapWarn(S.month)}
     <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
     <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("まだ記録がござらぬ","＋ から入れてくだされ")}</div>
@@ -719,17 +923,23 @@ function viewHome(){
 }
 
 function rowHTML(x){
-  const c=catOf(x.cat);
+  const c=catOf(x.cat), N=S.cfg.names;
   const d=String(x.date||"").split("-");
-  const pay = `<span class="tag ${x.payer||"c"}">${esc(payerLabel(x.payer))}</span>`;
-  const bur = x.burden==="share" ? "" : `<span class="tag ${x.burden}">${esc(burdenLabel(x.burden))}</span>`;
+  const loan=isLoan(x), inn=isIn(x);
+  /* 貸借は「どこから払ったか／誰の分か」ではなく「誰から誰へ」と読む。同じ2列を向きとして使う。 */
+  const pay = loan ? "" : `<span class="tag ${x.payer||"c"}">${esc(inn?inLabel(x.payer):payerLabel(x.payer))}</span>`;
+  const bur = (loan||x.burden==="share") ? "" : `<span class="tag ${x.burden}">${esc(burdenLabel(x.burden))}</span>`;
+  /* 20日の締めで翌月の精算へ回ったものには印を出す。黙って月をまたぐと勘定が合わぬように見える。 */
+  const nxt = pushedOut(x) ? `<span class="tag gray">翌月精算</span>` : "";
+  const knd = inn  ? `<span class="tag in">入金</span>`
+            : loan ? `<span class="tag gray">貸借 ${esc(N[x.payer]||"")}→${esc(N[x.burden]||"")}</span>` : "";
   return `<div class="row" ${x.fixed?"":`data-edit="${esc(x.id)}"`}>
-    <div class="ic-circle" style="background:var(${CVAR[c.c]}-bg)">${c.ic}</div>
+    <div class="ic-circle" style="background:var(${loan?"--card2":CVAR[c.c]+"-bg"})">${loan?"🤝":inn?"💰":c.ic}</div>
     <div class="body">
       <div class="t1">${esc(x.shop||x.cat)}${x.fixed?' <span class="tag gray">固定</span>':''}</div>
-      <div class="t2">${d[1]?Number(d[1])+"/"+Number(d[2]):""}・${esc(x.cat)}${pay}${bur}</div>
+      <div class="t2">${d[1]?Number(d[1])+"/"+Number(d[2]):""}${loan?"":"・"+esc(x.cat)}${knd}${pay}${bur}${nxt}</div>
     </div>
-    <div class="amt num">${yen(x.amount)}</div>
+    <div class="amt num ${inn?"plus":""}">${inn?"＋":""}${yen(x.amount)}</div>
   </div>`;
 }
 function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">🌱</span>${esc(a)}<br>${esc(b)}</div>`; }
@@ -784,15 +994,18 @@ function viewStats(){
 
 function viewList(){
   const s=summary(S.month);
+  /* 貸借と入金も並べて見せる（直せるように）。ただし**日ごとの合計には混ぜぬ。**
+     出費だけを足す ―― 混ぜると、その日いくら使ったのかが分からなくなる。 */
   const list=s.list.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const spend=x=>(isLoan(x)||isIn(x))?0:(Number(x.amount)||0);
   const byDate={}; list.forEach(x=>{ (byDate[x.date]=byDate[x.date]||[]).push(x); });
   const keys=Object.keys(byDate).sort().reverse();
   return header() + `<div class="wrap">
-    <div class="sechead"><h2>${list.length} 件・${yen(s.total)}</h2></div>
+    <div class="sechead"><h2>${list.length} 件・出費 ${yen(s.total)}${s.income?"・入金 "+yen(s.income):""}</h2></div>
     ${keys.length?keys.map(d=>{
-      const day=byDate[d], sum=day.reduce((a,b)=>a+(Number(b.amount)||0),0);
+      const day=byDate[d], sum=day.reduce((a,b)=>a+spend(b),0);
       const dd=d.split("-"), w=["日","月","火","水","木","金","土"][new Date(d).getDay()];
-      return `<div class="sechead"><h2>${Number(dd[1])}/${Number(dd[2])}（${w}）</h2><span class="more num">${yen(sum)}</span></div>
+      return `<div class="sechead"><h2>${Number(dd[1])}/${Number(dd[2])}（${w}）</h2><span class="more num">${sum?yen(sum):""}</span></div>
         <div class="card">${day.map(rowHTML).join("")}</div>`;
     }).join(""):`<div class="card">${emptyHTML("この月の記録がござらぬ","＋ から入れてくだされ")}</div>`}
   </div>`;
@@ -828,6 +1041,9 @@ function viewSettings(){
     <div class="card">
       <div class="setrow"><div><div class="sl">呼び名</div><div class="sd">${esc(c.names.r)}・${esc(c.names.m)}</div></div>
         <button class="mini ghost" data-open="names">変える</button></div>
+      <div class="setrow"><div><div class="sl">精算日</div>
+        <div class="sd num">毎月 ${settleDay()}日に共有口座へ振り込む${closedCount()?"・締めた月 "+closedCount()+"件":""}</div></div>
+        <button class="mini ghost" data-open="settle">変える</button></div>
       <div class="setrow"><div><div class="sl">按分する固定額</div>
         <div class="sd num">${yen(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)} で按分。足が出た分は折半</div></div>
         <button class="mini ghost" data-open="plan">開く</button></div>
@@ -842,7 +1058,10 @@ function viewSettings(){
       <div class="setrow"><div><div class="sl">店名の振り分け</div><div class="sd num">${(c.dict||[]).length}件の言葉を覚えており申す</div></div>
         <button class="mini ghost" data-open="dict">開く</button></div>
     </div>
-    <div class="note">決め事は「いつから」を持ってござる。割合や拠出を変えても、過去の月の精算は当時の決め事のまま動き申さぬ。</div>
+    <div class="note">決め事は「いつから」を持ってござる。割合や拠出を変えても、過去の月の精算は当時の決め事のまま動き申さぬ。
+    ${c.api&&S.cfgStale?"<br><b>⚠ 帳面側が古うござる。</b>決め事のやり取りができており申さぬゆえ、いまはこの端末のものが効いており申す。Apps Script を貼り替え、setup() を実行のうえ新バージョンでデプロイなされよ。"
+     :c.api?"<br>ここの決め事は<b>スプレッドシートに置いてあり、二人の端末で揃い申す。</b>（接続先と合言葉、CSVの列だけはこの端末のもの）"
+           :"<br><b>いまは未接続ゆえ、決め事はこの端末にしかござらぬ。</b>繋げば二人で揃い申す。"}</div>
   </div>`;
 }
 
@@ -871,26 +1090,51 @@ function chipRow(id, items, cur, key){
       style="${cur===o.k?chipStyle(o.cls):""}">${esc(o.label)}</button>`).join("")}</div>`;
 }
 function chipStyle(cls){
-  const map={c:"--purple",r:"--teal",m:"--pink"};
-  return `background:var(${map[cls]}-bg);color:var(${map[cls]}-ink)`;
+  const map={c:"--purple",r:"--teal",m:"--pink",in:"--teal",loan:"--amber"};
+  return `background:var(${map[cls]||"--purple"}-bg);color:var(${map[cls]||"--purple"}-ink)`;
 }
 
+/* 入力画面。**種別で問うことが変わる。**
+     出費 … 費目・どこから払ったか・誰の分か
+     入金 … 費目・どこへ入ったか・誰のものか（問いの向きが逆になるだけで、列は同じ）
+     貸借 … 誰から誰へ、それだけ。費目も精算月も要らぬ */
+const LOAN_DIR = ()=>[{k:"r",label:S.cfg.names.r+" → "+S.cfg.names.m,cls:"r"},
+                      {k:"m",label:S.cfg.names.m+" → "+S.cfg.names.r,cls:"m"}];
+
 function editorHTML(it, dupWarn){
-  return sheetShell(it.id?"記録を直す":"記録する", `
+  const k=kindOf(it), loan=k==="貸借", inn=k==="入金";
+  const title = it.id ? "記録を直す" : (loan?"貸し借りを記す":inn?"入金を記す":"記録する");
+  const kindRow = it.id ? "" : `<div class="trio kinds" id="f-kind">
+    ${[["","🧾 出費"],["入金","💰 入金"],["貸借","🤝 貸し借り"]].map(([v,lbl])=>
+      `<button class="chip ${k===v?"on":""}" data-kind="${v}"
+        style="${k===v?chipStyle(v==="入金"?"in":v==="貸借"?"loan":"c"):""}">${lbl}</button>`).join("")}</div>`;
+
+  return sheetShell(title, `
+    ${kindRow}
     ${dupWarn||""}
     <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
-    <div class="flabel">費目</div>
-    <div class="chips" id="f-cats">${CATS.map(c=>`
-      <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}"
-        style="${it.cat===c.k?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:""}">${c.ic} ${esc(c.k)}</button>`).join("")}</div>
-    <div class="flabel">どこから払ったか</div>
-    ${chipRow("f-payer", PAYERS(), it.payer, "payer")}
-    <div class="flabel">誰の分か <span class="hint">共有カードで個人のものを買ったら、ここを個人に</span></div>
-    ${chipRow("f-burden", BURDENS(), it.burden, "burden")}
-    <div class="field"><label>店・内容</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="マルエツ"></div>
+    ${loan ? `
+      <div class="note">二人のあいだで金が移っただけのもの。<b>家の金は動いており申さぬ</b>ゆえ、
+      <b>今月の出費にも、口座への振込にも入り申さぬ。</b>🤝 の残高だけが動きまする。</div>
+      <div class="flabel">誰から誰へ</div>
+      ${chipRow("f-dir", LOAN_DIR(), it.payer, "dir")}
+      <div class="field"><label>何のぶんか</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="立替の返し／貸した現金"></div>
+    ` : `
+      <div class="flabel">費目</div>
+      <div class="chips" id="f-cats">${CATS.map(c=>`
+        <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}"
+          style="${it.cat===c.k?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:""}">${c.ic} ${esc(c.k)}</button>`).join("")}</div>
+      <div class="flabel">${inn?"どこへ入ったか":"どこから払ったか"}</div>
+      ${chipRow("f-payer", inn?IN_TO():PAYERS(), it.payer, "payer")}
+      <div class="flabel">${inn?"誰のものか":"誰の分か"}
+        <span class="hint">${inn?"共有あてなら二人の振込が減り申す":"共有カードで個人のものを買ったら、ここを個人に"}</span></div>
+      ${chipRow("f-burden", BURDENS(), it.burden, "burden")}
+      <div class="field"><label>${inn?"何の入金か":"店・内容"}</label>
+        <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${inn?"◯◯生命 保険金":"マルエツ"}"></div>
+    `}
     <div class="field"><label>日付</label><input id="f-date" type="date" value="${esc(it.date||today())}"></div>
-    <div class="field"><label>引落月 <span class="hint">共有口座から出ていく月。カードは利用のひと月あと</span></label>
-      <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>
+    ${loan ? "" : `<div class="field"><label>精算する月 <span class="hint">${settleDay()}日以降のものは翌月まわし。締めた月へは入り申さぬ</span></label>
+      <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>`}
     <div class="field"><label>メモ</label><textarea id="f-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
     <button class="save" id="f-save">保存する</button>
     ${it.id?'<button class="save del" id="f-del">この記録を消す</button>':""}
@@ -898,7 +1142,7 @@ function editorHTML(it, dupWarn){
 }
 
 function openEditor(item, extra){
-  const it = item || {id:"",date:today(),cat:"食費",amount:0,payer:"c",burden:"share",shop:"",memo:""};
+  const it = item || {id:"",date:today(),cat:"食費",amount:0,payer:"c",burden:"share",shop:"",memo:"",kind:""};
   openSheet(editorHTML(it, extra&&extra.warn), {kind:"edit", it:Object.assign({},it), src:extra&&extra.src});
   setTimeout(()=>{ const a=document.getElementById("f-amt"); if(!it.id&&!it.amount&&a) a.focus(); },320);
 }
@@ -930,7 +1174,48 @@ function bindSheet(){
       x.style.cssText = on?chipStyle((items.find(o=>o.k===x.dataset[key])||{}).cls):"";
     });
   });
-  if(root.querySelector("#f-payer")){ pickRow("#f-payer","payer",PAYERS()); pickRow("#f-burden","burden",BURDENS()); }
+  if(root.querySelector("#f-payer")){
+    pickRow("#f-payer","payer", isIn(sheetCtx.it)?IN_TO():PAYERS());
+    pickRow("#f-burden","burden",BURDENS());
+  }
+  /* 貸借の向きは、支払元＝出した人／負担＝受け取る人 の2列で表す。列は増やさぬ。 */
+  if(root.querySelector("#f-dir")){
+    root.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{
+      const v=b.dataset.dir;
+      sheetCtx.it.payer=v; sheetCtx.it.burden = v==="r"?"m":"r";
+      root.querySelectorAll("[data-dir]").forEach(x=>{
+        const on=x.dataset.dir===v;
+        x.classList.toggle("on",on);
+        x.style.cssText = on?chipStyle(v):"";
+      });
+    });
+  }
+  /* 種別を切り替えたら、画面ごと組み直す（問う項目が変わるゆえ）。 */
+  root.querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{
+    const it=sheetCtx.it, v=b.dataset.kind;
+    it.kind=v;
+    it.amount=Number(String((root.querySelector("#f-amt")||{}).value||"").replace(/[^0-9]/g,""))||0;
+    const sh=root.querySelector("#f-shop"); if(sh) it.shop=sh.value;
+    if(v==="貸借"){ it.payer="r"; it.burden="m"; it.pay=undefined; }
+    else if(v==="入金"){ if(it.payer!=="r"&&it.payer!=="m") it.payer="c"; it.burden="share"; }
+    else { it.burden = it.burden==="share"?"share":it.burden; }
+    openSheet(editorHTML(it), {kind:"edit", it, src:sheetCtx.src});
+  });
+
+  /* 精算する月は、日付と支払元から決まる（20日の締め）。
+     上様が自ら選び直すまでは、日付や支払元を変えるたびに追従させる。
+     ―― 追従せぬと、8/25 と入れ直したのに精算月が8月のまま刻まれて黙ってずれる。 */
+  const payEl=root.querySelector("#f-pay"), dateEl=root.querySelector("#f-date");
+  if(payEl && dateEl){
+    payEl.addEventListener("change", ()=>{ payEl.dataset.touched="1"; });
+    const sync=()=>{
+      if(payEl.dataset.touched) return;
+      const v=defaultPay({date:dateEl.value||sheetCtx.it.date, payer:sheetCtx.it.payer});
+      if(v) payEl.value=v;
+    };
+    dateEl.addEventListener("input", sync);
+    root.querySelectorAll("[data-payer]").forEach(b=>b.addEventListener("click", ()=>setTimeout(sync,0)));
+  }
 
   const shop=root.querySelector("#f-shop");
   if(shop) shop.onblur=()=>{
@@ -947,11 +1232,15 @@ function bindSheet(){
     const n=Number(String(root.querySelector("#f-amt").value).replace(/[^0-9]/g,""));
     if(!n){ toast("金額を入れてくだされ"); root.querySelector("#f-amt").focus(); return; }
     it.amount=n;
-    it.shop=root.querySelector("#f-shop").value.trim();
+    it.shop=(root.querySelector("#f-shop")||{value:""}).value.trim();
     it.date=root.querySelector("#f-date").value||today();
-    // 利用月と同じなら持たせない（既定に任せる）。ずれているときだけ刻む。
+    it.kind=kindOf(it);                       // 空 / 入金 / 貸借 に均す
+    /* 既定（20日の締めで決まる月）と同じなら持たせない。ずれているときだけ刻む。
+       ⚠ 利用月ではなく**既定**と比べること。20日以降のものは既定が翌月ゆえ、
+         利用月と比べると触ってもおらぬのに引落月が刻まれてしまう。 */
     const pv=(root.querySelector("#f-pay")||{}).value||"";
-    it.pay = (pv && pv!==it.date.slice(0,7)) ? pv : undefined;
+    /* ⚠ 貸借は精算月を持たぬ。口座の精算に関わらぬゆえ。 */
+    it.pay = (!isLoan(it) && pv && pv!==defaultPay(it)) ? pv : undefined;
     it.memo=root.querySelector("#f-memo").value.trim();
     const isNew=!it.id;
     if(isNew){ it.id=uid(); it.src=sheetCtx.src||"手入力"; }
@@ -976,7 +1265,7 @@ function bindSheet(){
 function learnDict(shop, cat){
   const kw=String(shop).trim();
   if(kw.length<2) return;
-  S.cfg.dict.push({kw,cat}); save("cfg",S.cfg);
+  S.cfg.dict.push({kw,cat}); saveCfg();
 }
 
 /* ---------- 設定の各シート ---------- */
@@ -1065,6 +1354,64 @@ function openConfig(kind){
       <div class="field"><label>費目</label><select id="dc-cat">${CATS.map(x=>`<option>${esc(x.k)}</option>`).join("")}</select></div>
       <button class="save" id="dc-add">足す</button>`), {kind:"dict"});
   }
+  /* 月を締める ―― 「振り込んだ」という出来事を刻む（2026-08-21 上様の指図により追加）
+     押した折の振込額をそのまま控え、その月に乗っていた記録には精算月を刻んで凍らせる。
+     ⚠ 以後この月の額は**算し直さない。** 按分比を後から直しても、動いた金は動かぬゆえ。 */
+  /* 貸し借りの清算（2026-08-21 追加）
+     残高ぶんを**逆向きの貸借として1本立てる。** 消しはせぬ ―― いつ幾ら清算したかが残るように。 */
+  if(kind==="clear"){
+    const bal=loanBalance(), N=c.names;
+    const from = bal>0 ? N.m : N.r, to = bal>0 ? N.r : N.m;
+    openSheet(sheetShell("貸し借りを清算する", `
+      <div class="note">いまの残高は <b>${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))}</b> にござる。
+      これを直に渡し終えたら清算してくだされ。<b>逆向きの記録を1本立てて残高を0に戻し申す</b>
+      ―― 消さぬのは、いつ幾ら清算したかを残すためでござる。</div>
+      <div class="warnbox">これは<b>共有口座への振込とは別のやり取り</b>にござる。
+      口座の勘定には一切触れ申さぬ。</div>
+      <div class="field"><label>渡した日</label><input id="cr-on" type="date" value="${esc(today())}"></div>
+      <button class="save" id="cr-go">${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))} で清算する</button>`), {kind:"clear", bal});
+  }
+  if(kind==="settle"){
+    const cl=Object.keys(c.closed||{}).sort().reverse();
+    openSheet(sheetShell("精算日", `
+      <div class="note">二人が共有口座へ振り込む日にござる。カードの引き落としは<b>26日</b>ゆえ、
+      それより前に入れておく段取り。<b>この日を過ぎると「締める」の札が濃く出申す。</b></div>
+      <div class="field"><label>毎月何日か</label><input id="st-day" type="tel" inputmode="numeric" value="${settleDay()}"></div>
+      <div class="note">⚠ これは<b>見込みにすぎ申さぬ。</b>真は「精算した」を押した記録のほう。
+      この日より後に自分の財布から立て替えたものは、翌月の精算へ回り申す。</div>
+      <button class="save" id="st-save">変える</button>
+      ${cl.length?`<div class="flabel" style="margin-top:22px">締めた月</div>
+        ${cl.map(k=>{ const d=c.closed[k]; return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}</div>
+          <div class="sd num">${esc(String(d.on||"").replace(/-/g,"/"))} に締め・${esc(c.names.r)} ${yenPlain(d.r||0)} ／ ${esc(c.names.m)} ${yenPlain(d.m||0)}</div></div></div>`;
+          }).join("")}
+        <div class="note">締めを解くには、その月を開いて 🏦 の札から「締めを解く」を押されよ。</div>`:""}`), {kind:"settle"});
+  }
+  if(kind==="close"){
+    const m=S.month, t=transfer(m), N=c.names;
+    const pin=t.list.filter(x=>!x.fixed && !normYM(x.pay));   // 精算月を刻む相手
+    openSheet(sheetShell(ymLabel(m)+"の精算を締める", `
+      <div class="note">この月ぶんを<b>共有口座へ振り込んだ</b>ら締めてくだされ。
+      締めると額が控えとして残り、<b>あとから按分や固定費を直しても動き申さぬ。</b>
+      以後に足した記録は、次の精算へひとりでに回り申す。</div>
+      <div class="sumrow"><span>${esc(N.r)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.r))}</b></div>
+      <div class="sumrow"><span>${esc(N.m)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.m))}</b></div>
+      <div class="sumrow big"><span>26日に口座から出る</span><b class="num">${yen(t.out)}</b></div>
+      <div class="note num">この精算に乗っているのは <b>${t.list.filter(x=>!x.fixed).length}件</b>
+        （うち <b>${pin.length}件</b>に精算月を刻んで凍らせ申す）＋ 固定費。</div>
+      <div class="field"><label>振り込んだ日</label><input id="cl-on" type="date" value="${esc(today())}"></div>
+      <button class="save" id="cl-go">この額で締める</button>`), {kind:"close", m});
+  }
+  if(kind==="reopen"){
+    const m=S.month, d=closedOf(m)||{}, N=c.names;
+    openSheet(sheetShell(ymLabel(m)+"の締めを解く", `
+      <div class="warnbox">締めを解くと、この月の振込額は<b>いまの決め事で算し直され申す。</b>
+      ${esc(String(d.on||"").replace(/-/g,"/"))} に控えた
+      <b>${esc(N.r)} ${yen(d.r||0)}／${esc(N.m)} ${yen(d.m||0)}</b> は失われ申す。</div>
+      <div class="note">記録に刻んだ精算月は<b>そのまま残し申す。</b>
+      解いたあと締め直しても、同じ記録が同じ月に乗るようにするためでござる。
+      どうしても動かしたい記録があれば、その記録を開いて「精算する月」を直してくだされ。</div>
+      <button class="save del" id="ro-go">締めを解く</button>`), {kind:"reopen", m});
+  }
   /* 引落月の振り直し（2026-08-20 追加）
      共有カードは月末締め・翌月26日払いゆえ、引落月＝**利用月の翌月**で一意に決まる。
      ⚠ 当て直すのは「共有カード払い・CSVから取り込んだ・引落月を持たぬ」ものだけ。
@@ -1104,7 +1451,7 @@ function bindConfigSheet(root){
       c.names.r=root.querySelector("#c-n1").value.trim()||"諒";
       c.names.m=root.querySelector("#c-n2").value.trim()||"万貴";
     }
-    save("cfg",c); closeSheet(); render(); toast("変え申した");
+    saveCfg(); closeSheet(); render(); toast("変え申した");
   };
 
   const readPlan = ()=>({
@@ -1125,7 +1472,7 @@ function bindConfigSheet(root){
   if(psv) psv.onclick=()=>{
     const v=readPlan(), p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
     if(p){ p.base=v.base; p.ratio=v.ratio; p.extra=v.extra; }
-    save("cfg",c); closeSheet(); render(); toast("直し申した");
+    saveCfg(); closeSheet(); render(); toast("直し申した");
   };
   const pnew=root.querySelector("#p-new");
   if(pnew) pnew.onclick=()=>{
@@ -1133,12 +1480,49 @@ function bindConfigSheet(root){
     const exist=c.plans.map(normPlan).find(x=>x.from===S.month);
     if(exist){ exist.base=v.base; exist.ratio=v.ratio; exist.extra=v.extra; }
     else c.plans.push({from:S.month, base:v.base, ratio:v.ratio, extra:v.extra, fixed:structuredClone(src.fixed||[])});
-    save("cfg",c); closeSheet(); render(); toast(ymLabel(S.month)+"から新しい期にいたした");
+    saveCfg(); closeSheet(); render(); toast(ymLabel(S.month)+"から新しい期にいたした");
   };
   root.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
     c.plans=c.plans.filter(x=>x.from!==b.dataset.pdel);
-    save("cfg",c); openConfig("plan"); render();
+    saveCfg(); openConfig("plan"); render();
   });
+
+  /* 締める ―― 額を控え、乗っている記録に精算月を刻む。
+     ⚠ 刻むのは `pay` を持たぬものだけ。取り込んだカード明細は既に請求月を持っている。 */
+  const crg=root.querySelector("#cr-go");
+  if(crg) crg.onclick=async ()=>{
+    const bal=sheetCtx.bal, on=(root.querySelector("#cr-on")||{}).value||today();
+    if(!bal){ closeSheet(); return; }
+    closeSheet();
+    await pushItem("add", { id:uid(), date:on, cat:"その他", amount:Math.abs(bal),
+      payer: bal>0?"m":"r", burden: bal>0?"r":"m",       // 逆向きに立てる
+      shop:"貸し借りの清算", memo:"", src:"手入力", kind:"貸借" });
+    toast("清算いたした");
+  };
+
+  const stv=root.querySelector("#st-save");
+  if(stv) stv.onclick=()=>{
+    const d=Math.min(28,Math.max(1,num(root.querySelector("#st-day"))||20));
+    c.settleDay=d; saveCfg(); closeSheet(); render(); toast("毎月"+d+"日に改め申した");
+  };
+
+  const clg=root.querySelector("#cl-go");
+  if(clg) clg.onclick=async ()=>{
+    const m=sheetCtx.m, t=transfer(m);
+    const pin=t.list.filter(x=>!x.fixed && !normYM(x.pay)).map(x=>Object.assign({},x,{pay:m}));
+    const on=(root.querySelector("#cl-on")||{}).value||today();
+    closeSheet();
+    if(pin.length) await pushMany("update", pin);
+    c.closed=Object.assign({}, c.closed||{}, {[m]:{
+      on, r:Math.max(0,t.send.r), m:Math.max(0,t.send.m), out:Math.round(t.out), n:t.list.filter(x=>!x.fixed).length}});
+    saveCfg(); render(); toast(ymLabel(m)+"の精算を締め申した");
+  };
+  const rog=root.querySelector("#ro-go");
+  if(rog) rog.onclick=()=>{
+    const m=sheetCtx.m, nx=Object.assign({}, c.closed||{});
+    delete nx[m]; c.closed=nx;
+    saveCfg(); closeSheet(); render(); toast(ymLabel(m)+"の締めを解き申した");
+  };
 
   const fpg=root.querySelector("#fp-go");
   if(fpg) fpg.onclick=async ()=>{
@@ -1156,12 +1540,12 @@ function bindConfigSheet(root){
     const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
     (p.fixed=p.fixed||[]).push({name,amount:amt,cat:root.querySelector("#fx-cat").value,
       payer:root.querySelector("#fx-payer").value, burden:root.querySelector("#fx-burden").value, on:true});
-    save("cfg",c); closeSheet(); render(); toast("足し申した");
+    saveCfg(); closeSheet(); render(); toast("足し申した");
   };
   root.querySelectorAll("[data-fxdel]").forEach(b=>b.onclick=()=>{
     const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
     p.fixed.splice(Number(b.dataset.fxdel),1);
-    save("cfg",c); openConfig("fixed"); render();
+    saveCfg(); openConfig("fixed"); render();
   });
 
   const mna=root.querySelector("#mn-add");
@@ -1169,20 +1553,20 @@ function bindConfigSheet(root){
     const kw=root.querySelector("#mn-kw").value.trim();
     if(!kw){ toast("言葉を入れてくだされ"); return; }
     (c.mine=c.mine||[]).push({kw,who:root.querySelector("#mn-who").value});
-    save("cfg",c); openConfig("mine"); toast("覚え申した");
+    saveCfg(); openConfig("mine"); toast("覚え申した");
   };
   root.querySelectorAll("[data-mndel]").forEach(b=>b.onclick=()=>{
-    c.mine.splice(Number(b.dataset.mndel),1); save("cfg",c); openConfig("mine");
+    c.mine.splice(Number(b.dataset.mndel),1); saveCfg(); openConfig("mine");
   });
   const dca=root.querySelector("#dc-add");
   if(dca) dca.onclick=()=>{
     const kw=root.querySelector("#dc-kw").value.trim();
     if(!kw){ toast("言葉を入れてくだされ"); return; }
     c.dict.push({kw,cat:root.querySelector("#dc-cat").value});
-    save("cfg",c); openConfig("dict"); toast("覚え申した");
+    saveCfg(); openConfig("dict"); toast("覚え申した");
   };
   root.querySelectorAll("[data-dcdel]").forEach(b=>b.onclick=()=>{
-    c.dict.splice(Number(b.dataset.dcdel),1); save("cfg",c); openConfig("dict");
+    c.dict.splice(Number(b.dataset.dcdel),1); saveCfg(); openConfig("dict");
   });
 }
 
@@ -1373,7 +1757,7 @@ function showCsvMap(rows){
     S.cfg.csvMap={date:map.date, shop:map.shop, amt:map.amt, skip:map.skip}; save("cfg",S.cfg);
     const fresh=csvToItems(rows,map).filter(x=>!findDup(x,S.items));
     closeSheet();
-    for(const it of fresh) await pushItem("add", it);
+    await pushMany("add", fresh);          // ⚠ 1件ずつ送ると40件で40往復して待たされる
     toast(fresh.length+"件を取り込み申した");
   };
 
@@ -1414,12 +1798,16 @@ function csvToItems(rows,map){
     const m=String(r[map.date]||"").trim().match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);
     if(!m) return;
     const amt=Number(String(r[map.amt]||"").replace(/[^0-9\-]/g,""));
-    if(!amt||amt<0) return;
+    if(!amt) return;
     const shop=String(r[map.shop]||"").trim();
+    /* ⚠ マイナス行は**返品・返金**（2026-08-21 より取り込む）。
+       金額は正のまま持ち、種別を `入金` にして符号を種別へ預ける。
+       捨てていた頃は、取り込んだ合計が明細の合計と合わなかった。 */
     out.push({ id:uid(),
       date:m[1]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[3]).padStart(2,"0"),
-      cat:guessCat(shop)||"その他", amount:amt,
+      cat:guessCat(shop)||"その他", amount:Math.abs(amt),
       payer:"c", burden:guessMine(shop)||"share", shop, memo:"", src:"CSV",
+      kind: amt<0 ? "入金" : "",
       pay: map.pay || undefined });
   });
   return out;
