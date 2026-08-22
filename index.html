@@ -111,6 +111,7 @@ header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
 .loan .big{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .loan .memo{font-size:11px;line-height:1.6;margin-top:9px;opacity:.9}
 .loan .memo .mini{margin-left:6px;vertical-align:middle}
+.loan.done{background:var(--teal-bg);color:var(--teal-ink)}
 .tag.in{background:var(--teal-bg);color:var(--teal-ink)}
 .amt.plus{color:var(--teal-ink)}
 .trio.kinds{margin-bottom:14px}
@@ -585,11 +586,19 @@ function isIn(x){ return kindOf(x)==="入金"; }
 function isLoan(x){ return kindOf(x)==="貸借"; }
 function signed(x){ return (Number(x.amount)||0) * (isIn(x) ? -1 : 1); }
 
-/* 二人のあいだの貸し借りの残高。**月に紐づかぬ通算の値。**
-   正なら「万貴 → 諒」（諒が貸している側）。 */
-function loanBalance(){
+/* 二人のあいだで動かす金の正味。
+ *
+ * ⚠⚠ **向きは「この精算で誰から誰へ渡すか」である。**（2026-08-21 上様のご指摘により改めた）
+ *   支払元＝**渡す人**、負担＝**受け取る人**。正なら「諒 → 万貴」。
+ *   当初これを「もう渡してある。返してもらう」と読んで符号を逆に組み、上様に正されている。
+ *   **「渡す人の振込が増える」** ―― これが正。迷ったら次の一行を思い出すこと：
+ *     諒が万貴へ渡すなら、諒が口座へ多く入れ、万貴が少なく入れる。差額が万貴の手元に残る。
+ *
+ * ⚠ 2026-08-21 に**通算から精算月ごとへ改めた。** 振込額へ反映させるにあたり、
+ *   他のすべてと同じく「どの精算に乗るか」で括らねば、締めた月の額が後から動いてしまうため。 */
+function loanNet(list){
   let bal=0;
-  S.items.forEach(x=>{
+  (list||[]).forEach(x=>{
     if(!isLoan(x)) return;
     const a=Number(x.amount)||0;
     if(x.payer==="r" && x.burden==="m") bal+=a;
@@ -597,6 +606,7 @@ function loanBalance(){
   });
   return bal;
 }
+function loanOf(m){ return loanNet(payItems(m)); }
 /* 20日の締めで翌月へ送られたか（画面に印を出すため）。 */
 function pushedOut(x){ return !normYM(x.pay) && x.payer!=="c" && !x.fixed && payOf(x)!==String(x.date||"").slice(0,7); }
 /* 引落月が抜け落ちたまま入っている、取り込み済みの共有カード明細。
@@ -701,7 +711,19 @@ function transfer(m){
   /* ⚠ はみ出しの折半で半円が出る。振込に小数は使えぬゆえ、
      諒のぶんを円に丸め、**残りをまるごと万貴のぶんにする。**
      こうしないと、両方を丸めたときに合計が口座から出る額と1円ずれる。 */
-  const sr = Math.round(c.due.r + c.take.r - c.lend.r);
+  /* 二人のあいだの貸し借りを、口座への振込で相殺する（2026-08-21 上様の指図により追加）。
+   *
+   * ⚠⚠ **これはゼロ和である。** 一方から引いた額がそのまま他方へ乗るだけで、
+   *   口座へ入る総額は1円も変わらぬ。ゆえに
+   *   **「二人の振込を足すと口座から出る額に一致する」という検算（`diff`）は崩れぬ。**
+   *   （総額のほうへ足すと崩れる。そちらは決してやらぬこと）
+   *
+   * 正なら「諒 → 万貴」へ渡すぶん ―― **渡す諒が多く入れ、受け取る万貴が少なく入れる。**
+   * 差額がそのまま万貴の手元に残り、渡したことになる。
+   * `send.m` は `out − send.r` で出しているので、諒へ足せば自ずと万貴から引かれる。
+   */
+  const loan = loanNet(c.list);
+  const sr = Math.round(c.due.r + c.take.r - c.lend.r) + loan;
   const send = { r: sr, m: Math.round(out) - sr };
 
   /* この月に共有カードから引き落とされる請求の内訳（2026-08-19 上様の求めにより追加）。
@@ -729,7 +751,7 @@ function transfer(m){
     in:    sum(isInflow),
     other: sum(x=>x.payer==="c"&&x.fixed)
   };
-  return Object.assign(c, {send, out, bill, diff: (send.r+send.m) - Math.round(out)});
+  return Object.assign(c, {send, out, bill, loan, diff: (send.r+send.m) - Math.round(out)});
 }
 
 /* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
@@ -878,25 +900,30 @@ function sendCard(m){
     <div class="two">${one("r")}${one("m")}</div>
     <div class="memo num">この口座からは、のちの26日に ${yen(t.out)} が出てゆき申す
       ―― この月に引き落とされるカードと家賃。二人の振込を足すとちょうど同じ額になり申す。
+      ${t.loan?`<br>🤝 の貸し借り ${yen(Math.abs(t.loan))} を折り込んだ額にござる（合計は変わらず）。`:""}
       ${back("r")}${back("m")}</div>
     <button class="settle ${due?"":"ghost"}" data-open="close">${due?"振り込んだ ―― この月を締める":"先んじて締める"}</button>
   </div>`;
 }
 
-/* 🤝 二人のあいだの貸し借り（2026-08-21 上様の指図により追加）
-   ⚠ **口座への振込額とは決して混ぜぬ。** 混ぜると
-     「二人の振込を足すと口座から出る額に一致する」という検算の要が崩れ、壊れに気づけなくなる。
-   月に紐づかぬ通算の残高ゆえ、どの月を開いていても同じものが出る。 */
-function loanCard(){
-  const bal=loanBalance(), N=S.cfg.names;
+/* 🤝 二人のあいだの受け渡し（2026-08-21 追加・同日に向きを正した）
+   ⚠ **渡す人の振込が増え、受け取る人の振込が減る。** 差額が受け取る人の手元に残る。
+     ゼロ和ゆえ二人の合計は動かず、`diff` の検算も崩れぬ。 */
+function loanCard(m){
+  const bal=loanOf(m), N=S.cfg.names, done=closedOf(m);
   if(!bal) return "";
-  const from = bal>0 ? N.m : N.r, to = bal>0 ? N.r : N.m;
-  return `<div class="loan">
-    <div class="hd"><span class="ic">🤝</span><div class="lbl">二人のあいだの貸し借り</div></div>
-    <div class="big num">${esc(from)} → ${esc(to)}　${yen(Math.abs(bal))}</div>
-    <div class="memo">これは<b>今月の出費にも、口座への振込にも入っており申さぬ。</b>
-      二人で直にやり取りするぶんにござる。
-      <button class="mini ghost" data-open="clear">清算した</button></div>
+  const from = bal>0 ? N.r : N.m, to = bal>0 ? N.m : N.r;   // 正 = 諒 → 万貴
+  const a=Math.abs(bal);
+  return `<div class="loan${done?" done":""}">
+    <div class="hd"><span class="ic">🤝</span><div class="lbl">${ymLabel(m)}の精算で 二人のあいだを動かす金</div></div>
+    <div class="big num">${esc(from)} → ${esc(to)}　${yen(a)}</div>
+    <div class="memo">${done
+      ? `${ymLabel(m)}の精算で渡し終えてござる。`
+      : `<b>今月の出費には入っており申さぬ</b>が、<b>振込額に折り込んでござる</b> ――
+         渡す${esc(from)}の振込が ${yen(a)} <b>多く</b>、受け取る${esc(to)}の振込が ${yen(a)} <b>少なく</b>なってござる。
+         その差が${esc(to)}の手元に残り申す。二人の合計は変わり申さぬ。
+         <br>口座を通さず<b>直に手渡しした</b>なら
+         <button class="mini ghost" data-open="clear">こちらで消す</button>`}</div>
   </div>`;
 }
 
@@ -925,7 +952,7 @@ function viewHome(){
     <div class="grid2">${side("r","teal")}${side("m","pink")}</div>
     ${billCard(S.month)}
     ${sendCard(S.month)}
-    ${loanCard()}
+    ${loanCard(S.month)}
     ${gapWarn(S.month)}
     <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
     <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("まだ記録がござらぬ","＋ から入れてくだされ")}</div>
@@ -942,7 +969,7 @@ function rowHTML(x){
   /* 20日の締めで翌月の精算へ回ったものには印を出す。黙って月をまたぐと勘定が合わぬように見える。 */
   const nxt = pushedOut(x) ? `<span class="tag gray">翌月精算</span>` : "";
   const knd = inn  ? `<span class="tag in">入金</span>`
-            : loan ? `<span class="tag gray">貸借 ${esc(N[x.payer]||"")}→${esc(N[x.burden]||"")}</span>` : "";
+            : loan ? `<span class="tag gray">${esc(N[x.payer]||"")}→${esc(N[x.burden]||"")} へ渡す</span>` : "";
   return `<div class="row" ${x.fixed?"":`data-edit="${esc(x.id)}"`}>
     <div class="ic-circle" style="background:var(${loan?"--card2":CVAR[c.c]+"-bg"})">${loan?"🤝":inn?"💰":c.ic}</div>
     <div class="body">
@@ -1107,9 +1134,10 @@ function chipStyle(cls){
 /* 入力画面。**種別で問うことが変わる。**
      出費 … 費目・どこから払ったか・誰の分か
      入金 … 費目・どこへ入ったか・誰のものか（問いの向きが逆になるだけで、列は同じ）
-     貸借 … 誰から誰へ、それだけ。費目も精算月も要らぬ */
-const LOAN_DIR = ()=>[{k:"r",label:S.cfg.names.r+" → "+S.cfg.names.m,cls:"r"},
-                      {k:"m",label:S.cfg.names.m+" → "+S.cfg.names.r,cls:"m"}];
+     貸借 … 誰から誰へ渡すか、それだけ。費目は要らぬが**精算月は要る**（振込に折り込むゆえ） */
+/* ⚠ 「→」だけでは「渡した」とも「返してもらう」とも読めてしまう。**「渡す」と言い切ること。** */
+const LOAN_DIR = ()=>[{k:"r",label:S.cfg.names.r+" が "+S.cfg.names.m+" へ渡す",cls:"r"},
+                      {k:"m",label:S.cfg.names.m+" が "+S.cfg.names.r+" へ渡す",cls:"m"}];
 
 function editorHTML(it, dupWarn){
   const k=kindOf(it), loan=k==="貸借", inn=k==="入金";
@@ -1124,11 +1152,12 @@ function editorHTML(it, dupWarn){
     ${dupWarn||""}
     <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
     ${loan ? `
-      <div class="note">二人のあいだで金が移っただけのもの。<b>家の金は動いており申さぬ</b>ゆえ、
-      <b>今月の出費にも、口座への振込にも入り申さぬ。</b>🤝 の残高だけが動きまする。</div>
-      <div class="flabel">誰から誰へ</div>
+      <div class="note">二人のあいだで動かす金。<b>家の金は動いており申さぬ</b>ゆえ
+      <b>今月の出費には入り申さぬ</b>が、<b>その月の振込額で受け渡しいたす</b> ――
+      <b>渡す人の振込が増え、受け取る人の振込が減り</b>申す。二人の合計は変わり申さぬ。</div>
+      <div class="flabel">誰から誰へ <span class="hint">口座を通して渡す向き</span></div>
       ${chipRow("f-dir", LOAN_DIR(), it.payer, "dir")}
-      <div class="field"><label>何のぶんか</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="立替の返し／貸した現金"></div>
+      <div class="field"><label>何のぶんか</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="貸す金／立替の返し"></div>
     ` : `
       <div class="flabel">費目</div>
       <div class="chips" id="f-cats">${CATS.map(c=>`
@@ -1143,8 +1172,8 @@ function editorHTML(it, dupWarn){
         <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${inn?"◯◯生命 保険金":"マルエツ"}"></div>
     `}
     <div class="field"><label>日付</label><input id="f-date" type="date" value="${esc(it.date||today())}"></div>
-    ${loan ? "" : `<div class="field"><label>精算する月 <span class="hint">${settleDay()}日以降のものは翌月まわし。締めた月へは入り申さぬ</span></label>
-      <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>`}
+    <div class="field"><label>精算する月 <span class="hint">${loan?"この月の振込で相殺され申す":settleDay()+"日以降のものは翌月まわし"}。締めた月へは入り申さぬ</span></label>
+      <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>
     <div class="field"><label>メモ</label><textarea id="f-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
     <button class="save" id="f-save">保存する</button>
     ${it.id?'<button class="save del" id="f-del">この記録を消す</button>':""}
@@ -1206,7 +1235,7 @@ function bindSheet(){
     it.kind=v;
     it.amount=Number(String((root.querySelector("#f-amt")||{}).value||"").replace(/[^0-9]/g,""))||0;
     const sh=root.querySelector("#f-shop"); if(sh) it.shop=sh.value;
-    if(v==="貸借"){ it.payer="r"; it.burden="m"; it.pay=undefined; }
+    if(v==="貸借"){ it.payer="r"; it.burden="m"; }
     else if(v==="入金"){ if(it.payer!=="r"&&it.payer!=="m") it.payer="c"; it.burden="share"; }
     else { it.burden = it.burden==="share"?"share":it.burden; }
     openSheet(editorHTML(it), {kind:"edit", it, src:sheetCtx.src});
@@ -1249,8 +1278,9 @@ function bindSheet(){
        ⚠ 利用月ではなく**既定**と比べること。20日以降のものは既定が翌月ゆえ、
          利用月と比べると触ってもおらぬのに引落月が刻まれてしまう。 */
     const pv=(root.querySelector("#f-pay")||{}).value||"";
-    /* ⚠ 貸借は精算月を持たぬ。口座の精算に関わらぬゆえ。 */
-    it.pay = (!isLoan(it) && pv && pv!==defaultPay(it)) ? pv : undefined;
+    /* ⚠ 貸借も精算月を持つ（2026-08-21 改）。振込額へ折り込むようになったゆえ、
+       どの月の精算に乗るかで括らねば、締めた月の額が後から動く。 */
+    it.pay = (pv && pv!==defaultPay(it)) ? pv : undefined;
     it.memo=root.querySelector("#f-memo").value.trim();
     const isNew=!it.id;
     if(isNew){ it.id=uid(); it.src=sheetCtx.src||"手入力"; }
@@ -1369,19 +1399,21 @@ function openConfig(kind){
   /* 月を締める ―― 「振り込んだ」という出来事を刻む（2026-08-21 上様の指図により追加）
      押した折の振込額をそのまま控え、その月に乗っていた記録には精算月を刻んで凍らせる。
      ⚠ 以後この月の額は**算し直さない。** 按分比を後から直しても、動いた金は動かぬゆえ。 */
-  /* 貸し借りの清算（2026-08-21 追加）
-     残高ぶんを**逆向きの貸借として1本立てる。** 消しはせぬ ―― いつ幾ら清算したかが残るように。 */
+  /* 直に手渡しで済ませたとき（2026-08-21 追加）
+     残高ぶんを**逆向きに1本立てる。** 消しはせぬ ―― いつ幾ら渡したかが残るように。 */
   if(kind==="clear"){
-    const bal=loanBalance(), N=c.names;
-    const from = bal>0 ? N.m : N.r, to = bal>0 ? N.r : N.m;
-    openSheet(sheetShell("貸し借りを清算する", `
-      <div class="note">いまの残高は <b>${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))}</b> にござる。
-      これを直に渡し終えたら清算してくだされ。<b>逆向きの記録を1本立てて残高を0に戻し申す</b>
-      ―― 消さぬのは、いつ幾ら清算したかを残すためでござる。</div>
-      <div class="warnbox">これは<b>共有口座への振込とは別のやり取り</b>にござる。
-      口座の勘定には一切触れ申さぬ。</div>
+    const m=S.month, bal=loanOf(m), N=c.names;
+    const from = bal>0 ? N.r : N.m, to = bal>0 ? N.m : N.r;   // 正 = 諒 → 万貴
+    openSheet(sheetShell("直に手渡しで済ませた", `
+      <div class="note">${ymLabel(m)}の精算で動かすことになっておるのは
+      <b>${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))}</b> にござる。
+      いまはこれが<b>振込額に折り込まれてござる</b> ―― 渡す${esc(from)}が多く、受け取る${esc(to)}が少なく入れる形。</div>
+      <div class="warnbox"><b>口座を通さず、直に手渡しで済ませた</b>ときだけ押されよ。
+      逆向きの記録を1本立て、この月の貸し借りを0に戻し申す
+      ―― 消さぬのは、いつ幾ら渡したかを残すためでござる。<br>
+      押せば<b>振込額から貸し借りのぶんが消え</b>、二人とも本来の額に戻り申す。</div>
       <div class="field"><label>渡した日</label><input id="cr-on" type="date" value="${esc(today())}"></div>
-      <button class="save" id="cr-go">${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))} で清算する</button>`), {kind:"clear", bal});
+      <button class="save" id="cr-go">${esc(from)} が ${esc(to)} へ ${yen(Math.abs(bal))} を直に手渡した</button>`), {kind:"clear", bal, m});
   }
   if(kind==="settle"){
     const cl=Object.keys(c.closed||{}).sort().reverse();
@@ -1554,12 +1586,14 @@ function bindConfigSheet(root){
      ⚠ 刻むのは `pay` を持たぬものだけ。取り込んだカード明細は既に請求月を持っている。 */
   const crg=root.querySelector("#cr-go");
   if(crg) crg.onclick=async ()=>{
-    const bal=sheetCtx.bal, on=(root.querySelector("#cr-on")||{}).value||today();
+    const bal=sheetCtx.bal, m=sheetCtx.m, on=(root.querySelector("#cr-on")||{}).value||today();
     if(!bal){ closeSheet(); return; }
     closeSheet();
+    /* ⚠ 精算月を **その月に釘付けする。** 既定に任せると渡した日によって翌月へ流れ、
+       打ち消し合わずに両月へ貸し借りが立ってしまう。 */
     await pushItem("add", { id:uid(), date:on, cat:"その他", amount:Math.abs(bal),
       payer: bal>0?"m":"r", burden: bal>0?"r":"m",       // 逆向きに立てる
-      shop:"貸し借りの清算", memo:"", src:"手入力", kind:"貸借" });
+      shop:"直に手渡し（振込では動かさぬ）", memo:"", src:"手入力", kind:"貸借", pay:m });
     toast("清算いたした");
   };
 
