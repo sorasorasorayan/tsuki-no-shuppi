@@ -262,6 +262,7 @@ const CVAR = {blue:"--blue",teal:"--teal",amber:"--amber",purple:"--purple",pink
    base   … 年収比で按分する固定額。二人合わせた額
    ratio  … その固定額のうち、一人目が持つ割合
    extra  … 按分の外で上乗せしている額(共有カード払いの個人保険など)
+   savings… 月々の積立貯蓄。**二人がそれぞれ同額を、口座へ余分に入れて貯めるぶん**
    これを足したものが、その人が毎月共有の財布へ入れる額になる。
 
    下の値は旧Excelから読み解いたもの。万貴の額は常に 250,000 の按分ちょうどで、
@@ -277,7 +278,10 @@ const DEFAULT_PLANS = [
   {from:"2025-04", base:250000, ratio:0.56, extra:{r:0,     m:0}, fixed:[RENT()]},
   {from:"2025-09", base:250000, ratio:0.56, extra:{r:8400,  m:0}, fixed:[RENT()]},
   {from:"2025-10", base:250000, ratio:0.56, extra:{r:16285, m:0}, fixed:[RENT()]},
-  {from:"2025-11", base:250000, ratio:0.48, extra:{r:16285, m:0}, fixed:[RENT()]}
+  {from:"2025-11", base:250000, ratio:0.48, extra:{r:16285, m:0}, fixed:[RENT()]},
+  /* 旧Excelは 2026年6月から H3・H4 の両方に +H5(5,000)＝「※月々の積立貯蓄」を足している。
+     2026-08-22 に旧Excelとの突合で見つけた。 */
+  {from:"2026-06", base:250000, ratio:0.48, extra:{r:16285, m:0}, savings:5000, fixed:[RENT()]}
 ];
 
 const DEFAULT_CFG = {
@@ -494,6 +498,7 @@ function normPlan(p){
   }
   p.extra=p.extra||{r:0,m:0};
   p.base=Number(p.base)||0; p.ratio=Number(p.ratio)||0;
+  p.savings=Math.max(0, Number(p.savings)||0);   // 古い期には無いので0に均す
   return p;
 }
 function contribOf(p){
@@ -703,7 +708,8 @@ function summary(m){ return calcOn(m, monthItems(m).concat(fixedFor(m))); }
  *          + 自分が共有カードで買った個人のもの（持ち出し）
  *          − 自分の財布から出した共有のもの（立替。もう払っているぶん）
  *
- * 二人の振込額を足すと、口座から出ていく額にちょうど一致する（`out` で確かめている）。
+ * 二人の振込額を足すと、口座へ入れるべき額（`put`）にちょうど一致する（`diff` で確かめている）。
+ * `put` は 26日に出ていく額（`out`）＋ 月々の積立貯蓄の二人ぶん。積立が0なら `put === out`。
  */
 function transfer(m){
   const c = calcOn(m, payItems(m).concat(fixedFor(m)));
@@ -723,8 +729,18 @@ function transfer(m){
    * `send.m` は `out − send.r` で出しているので、諒へ足せば自ずと万貴から引かれる。
    */
   const loan = loanNet(c.list);
-  const sr = Math.round(c.due.r + c.take.r - c.lend.r) + loan;
-  const send = { r: sr, m: Math.round(out) - sr };
+  /* 月々の積立貯蓄（2026-08-22 上様の指図により追加）。
+   * 旧Excelは 2026年6月から H3・H4 の**両方**に `+H5`(5,000) を足していた ――
+   * 二人が同額ずつ口座へ余分に入れて貯めるもの。
+   *
+   * ⚠⚠ **これはゼロ和ではない。** 貸借と違い、二人の合計が 2×savings だけ増える。
+   *   ゆえに検算の相手を `out` から **`put`（＝out ＋ 積立の二人ぶん）** に改めた。
+   *   **`out` の意味は変えぬ** ―― 「26日に口座から出ていく額」であり、
+   *   `bill.total + bill.other − bill.in === out` の突合に使うゆえ、ここへ積立を混ぜてはならぬ。 */
+  const sv  = Math.max(0, Number(c.plan.savings)||0);
+  const put = Math.round(out) + sv*2;
+  const sr = Math.round(c.due.r + c.take.r - c.lend.r) + loan + sv;
+  const send = { r: sr, m: put - sr };
 
   /* この月に共有カードから引き落とされる請求の内訳（2026-08-19 上様の求めにより追加）。
      家賃は共有口座から出るがカード払いではないゆえ、fixed を除いて数える。
@@ -751,7 +767,7 @@ function transfer(m){
     in:    sum(isInflow),
     other: sum(x=>x.payer==="c"&&x.fixed)
   };
-  return Object.assign(c, {send, out, bill, loan, diff: (send.r+send.m) - Math.round(out)});
+  return Object.assign(c, {send, out, put, savings:sv, bill, loan, diff: (send.r+send.m) - put});
 }
 
 /* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
@@ -880,7 +896,7 @@ function sendCard(m){
       <div class="hd"><span class="ic">✅</span><div class="lbl">${ymLabel(m)}の精算 ―― 済んでござる</div></div>
       <div class="two">${one("r")}${one("m")}</div>
       <div class="memo num">${esc(String(done.on||"").replace(/-/g,"/"))} に締め申した。
-        口座から出るのは ${yen(done.out||0)}。この月の記録は凍らせてあり、
+        口座から出るのは ${yen(done.out||0)}${done.sv?`、ほかに<b>積立貯蓄</b> ${yenPlain(done.sv)}×2 が残り申す`:""}。この月の記録は凍らせてあり、
         あとから足したものは次の精算へ回り申す。
         <button class="mini ghost" data-open="reopen">締めを解く</button></div>
     </div>`;
@@ -899,7 +915,9 @@ function sendCard(m){
     <div class="hd"><span class="ic">🏦</span><div class="lbl">${ymLabel(m)}${settleDay()}日 精算 ―― 共有口座へ振り込む額</div></div>
     <div class="two">${one("r")}${one("m")}</div>
     <div class="memo num">この口座からは、のちの26日に ${yen(t.out)} が出てゆき申す
-      ―― この月に引き落とされるカードと家賃。二人の振込を足すとちょうど同じ額になり申す。
+      ―― この月に引き落とされるカードと家賃。${t.savings
+        ? `二人の振込 ${yen(t.put)} との差 ${yen(t.savings*2)} は<b>積立貯蓄</b>（一人 ${yenPlain(t.savings)} ずつ）として口座に残り申す。`
+        : "二人の振込を足すとちょうど同じ額になり申す。"}
       ${t.loan?`<br>🤝 の貸し借り ${yen(Math.abs(t.loan))} を折り込んだ額にござる（合計は変わらず）。`:""}
       ${back("r")}${back("m")}</div>
     <button class="settle ${due?"":"ghost"}" data-open="close">${due?"振り込んだ ―― この月を締める":"先んじて締める"}</button>
@@ -1342,13 +1360,16 @@ function openConfig(kind){
       <div class="field"><label>${esc(c.names.r)} の割合（％）</label><input id="p-ratio" type="tel" inputmode="numeric" value="${Math.round(cur.ratio*1000)/10}"></div>
       <div class="field"><label>${esc(c.names.r)} の上乗せ（保険など・無ければ0）</label><input id="p-er" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.r)}"></div>
       <div class="field"><label>${esc(c.names.m)} の上乗せ（無ければ0）</label><input id="p-em" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.m)}"></div>
+      <div class="field"><label>月々の積立貯蓄（<b>一人あたり</b>・無ければ0）</label><input id="p-sv" type="tel" inputmode="numeric" value="${yenPlain(cur.savings)}"></div>
+      <div class="note">積立は<b>二人とも同額</b>を余分に入れ、口座に貯めるもの。カードの請求ではござらぬゆえ、
+      「26日に口座から出る額」には入り申さぬ ―― <b>二人の振込のほうが積立の二人ぶんだけ多く</b>なり申す。</div>
       <div class="warnbox" id="p-calc"></div>
       <button class="save" id="p-save">この期を直す</button>
       <button class="save ghost" id="p-new">${ymLabel(S.month)}から新しい期を始める</button>
       <div class="flabel" style="margin-top:22px">これまでの期</div>
       ${ps.map(p=>{ const cb=contribOf(p); return `<div class="setrow"><div><div class="sl num">${ymLabel(p.from)} から</div>
         <div class="sd num">${yenPlain(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)}${p.extra.r||p.extra.m?"＋上乗せ":""}
-        → ${yenPlain(cb.r)} / ${yenPlain(cb.m)}</div></div>
+        → ${yenPlain(cb.r)} / ${yenPlain(cb.m)}${p.savings?`　＋積立 ${yenPlain(p.savings)}ずつ`:""}</div></div>
         ${ps.length>1?`<button class="mini ghost" data-pdel="${esc(p.from)}">消す</button>`:""}</div>`; }).join("")}
       <div class="note">割合は年に一度ほど見直すものと承ってござる。変えるときは<b>「新しい期を始める」</b>を押されよ ――
       いま開いている月から先だけが変わり、過去の精算は動き申さぬ。</div>
@@ -1439,6 +1460,7 @@ function openConfig(kind){
       以後に足した記録は、次の精算へひとりでに回り申す。</div>
       <div class="sumrow"><span>${esc(N.r)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.r))}</b></div>
       <div class="sumrow"><span>${esc(N.m)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.m))}</b></div>
+      ${t.savings?`<div class="sumrow"><span>うち積立貯蓄（一人ずつ）</span><b class="num">${yen(t.savings)}</b></div>`:""}
       <div class="sumrow big"><span>26日に口座から出る</span><b class="num">${yen(t.out)}</b></div>
       <div class="note num">この精算に乗っているのは <b>${t.list.filter(x=>!x.fixed).length}件</b>
         （うち <b>${pin.length}件</b>に精算月を刻んで凍らせ申す）＋ 固定費。</div>
@@ -1552,29 +1574,31 @@ function bindConfigSheet(root){
   const readPlan = ()=>({
     base: num(root.querySelector("#p-base")),
     ratio: Math.min(100,Math.max(0,num(root.querySelector("#p-ratio"))))/100,
-    extra:{ r:num(root.querySelector("#p-er")), m:num(root.querySelector("#p-em")) }
+    extra:{ r:num(root.querySelector("#p-er")), m:num(root.querySelector("#p-em")) },
+    savings: Math.max(0, num(root.querySelector("#p-sv")))
   });
   const calc=root.querySelector("#p-calc");
   if(calc){
     const show=()=>{
       const v=readPlan(), cb=contribOf(v);
-      calc.innerHTML = `毎月 共有の財布へ入れる額 ―― <b>${esc(c.names.r)} ${yen(cb.r)}</b>／<b>${esc(c.names.m)} ${yen(cb.m)}</b>`;
+      calc.innerHTML = `毎月 共有の財布へ入れる額 ―― <b>${esc(c.names.r)} ${yen(cb.r)}</b>／<b>${esc(c.names.m)} ${yen(cb.m)}</b>`
+        + (v.savings?`<br>これに<b>積立 ${yen(v.savings)}</b> を二人とも上乗せ ―― 口座には毎月 ${yen(v.savings*2)} 貯まり申す。`:"");
     };
-    ["p-base","p-ratio","p-er","p-em"].forEach(id=>{ const el=root.querySelector("#"+id); if(el) el.oninput=show; });
+    ["p-base","p-ratio","p-er","p-em","p-sv"].forEach(id=>{ const el=root.querySelector("#"+id); if(el) el.oninput=show; });
     show();
   }
   const psv=root.querySelector("#p-save");
   if(psv) psv.onclick=()=>{
     const v=readPlan(), p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
-    if(p){ p.base=v.base; p.ratio=v.ratio; p.extra=v.extra; }
+    if(p){ p.base=v.base; p.ratio=v.ratio; p.extra=v.extra; p.savings=v.savings; }
     saveCfg(); closeSheet(); render(); toast("直し申した");
   };
   const pnew=root.querySelector("#p-new");
   if(pnew) pnew.onclick=()=>{
     const v=readPlan(), src=planFor(S.month);
     const exist=c.plans.map(normPlan).find(x=>x.from===S.month);
-    if(exist){ exist.base=v.base; exist.ratio=v.ratio; exist.extra=v.extra; }
-    else c.plans.push({from:S.month, base:v.base, ratio:v.ratio, extra:v.extra, fixed:structuredClone(src.fixed||[])});
+    if(exist){ exist.base=v.base; exist.ratio=v.ratio; exist.extra=v.extra; exist.savings=v.savings; }
+    else c.plans.push({from:S.month, base:v.base, ratio:v.ratio, extra:v.extra, savings:v.savings, fixed:structuredClone(src.fixed||[])});
     saveCfg(); closeSheet(); render(); toast(ymLabel(S.month)+"から新しい期にいたした");
   };
   root.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
@@ -1611,7 +1635,8 @@ function bindConfigSheet(root){
     closeSheet();
     if(pin.length) await pushMany("update", pin);
     c.closed=Object.assign({}, c.closed||{}, {[m]:{
-      on, r:Math.max(0,t.send.r), m:Math.max(0,t.send.m), out:Math.round(t.out), n:t.list.filter(x=>!x.fixed).length}});
+      on, r:Math.max(0,t.send.r), m:Math.max(0,t.send.m), out:Math.round(t.out),
+      sv:t.savings, n:t.list.filter(x=>!x.fixed).length}});
     saveCfg(); render(); toast(ymLabel(m)+"の精算を締め申した");
   };
   const rog=root.querySelector("#ro-go");
