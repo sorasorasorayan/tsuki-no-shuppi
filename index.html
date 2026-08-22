@@ -384,7 +384,17 @@ async function api(action, payload){
     : {method:"GET", redirect:"follow"};
   const res = await fetch(url, opt);
   if(!res.ok) throw new Error("HTTP "+res.status);
-  const j = await res.json();
+  /* ⚠ そのまま res.json() を呼ばぬこと。
+     デプロイの「アクセスできるユーザー」が『全員』でないと、Googleは**ログイン画面のHTML**を返す。
+     JSONとして読もうとして「Unexpected token '<'」と出るだけでは、何が悪いのか分からぬ。 */
+  const txt = await res.text();
+  let j;
+  try{ j = JSON.parse(txt); }
+  catch(e){
+    if(/<html|<!DOCTYPE/i.test(txt))
+      throw new Error("帳面がJSONを返し申さぬ。デプロイの「アクセスできるユーザー」が『全員』になっておらぬ見込み");
+    throw new Error("返りが読めず申さぬ ―― "+txt.slice(0,60));
+  }
   if(j.ok===false) throw new Error(j.error||"エラー");
   return j;
 }
@@ -1277,7 +1287,9 @@ function openConfig(kind){
       <div class="field"><label>ウェブアプリのURL</label><input id="c-api" value="${esc(c.api)}" placeholder="https://script.google.com/macros/s/..."></div>
       <div class="field"><label>合言葉</label><input id="c-token" value="${esc(c.token)}" placeholder="二人で決めた言葉"></div>
       <div class="note">Apps Scriptを配置したあと、そこで出たURLと合言葉をここへ入れると、二人の記録が一つに集まり申す。空のままでもこの端末だけで使えるでござる。</div>
-      <button class="save" id="c-save">繋ぐ</button>`), {kind:"conn"});
+      <button class="save" id="c-save">繋ぐ</button>
+      <button class="save ghost" id="c-test">試して確かめる</button>
+      <div id="c-diag"></div>`), {kind:"conn"});
   }
   if(kind==="names"){
     openSheet(sheetShell("呼び名", `
@@ -1437,6 +1449,57 @@ function openConfig(kind){
 function bindConfigSheet(root){
   const c=S.cfg;
   const num = el => Number(String(el.value).replace(/[^0-9.]/g,""))||0;
+
+  /* 繋がらぬときの見立て（2026-08-21 追加）。
+     URL・デプロイ・合言葉・帳面の版 ―― どこで詰まっているのかを順に当てる。
+     ⚠ `ping` は合言葉を要らぬ用向きゆえ、URLとデプロイだけを先に切り分けられる。 */
+  const tst=root.querySelector("#c-test");
+  if(tst) tst.onclick=async ()=>{
+    const box=root.querySelector("#c-diag");
+    const api0=root.querySelector("#c-api").value.trim().replace(/\/exec.*$/,"/exec");
+    const tok0=root.querySelector("#c-token").value.trim();
+    if(!api0){ box.innerHTML=`<div class="warnbox">URLが空でござる。</div>`; return; }
+    box.innerHTML=`<div class="note">試しており申す…</div>`;
+    const hit = async (action, tok) => {
+      const u = api0 + (api0.includes("?")?"&":"?") + "action="+encodeURIComponent(action)
+              + "&token="+encodeURIComponent(tok||"");
+      const res = await fetch(u, {redirect:"follow"});
+      const txt = await res.text();
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      try{ return JSON.parse(txt); }
+      catch(e){ throw new Error(/<html|<!DOCTYPE/i.test(txt) ? "HTML" : "読めず"); }
+    };
+    const ng=(t,h)=>`<div class="warnbox"><b>${t}</b><br>${h}</div>`;
+    try{
+      await hit("ping","");
+    }catch(e){
+      box.innerHTML = e.message==="HTML"
+        ? ng("デプロイの「アクセスできるユーザー」が『全員』になっており申さぬ。",
+             "Apps Script → デプロイ → デプロイを管理 → 鉛筆 →「アクセスできるユーザー」を<b>全員</b>に。")
+        : ng("URLへ届き申さぬ ―― "+esc(e.message),
+             "末尾が <b>/exec</b> のURLでござるか。デプロイを一度も行っておらぬ、または消してしまった見込み。");
+      return;
+    }
+    let j;
+    try{ j = await hit("list", tok0); }
+    catch(e){ box.innerHTML = ng("URLは生きており申すが、明細が読めず申さぬ ―― "+esc(e.message), "帳面の `setup` を実行なされたか。"); return; }
+    if(j.ok===false && /合言葉/.test(j.error||"")){
+      box.innerHTML = ng("URLは正しゅうござるが、<b>合言葉が食い違うており申す。</b>",
+        "帳面の <code>Code.gs</code> を貼り替えると <code>var TOKEN</code> が雛形へ戻り申す。"
+        + "そこを二人の合言葉に直すか、スクリプト プロパティに <b>TOKEN</b> を登録なされよ（以後は貼り替えても保たれ申す）。");
+      return;
+    }
+    if(j.ok===false){ box.innerHTML = ng("帳面が断り申した ―― "+esc(j.error||""), "「知らぬ用向き」と出るなら、<b>新バージョンでのデプロイ</b>がまだにござる。"); return; }
+    /* ⚠ 古い帳面は「知らぬ用向き: config」を **JSONで正しく** 返す。
+       投げてはこぬゆえ、`ok===false` も併せて見ねば「万全」と偽って告げてしまう。 */
+    const stale = "<br>⚠ ただし<b>帳面が古うござる。</b>決め事のやり取りができており申さぬ。"
+                + "<code>Code.gs</code> を貼り替え、<code>setup</code> を実行のうえ新バージョンでデプロイなされよ。";
+    let cfgMsg="";
+    try{ const c=await hit("config", tok0); cfgMsg = (c && c.ok) ? "決め事のやり取りもでき申す。" : stale; }
+    catch(e){ cfgMsg = stale; }
+    box.innerHTML = `<div class="warnbox" style="background:var(--teal-bg);color:var(--teal-ink)">
+      <b>繋がってござる。</b>明細 ${((j.items||[]).length)} 件が読め申した。${cfgMsg}</div>`;
+  };
 
   const sv=root.querySelector("#c-save");
   if(sv) sv.onclick=async ()=>{
