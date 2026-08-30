@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#7C6BF0">
+<meta name="theme-color" content="#EAF0EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B211D" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="月の出費">
@@ -11,207 +12,273 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>
+/* ============================================================
+   Material Design 3 ―― 種色は深緑（hue ≒ 155）。2026-08-30 に総取り替え。
+   守る決まりは三つ。崩すと元の「AIっぽい画面」に戻り申す。
+     1. 面は surface-container の階調で高さを出す。**影はFABとsnackbarだけ。**
+     2. 角丸は Shape scale の 4 / 8 / 12 / 16 / 28 のみ。他の値を書かない。
+     3. 色は「意味」にだけ差す ―― 共有=primary / 諒=secondary / 万貴=tertiary / 促し=error。
+        費目に色は割り当てない（濃淡で額の大小を表す。--ramp-1〜6 を見よ）。
+   ============================================================ */
 :root{
-  --bg:#FFF9F2; --card:#FFFFFF; --card2:#F7F4EE;
-  --ink:#2B2A28; --sub:#6E6B64; --muted:#A5A199;
-  --line:#EFEAE1;
-  --purple:#7C6BF0; --purple-bg:#EFEDFE; --purple-ink:#3F35A0;
-  --teal:#17B183;  --teal-bg:#E2F6EF;  --teal-ink:#0B6A4E;
-  --pink:#E4628F;  --pink-bg:#FDEBF1;  --pink-ink:#962E53;
-  --amber:#F5A524; --amber-bg:#FEF3E0; --amber-ink:#8A5806;
-  --blue:#3B8DED;  --blue-bg:#E8F2FD;  --blue-ink:#1B5497;
-  --red:#EF5B5B;   --red-bg:#FDECEC;   --red-ink:#9C2A2A;
-  --shadow:0 2px 10px rgba(43,42,40,.06);
+  --m-primary:#1F6C46;             --m-on-primary:#FFFFFF;
+  --m-primary-container:#A6F2C4;   --m-on-primary-container:#00522E;
+  --m-secondary:#4C6357;           --m-on-secondary:#FFFFFF;
+  --m-secondary-container:#CFE9D9; --m-on-secondary-container:#0A1F16;
+  --m-tertiary:#3B6472;            --m-on-tertiary:#FFFFFF;
+  --m-tertiary-container:#BFE9F8;  --m-on-tertiary-container:#001F28;
+  --m-error:#BA1A1A;               --m-on-error:#FFFFFF;
+  --m-error-container:#FFDAD6;     --m-on-error-container:#410002;
+
+  --m-surface:#F6FBF6;
+  --m-surface-container-lowest:#FFFFFF;
+  --m-surface-container-low:#F0F6F0;
+  --m-surface-container:#EAF0EA;
+  --m-surface-container-high:#E5EBE5;
+  --m-surface-container-highest:#DFE4DF;
+  --m-on-surface:#171D19;
+  --m-on-surface-variant:#3F4943;
+  --m-outline:#6F7973;
+  --m-outline-variant:#BFC9C1;
+  --m-inverse-surface:#2C322E;
+  --m-inverse-on-surface:#EDF2EB;
+  --m-scrim:rgba(0,0,0,.32);
+
+  /* 費目バーの濃淡。額の多い順に 1→6 を当てる（toneOf）。7位以降は 6 で頭打ち。 */
+  --ramp-1:#1F6C46; --ramp-2:#3B8161; --ramp-3:#5C9C7D;
+  --ramp-4:#82B79B; --ramp-5:#AAD2BA; --ramp-6:#CFE4D7;
+
+  /* Shape scale。**ここに無い角丸を書かないこと。** */
+  --sh-xs:4px; --sh-s:8px; --sh-m:12px; --sh-l:16px; --sh-xl:28px; --sh-full:999px;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#191816; --card:#242220; --card2:#2E2B28;
-    --ink:#F2EFE9; --sub:#B4AFA6; --muted:#807B73;
-    --line:#35322E;
-    --purple-bg:#2E2A52; --purple-ink:#C3BBFB;
-    --teal-bg:#123A2E;   --teal-ink:#7FE3C0;
-    --pink-bg:#3D2029;   --pink-ink:#F6A7C3;
-    --amber-bg:#3A2A11;  --amber-ink:#F8CE86;
-    --blue-bg:#152C46;   --blue-ink:#9CC8F7;
-    --red-bg:#3B1F1F;    --red-ink:#F6A2A2;
-    --shadow:0 2px 10px rgba(0,0,0,.3);
+    --m-primary:#8BD8AB;             --m-on-primary:#00391F;
+    --m-primary-container:#00522E;   --m-on-primary-container:#A6F2C4;
+    --m-secondary:#B4CCBC;           --m-on-secondary:#20352A;
+    --m-secondary-container:#364B3F; --m-on-secondary-container:#CFE9D9;
+    --m-tertiary:#A3CDDC;            --m-on-tertiary:#033541;
+    --m-tertiary-container:#214C58;  --m-on-tertiary-container:#BFE9F8;
+    --m-error:#FFB4AB;               --m-on-error:#690005;
+    --m-error-container:#93000A;     --m-on-error-container:#FFDAD6;
+
+    --m-surface:#0F1511;
+    --m-surface-container-lowest:#0A0F0C;
+    --m-surface-container-low:#171D19;
+    --m-surface-container:#1B211D;
+    --m-surface-container-high:#262B27;
+    --m-surface-container-highest:#313631;
+    --m-on-surface:#DFE4DF;
+    --m-on-surface-variant:#BFC9C1;
+    --m-outline:#89938C;
+    --m-outline-variant:#3F4943;
+    --m-inverse-surface:#DFE4DF;
+    --m-inverse-on-surface:#2C322E;
+    --m-scrim:rgba(0,0,0,.5);
+
+    --ramp-1:#8BD8AB; --ramp-2:#77C298; --ramp-3:#63AC85;
+    --ramp-4:#4F9672; --ramp-5:#3C7F5F; --ramp-6:#2A694D;
   }
 }
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
-  background:var(--bg); color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
-  font-size:15px; line-height:1.6;
-  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  background:var(--m-surface); color:var(--m-on-surface);
+  /* Roboto と Noto Sans JP は Android 端末に載っておる。**外部から読み込まぬこと** ――
+     sw.js が外部通信を横取りせぬ造りゆえ、CDNから引くと圏外で字が崩れる。 */
+  font-family:Roboto,"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans",system-ui,sans-serif;
+  font-size:14px; line-height:1.5;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom));
   -webkit-font-smoothing:antialiased;
 }
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 button{font-family:inherit;font-size:inherit;color:inherit;border:none;background:none;padding:0;cursor:pointer}
-input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--m-on-surface)}
 .wrap{max-width:520px;margin:0 auto;padding:0 16px}
+/* Material Symbols（Apache 2.0）の線画。使う分だけ ICON_D に path を埋めてある。 */
+svg.i{width:24px;height:24px;fill:currentColor;display:block;flex:0 0 auto}
+svg.i.s20{width:20px;height:20px}
+svg.i.s18{width:18px;height:18px}
 
-header{padding:calc(14px + env(safe-area-inset-top)) 0 8px}
-.hrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.month-pick{display:flex;align-items:center;gap:10px}
-.month-pick b{font-size:20px;font-weight:700;letter-spacing:.02em}
-.arrowbtn{width:32px;height:32px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub)}
-.arrowbtn:disabled{opacity:.3}
-.pill{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--purple-bg);color:var(--purple-ink);margin-left:5px}
-.pill.warn{background:var(--amber-bg);color:var(--amber-ink)}
+header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:56px}
+.hrow>div:last-child{display:flex;align-items:center;flex:0 0 auto;white-space:nowrap}
+.month-pick{display:flex;align-items:center;gap:2px;min-width:0}
+.month-pick b{font-size:22px;line-height:28px;font-weight:400;padding:0 6px;white-space:nowrap}
+.arrowbtn{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;color:var(--m-on-surface-variant);flex:0 0 40px}
+.arrowbtn:active{background:var(--m-surface-container-high)}
+.arrowbtn:disabled{opacity:.38}
+.pill{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.5px;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-high);color:var(--m-on-surface-variant);margin-left:6px}
+.pill.warn{background:var(--m-error-container);color:var(--m-on-error-container)}
 
-.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
-.hero{background:var(--purple-bg);border-radius:24px;padding:20px;margin-bottom:12px}
-.hero .lbl{font-size:12px;font-weight:700;color:var(--purple-ink);opacity:.85}
-.hero .big{font-size:34px;font-weight:800;color:var(--purple-ink);letter-spacing:-.02em;margin:2px 0 0}
-.hero .sub{font-size:12px;color:var(--purple-ink);opacity:.8;margin-top:4px}
+.card{background:var(--m-surface-container-low);border-radius:var(--sh-m);padding:12px 16px;margin-bottom:8px}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.tile{border-radius:20px;padding:14px}
-.tile .lbl{font-size:11px;font-weight:700;opacity:.9}
-.tile .val{font-size:19px;font-weight:800;letter-spacing:-.01em}
-.tile .sub2{font-size:10px;opacity:.75;margin-top:2px}
-.t-teal{background:var(--teal-bg);color:var(--teal-ink)}
-.t-pink{background:var(--pink-bg);color:var(--pink-ink)}
+/* 唯一、色を大きく敷く場所。ここ以外の面は無彩に近い階調で通す。 */
+.hero{background:var(--m-primary);color:var(--m-on-primary);border-radius:var(--sh-l);padding:20px;margin-bottom:8px}
+@media (prefers-color-scheme: dark){
+  .hero{background:var(--m-primary-container);color:var(--m-on-primary-container)}
+}
+.hero .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;opacity:.9}
+.hero .big{font-size:36px;line-height:44px;font-weight:400;margin:4px 0 0}
+.hero .sub{font-size:12px;line-height:16px;opacity:.85;margin-top:6px}
 
-.settle{background:var(--amber-bg);color:var(--amber-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
-.settle .ic{font-size:22px}
-.settle .lbl{font-size:11px;font-weight:700;opacity:.85}
-.settle .val{font-size:16px;font-weight:800}
-.settle.even{background:var(--teal-bg);color:var(--teal-ink)}
-.bill{background:var(--blue-bg);color:var(--blue-ink);border-radius:20px;padding:14px 16px;margin-bottom:12px}
-.bill .hd{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.bill .hd .ic{font-size:20px}
-.bill .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
-.bill .big{font-size:30px;font-weight:800;letter-spacing:-.02em}
-.bill .brk{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.bill .chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--card)}
-.bill .memo{font-size:11px;line-height:1.6;margin-top:9px;opacity:.85}
-.send{background:var(--purple-bg);color:var(--purple-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px}
-.send .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.send .hd .ic{font-size:20px}
-.send .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
-.send .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.send .who{font-size:11px;font-weight:700;opacity:.8;margin-bottom:2px}
-.send .amt{font-size:19px;font-weight:800;letter-spacing:-.4px}
-.send .memo{font-size:11px;line-height:1.6;margin-top:10px;opacity:.85}
-/* 精算を締める札。済んだ月は緑に沈める（2026-08-21） */
-.send.done{background:var(--teal-bg);color:var(--teal-ink)}
-.send .settle{width:100%;background:var(--purple);color:#fff;font-size:14px;font-weight:700;padding:12px;border-radius:999px;margin-top:12px}
-.send .settle.ghost{background:transparent;color:inherit;opacity:.7;box-shadow:inset 0 0 0 1.5px currentColor}
-.send .memo .mini{margin-left:6px;vertical-align:middle}
-.sumrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 2px;border-bottom:1px solid var(--card2)}
-.sumrow b{font-weight:800}
-.sumrow.big{font-size:16px;border-bottom:none;padding-top:13px}
-/* 🤝 二人のあいだの貸し借り（2026-08-21）。口座の話ではないゆえ、🏦 とは別の色に置く */
-.loan{background:var(--amber-bg);color:var(--amber-ink);border-radius:20px;padding:14px 16px;margin-bottom:16px}
-.loan .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.loan .hd .ic{font-size:20px}
-.loan .hd .lbl{font-size:11px;font-weight:700;opacity:.85}
-.loan .big{font-size:22px;font-weight:800;letter-spacing:-.02em}
-.loan .memo{font-size:11px;line-height:1.6;margin-top:9px;opacity:.9}
-.loan .memo .mini{margin-left:6px;vertical-align:middle}
-.loan.done{background:var(--teal-bg);color:var(--teal-ink)}
-.tag.in{background:var(--teal-bg);color:var(--teal-ink)}
-.amt.plus{color:var(--teal-ink)}
-.trio.kinds{margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.tile{border-radius:var(--sh-m);padding:14px 16px}
+.tile .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;opacity:.9}
+.tile .val{font-size:22px;line-height:28px;font-weight:400;margin-top:2px}
+.tile .sub2{font-size:11px;line-height:16px;opacity:.8;margin-top:4px}
+/* クラス名は据え置き（JSが吐いておる）。中身は 諒=secondary / 万貴=tertiary。 */
+.t-teal{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
+.t-pink{background:var(--m-tertiary-container);color:var(--m-on-tertiary-container)}
 
-.sechead{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}
-.sechead h2{font-size:13px;font-weight:700;color:var(--sub);margin:0;letter-spacing:.04em}
-.sechead .more{font-size:12px;font-weight:700;color:var(--purple)}
+.bill,.send,.loan,.settle{background:var(--m-surface-container-high);color:var(--m-on-surface);border-radius:var(--sh-m);padding:16px;margin-bottom:8px}
+.bill .hd,.send .hd,.loan .hd,.settle .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bill .hd .ic,.send .hd .ic,.loan .hd .ic,.settle .ic{display:flex;color:var(--m-primary)}
+.bill .hd .lbl,.send .hd .lbl,.loan .hd .lbl,.settle .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;line-height:16px;color:var(--m-on-surface-variant)}
+.bill .big{font-size:28px;line-height:36px;font-weight:400}
+.loan .big{font-size:22px;line-height:28px;font-weight:400}
+.settle .val{font-size:16px;line-height:24px;font-weight:500}
+.bill .brk{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.bill .chip{font-size:11px;font-weight:500;min-height:0;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-lowest);color:var(--m-on-surface-variant);box-shadow:none}
+.bill .memo,.send .memo,.loan .memo{font-size:12px;line-height:18px;margin-top:10px;color:var(--m-on-surface-variant)}
+.send .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.send .who{font-size:11px;font-weight:500;letter-spacing:.5px;color:var(--m-on-surface-variant);margin-bottom:2px}
+.send .amt{font-size:24px;line-height:32px;font-weight:400}
+/* 済んだ月・渡し終えた貸借は secondary へ沈める。 */
+.send.done,.loan.done,.settle.even{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
+.send.done .hd .ic,.loan.done .hd .ic,.send.done .lbl,.loan.done .lbl,
+.send.done .who,.send.done .memo,.loan.done .memo{color:inherit;opacity:.9}
+/* 精算を締める釦（M3 の filled button）。上の .settle 札より詳しいゆえ勝つ。 */
+.send .settle{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;background:var(--m-primary);color:var(--m-on-primary);font-size:14px;font-weight:500;letter-spacing:.1px;padding:12px 24px;border-radius:var(--sh-full);margin:16px 0 0}
+.send .settle.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
+.send .memo .mini,.loan .memo .mini{margin-left:6px;vertical-align:middle}
 
-.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:none}
-.ic-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 38px}
+.sumrow{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:20px;padding:10px 0;color:var(--m-on-surface-variant)}
+.sumrow+.sumrow{border-top:1px solid var(--m-outline-variant)}
+.sumrow b{font-weight:500;color:var(--m-on-surface)}
+.sumrow.big{font-size:16px;padding-top:14px;color:var(--m-on-surface)}
+
+.sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px}
+.sechead h2{font-size:11px;font-weight:500;color:var(--m-on-surface-variant);margin:0;letter-spacing:.5px}
+.sechead .more{font-size:14px;font-weight:500;color:var(--m-primary);letter-spacing:.1px}
+.sechead .more.num{color:var(--m-on-surface-variant);font-weight:400}
+
+.row{display:flex;align-items:center;gap:16px;padding:8px 0;min-height:56px}
+.row+.row{border-top:1px solid var(--m-outline-variant)}
+/* 費目で色を変えない。額は右の数字で読み、種類は絵で読む。 */
+.ic-circle{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;flex:0 0 40px;background:var(--m-surface-container-highest);color:var(--m-on-surface-variant)}
+.ic-circle.accent{background:var(--m-primary-container);color:var(--m-on-primary-container)}
 .row .body{flex:1;min-width:0}
-.row .t1{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .t2{font-size:11px;color:var(--muted);margin-top:1px}
-.row .amt{font-size:15px;font-weight:700;white-space:nowrap}
-.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:5px;vertical-align:1px}
-.tag.c{background:var(--purple-bg);color:var(--purple-ink)}
-.tag.r{background:var(--teal-bg);color:var(--teal-ink)}
-.tag.m{background:var(--pink-bg);color:var(--pink-ink)}
-.tag.gray{background:var(--card2);color:var(--muted)}
+.row .t1{font-size:16px;line-height:22px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:12px;line-height:18px;color:var(--m-on-surface-variant);margin-top:1px}
+.row .amt{font-size:16px;line-height:22px;font-weight:500;white-space:nowrap}
 
-.empty{text-align:center;padding:28px 12px;color:var(--muted);font-size:13px}
-.empty .e-ic{font-size:34px;display:block;margin-bottom:8px;opacity:.6}
+.tag{display:inline-block;font-size:11px;font-weight:500;line-height:16px;padding:0 8px;border-radius:var(--sh-xs);margin-left:6px;vertical-align:1px}
+.tag.c{background:var(--m-primary-container);color:var(--m-on-primary-container)}
+.tag.r{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
+.tag.m{background:var(--m-tertiary-container);color:var(--m-on-tertiary-container)}
+.tag.gray{background:var(--m-surface-container-highest);color:var(--m-on-surface-variant)}
+.tag.in{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
+.amt.plus{color:var(--m-primary)}
 
-.barrow{margin-bottom:14px}
-.barrow .bh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:5px}
-.barrow .bh .nm{font-weight:600}
-.barrow .bh .vl{font-weight:700}
-.barrow .bh .pc{font-size:11px;color:var(--muted);margin-left:6px;font-weight:500}
-.track{height:9px;border-radius:999px;background:var(--card2);overflow:hidden}
-.fill{height:100%;border-radius:999px;transition:width .4s cubic-bezier(.2,.8,.3,1)}
+.empty{text-align:center;padding:32px 12px;color:var(--m-on-surface-variant);font-size:14px;line-height:20px}
+.empty .e-ic{display:flex;justify-content:center;margin-bottom:10px;color:var(--m-outline)}
+.empty .e-ic svg{width:32px;height:32px}
 
-.mbars{display:flex;align-items:flex-end;gap:6px;padding-top:6px}
-.mbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
-.mbar .bb{width:100%;background:var(--purple);border-radius:7px 7px 4px 4px;min-height:3px;transition:height .4s cubic-bezier(.2,.8,.3,1)}
-.mbar .bb.dim{background:var(--purple-bg)}
-.mbar .ml{font-size:10px;color:var(--muted);white-space:nowrap}
+.barrow{margin-bottom:16px}
+.barrow:last-child{margin-bottom:4px}
+.barrow .bh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:6px}
+.barrow .bh .nm{display:flex;align-items:center;gap:8px;min-width:0;font-weight:400}
+.barrow .bh .nm svg{color:var(--m-on-surface-variant)}
+.barrow .bh .vl{font-weight:500}
+.barrow .bh .pc{font-size:12px;color:var(--m-on-surface-variant);margin-left:8px;font-weight:400}
+.track{height:8px;border-radius:var(--sh-full);background:var(--m-surface-container-highest);overflow:hidden}
+.fill{height:100%;border-radius:var(--sh-full);transition:width .4s cubic-bezier(.2,0,0,1)}
 
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:40}
-.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 64px 1fr 1fr;align-items:end}
-.nb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:var(--muted);font-size:10px;font-weight:600}
-.nb .ni{font-size:20px;line-height:1}
-.nb.on{color:var(--purple)}
-.fab{width:56px;height:56px;border-radius:50%;background:var(--purple);color:#fff;font-size:28px;font-weight:300;display:flex;align-items:center;justify-content:center;margin:0 auto;transform:translateY(-14px);box-shadow:0 6px 16px rgba(124,107,240,.4)}
-.fab:active{transform:translateY(-14px) scale(.94)}
+.mbars{display:flex;align-items:flex-end;gap:8px;padding-top:8px}
+.mbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+.mbar .bb{width:100%;background:var(--m-primary);border-radius:var(--sh-xs);min-height:4px;transition:height .4s cubic-bezier(.2,0,0,1)}
+.mbar .bb.dim{background:var(--m-secondary-container)}
+.mbar .ml{font-size:11px;color:var(--m-on-surface-variant);white-space:nowrap}
 
-.sheet-bg{position:fixed;inset:0;background:rgba(20,18,16,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+/* M3 の Navigation bar。選んだ札は丸薬型の下敷きで示す ―― 色を塗り分けない。 */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 72px 1fr 1fr;align-items:center;height:80px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--m-on-surface-variant);font-size:12px;line-height:16px;font-weight:500;letter-spacing:.5px}
+.nb .ni{width:64px;height:32px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.nb.on{color:var(--m-on-surface)}
+.nb.on .ni{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
+/* M3 の FAB は真円でなく角丸16px。影を許すのはここと snackbar だけ。 */
+.fab{width:56px;height:56px;border-radius:var(--sh-l);background:var(--m-primary-container);color:var(--m-on-primary-container);display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 3px 6px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.24)}
+.fab:active{background:var(--m-primary);color:var(--m-on-primary)}
+
+.sheet-bg{position:fixed;inset:0;background:var(--m-scrim);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
 .sheet-bg.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-radius:26px 26px 0 0;z-index:51;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.3,1);max-height:94vh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container-low);border-radius:var(--sh-xl) var(--sh-xl) 0 0;z-index:51;transform:translateY(100%);transition:transform .3s cubic-bezier(.05,.7,.1,1);max-height:94vh;overflow-y:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .sheet.open{transform:translateY(0)}
-.sheet-in{max-width:520px;margin:0 auto;padding:8px 16px 0}
-.grab{width:38px;height:4px;border-radius:999px;background:var(--line);margin:8px auto 10px}
-.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sheet-head h3{font-size:17px;font-weight:700;margin:0}
-.xbtn{width:32px;height:32px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+.sheet-in{max-width:520px;margin:0 auto;padding:0 16px}
+.grab{width:32px;height:4px;border-radius:var(--sh-full);background:var(--m-outline-variant);margin:16px auto 0}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;margin-bottom:8px}
+.sheet-head h3{font-size:22px;line-height:28px;font-weight:400;margin:0}
+.xbtn{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;color:var(--m-on-surface-variant);flex:0 0 40px}
+.xbtn:active{background:var(--m-surface-container-high)}
 
-.amtbox{background:var(--purple-bg);border-radius:22px;padding:16px;text-align:center;margin-bottom:16px}
-.amtbox input{width:100%;border:none;background:none;text-align:center;font-size:36px;font-weight:800;color:var(--purple-ink);outline:none;letter-spacing:-.02em;padding:0}
-.amtbox input::placeholder{color:var(--purple-ink);opacity:.3}
-.flabel{font-size:12px;font-weight:700;color:var(--sub);margin:0 2px 8px}
-.flabel .hint{font-weight:500;color:var(--muted);margin-left:6px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.chip{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;gap:5px}
-.chip.on{box-shadow:none}
-.chip:active{transform:scale(.96)}
-.trio{display:flex;gap:8px;margin-bottom:18px}
-.trio .chip{flex:1;justify-content:center;padding:12px 6px;font-size:13px}
-.field{background:var(--card);border-radius:16px;padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--muted)}
-.field input,.field select,.field textarea{width:100%;border:none;background:none;outline:none;padding:2px 0;font-size:15px}
-.field textarea{resize:none;min-height:22px}
-.save{width:100%;background:var(--teal);color:#fff;font-size:16px;font-weight:700;padding:15px;border-radius:999px;margin-top:6px}
-.save:active{transform:scale(.98)}
-.save.del{background:var(--red-bg);color:var(--red-ink);margin-top:10px;font-size:14px;padding:12px}
-.save.ghost{background:var(--card2);color:var(--sub);margin-top:10px;font-size:14px;padding:12px}
-.save:disabled{opacity:.45}
+.amtbox{background:var(--m-surface-container-high);border-radius:var(--sh-l);padding:20px 16px;text-align:center;margin-bottom:20px}
+.amtbox input{width:100%;border:none;background:none;text-align:center;font-size:40px;line-height:48px;font-weight:400;color:var(--m-on-surface);outline:none;padding:0}
+.amtbox input::placeholder{color:var(--m-outline)}
+.flabel{font-size:11px;font-weight:500;letter-spacing:.5px;color:var(--m-on-surface-variant);margin:0 4px 8px}
+.flabel .hint{font-weight:400;letter-spacing:0;color:var(--m-outline);margin-left:6px}
 
-.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
-.setrow:last-child{border-bottom:none}
-.setrow .sl{font-size:14px;font-weight:600}
-.setrow .sd{font-size:11px;color:var(--muted);margin-top:1px}
-.mini{font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;background:var(--purple-bg);color:var(--purple-ink);white-space:nowrap}
-.mini.ghost{background:var(--card2);color:var(--sub)}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:0}
-.dot.ok{background:var(--teal)} .dot.ng{background:var(--muted)} .dot.er{background:var(--red)}
+/* M3 の filter chip。**角丸8px、選ばぬうちは輪郭線だけ。**丸薬型に戻さぬこと。 */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;letter-spacing:.1px;min-height:32px;padding:6px 14px;border-radius:var(--sh-s);background:transparent;color:var(--m-on-surface-variant);box-shadow:inset 0 0 0 1px var(--m-outline)}
+.chip svg{width:18px;height:18px}
+.chip.on{box-shadow:none;background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
+.chip:active{opacity:.85}
+.trio{display:flex;gap:8px;margin-bottom:20px}
+.trio .chip{flex:1;justify-content:center;padding:10px 8px;font-size:13px;line-height:1.35;text-align:center}
+.trio.kinds{margin-bottom:16px}
 
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;padding:11px 20px;border-radius:999px;z-index:70;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
+/* M3 の filled text field。上だけ角を丸め、下に一本線を敷く。 */
+.field{background:var(--m-surface-container-high);border-radius:var(--sh-xs) var(--sh-xs) 0 0;padding:8px 16px 6px;margin-bottom:12px;border-bottom:1px solid var(--m-on-surface-variant)}
+.field:focus-within{border-bottom:2px solid var(--m-primary);padding-bottom:5px}
+.field label{display:block;font-size:12px;line-height:16px;color:var(--m-on-surface-variant)}
+.field:focus-within label{color:var(--m-primary)}
+.field input,.field select,.field textarea{width:100%;border:none;background:none;outline:none;padding:2px 0;font-size:16px;line-height:24px}
+.field textarea{resize:none;min-height:24px}
+
+.save{width:100%;background:var(--m-primary);color:var(--m-on-primary);font-size:14px;font-weight:500;letter-spacing:.1px;min-height:48px;padding:12px 24px;border-radius:var(--sh-full);margin-top:12px}
+.save:active{opacity:.9}
+.save.del{background:var(--m-error-container);color:var(--m-on-error-container);margin-top:8px;min-height:40px}
+.save.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline);margin-top:8px;min-height:40px}
+.save:disabled{opacity:.38}
+
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;min-height:56px}
+.setrow+.setrow{border-top:1px solid var(--m-outline-variant)}
+.setrow .sl{font-size:16px;line-height:22px}
+.setrow .sd{font-size:12px;line-height:18px;color:var(--m-on-surface-variant);margin-top:2px}
+.mini{font-size:14px;font-weight:500;letter-spacing:.1px;min-height:32px;padding:6px 16px;border-radius:var(--sh-full);background:var(--m-primary);color:var(--m-on-primary);white-space:nowrap}
+.mini.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:var(--sh-full);margin-right:6px}
+.dot.ok{background:var(--m-primary)} .dot.ng{background:var(--m-outline)} .dot.er{background:var(--m-error)}
+
+/* M3 の snackbar。角丸は 4px。 */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:var(--m-inverse-surface);color:var(--m-inverse-on-surface);font-size:14px;line-height:20px;padding:14px 16px;border-radius:var(--sh-xs);z-index:70;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 6px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.24)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-table.csv{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
-table.csv td{border:1px solid var(--line);padding:5px 6px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
-.maprow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.maprow .mk{font-size:13px;font-weight:600;width:86px;flex:0 0 86px}
-.maprow select{flex:1;background:var(--card);border:none;border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);outline:none}
-.note{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 2px}
-.warnbox{background:var(--amber-bg);color:var(--amber-ink);border-radius:14px;padding:11px 14px;font-size:12px;line-height:1.6;margin-bottom:12px}
-.spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+table.csv{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+table.csv td{border:1px solid var(--m-outline-variant);padding:6px 8px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--m-on-surface-variant)}
+.scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:16px}
+.maprow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.maprow .mk{font-size:14px;width:86px;flex:0 0 86px}
+.maprow select{flex:1;background:var(--m-surface-container-high);border:none;border-bottom:1px solid var(--m-on-surface-variant);border-radius:var(--sh-xs) var(--sh-xs) 0 0;padding:12px;outline:none}
+.note{font-size:12px;color:var(--m-on-surface-variant);line-height:18px;margin:12px 4px}
+/* M3 に「警告」の役は無い。促しは error-container で受ける。 */
+.warnbox{background:var(--m-error-container);color:var(--m-on-error-container);border-radius:var(--sh-m);padding:14px 16px;font-size:12px;line-height:18px;margin-bottom:12px}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:var(--sh-full);animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes sp{to{transform:rotate(360deg)}}
-.thumb{width:100%;border-radius:16px;margin-bottom:12px;display:block}
+.thumb{width:100%;border-radius:var(--sh-m);margin-bottom:12px;display:block}
 </style>
 </head>
 <body>
@@ -220,11 +287,11 @@ table.csv td{border:1px solid var(--line);padding:5px 6px;text-align:left;white-
 
 <nav>
   <div class="navin">
-    <button class="nb on" data-tab="home"><span class="ni">🏠</span>まとめ</button>
-    <button class="nb" data-tab="stats"><span class="ni">📊</span>分析</button>
-    <button class="fab" id="fab">＋</button>
-    <button class="nb" data-tab="list"><span class="ni">📋</span>履歴</button>
-    <button class="nb" data-tab="settings"><span class="ni">⚙️</span>設定</button>
+    <button class="nb on" data-tab="home"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg></span>まとめ</button>
+    <button class="nb" data-tab="stats"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M640-160v-280h160v280H640Zm-240 0v-640h160v640H400Zm-240 0v-440h160v440H160Z"/></svg></span>分析</button>
+    <button class="fab" id="fab"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg></button>
+    <button class="nb" data-tab="list"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v40q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z"/></svg></span>履歴</button>
+    <button class="nb" data-tab="settings"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg></span>設定</button>
   </div>
 </nav>
 
@@ -235,6 +302,53 @@ table.csv td{border:1px solid var(--line);padding:5px 6px;text-align:left;white-
 <script>
 "use strict";
 
+/* Material Symbols Outlined（Google・Apache 2.0）の線画を path だけ抜いて埋めてある。
+   ⚠ **外部から読み込まぬこと。** sw.js が外部通信を横取りせぬ造りゆえ（`url.origin !== location.origin` で素通し）、
+     Google Fonts から引くと圏外で絵が消える。絵柄を足すときは
+     https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/<名>/default/24px.svg
+     の path を、この表へ書き写す。viewBox は全て "0 -960 960 960"。 */
+const ICON_D = {
+  home:"M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z",
+  bar_chart:"M640-160v-280h160v280H640Zm-240 0v-640h160v640H400Zm-240 0v-440h160v440H160Z",
+  receipt_long:"M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v40q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z",
+  settings:"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z",
+  add:"M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z",
+  chevron_left:"M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z",
+  chevron_right:"M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z",
+  close:"m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z",
+  check_circle:"m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z",
+  credit_card:"M880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720Zm-720 80h640v-80H160v80Zm0 160v240h640v-240H160Zm0 240v-480 480Z",
+  account_balance_wallet:"M200-200v-560 560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v100h-80v-100H200v560h560v-100h80v100q0 33-23.5 56.5T760-120H200Zm320-160q-33 0-56.5-23.5T440-360v-240q0-33 23.5-56.5T520-680h280q33 0 56.5 23.5T880-600v240q0 33-23.5 56.5T800-280H520Zm280-80v-240H520v240h280Zm-117.5-77.5Q700-455 700-480t-17.5-42.5Q665-540 640-540t-42.5 17.5Q580-505 580-480t17.5 42.5Q615-420 640-420t42.5-17.5Z",
+  handshake:"M475-160q4 0 8-2t6-4l328-328q12-12 17.5-27t5.5-30q0-16-5.5-30.5T817-607L647-777q-11-12-25.5-17.5T591-800q-15 0-30 5.5T534-777l-11 11 74 75q15 14 22 32t7 38q0 42-28.5 70.5T527-522q-20 0-38.5-7T456-550l-75-74-175 175q-3 3-4.5 6.5T200-435q0 8 6 14.5t14 6.5q4 0 8-2t6-4l136-136 56 56-135 136q-3 3-4.5 6.5T285-350q0 8 6 14t14 6q4 0 8-2t6-4l136-135 56 56-135 136q-3 2-4.5 6t-1.5 8q0 8 6 14t14 6q4 0 7.5-1.5t6.5-4.5l136-135 56 56-136 136q-3 3-4.5 6.5T454-180q0 8 6.5 14t14.5 6Zm-1 80q-37 0-65.5-24.5T375-166q-34-5-57-28t-28-57q-34-5-56.5-28.5T206-336q-38-5-62-33t-24-66q0-20 7.5-38.5T149-506l232-231 131 131q2 3 6 4.5t8 1.5q9 0 15-5.5t6-14.5q0-4-1.5-8t-4.5-6L398-777q-11-12-25.5-17.5T342-800q-15 0-30 5.5T285-777L144-635q-9 9-15 21t-8 24q-2 12 0 24.5t8 23.5l-58 58q-17-23-25-50.5T40-590q2-28 14-54.5T87-692l141-141q24-23 53.5-35t60.5-12q31 0 60.5 12t52.5 35l11 11 11-11q24-23 53.5-35t60.5-12q31 0 60.5 12t52.5 35l169 169q23 23 35 53t12 61q0 31-12 60.5T873-437L545-110q-14 14-32.5 22T474-80Zm-99-560Z",
+  payments:"M560-440q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35ZM280-320q-33 0-56.5-23.5T200-400v-320q0-33 23.5-56.5T280-800h560q33 0 56.5 23.5T920-720v320q0 33-23.5 56.5T840-320H280Zm80-80h400q0-33 23.5-56.5T840-480v-160q-33 0-56.5-23.5T760-720H360q0 33-23.5 56.5T280-640v160q33 0 56.5 23.5T360-400Zm440 240H120q-33 0-56.5-23.5T40-240v-440h80v440h680v80ZM280-400v-320 320Z",
+  inbox:"M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-120H640q-30 38-71.5 59T480-240q-47 0-88.5-21T320-320H200v120Zm349-142q31-22 43-58h168v-360H200v360h168q12 36 43 58t69 22q38 0 69-22ZM200-200h560-560Z",
+  calendar_month:"M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z",
+  warning:"m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm330.5-51.5Q520-263 520-280t-11.5-28.5Q497-320 480-320t-28.5 11.5Q440-297 440-280t11.5 28.5Q463-240 480-240t28.5-11.5ZM440-360h80v-200h-80v200Zm40-100Z",
+  shopping_basket:"M221-120q-27 0-48-16.5T144-179L42-549q-5-19 6.5-35T80-600h190l176-262q5-8 14-13t19-5q10 0 19 5t14 13l176 262h192q20 0 31.5 16t6.5 35L816-179q-8 26-29 42.5T739-120H221Zm-1-80h520l88-320H132l88 320Zm316.5-103.5Q560-327 560-360t-23.5-56.5Q513-440 480-440t-56.5 23.5Q400-393 400-360t23.5 56.5Q447-280 480-280t56.5-23.5ZM367-600h225L479-768 367-600Zm113 240Z",
+  restaurant:"M280-80v-366q-51-14-85.5-56T160-600v-280h80v280h40v-280h80v280h40v-280h80v280q0 56-34.5 98T360-446v366h-80Zm400 0v-320H560v-280q0-83 58.5-141.5T760-880v800h-80Z",
+  soap:"M580.5-660.5Q560-681 560-710t20.5-49.5Q601-780 630-780t49.5 20.5Q700-739 700-710t-20.5 49.5Q659-640 630-640t-49.5-20.5Zm203-3Q760-687 760-720t23.5-56.5Q807-800 840-800t56.5 23.5Q920-753 920-720t-23.5 56.5Q873-640 840-640t-56.5-23.5Zm-126-154Q640-835 640-860t17.5-42.5Q675-920 700-920t42.5 17.5Q760-885 760-860t-17.5 42.5Q725-800 700-800t-42.5-17.5ZM240-80q-66 0-113-47T80-240v-216q0-31 14.5-57.5T135-557l330-214 20 20q20 20 23.5 47.5T497-652l-45 72h308q17 0 28.5 11.5T800-540q0 17-11.5 28.5T760-500H308l77-124-207 134q-9 5-13.5 14t-4.5 20v216q0 33 23.5 56.5T240-160h480q17 0 28.5 11.5T760-120q0 17-11.5 28.5T720-80H240Zm240-280v-80h360q17 0 28.5 11.5T880-400q0 17-11.5 28.5T840-360H480Zm0 140v-80h320q17 0 28.5 11.5T840-260q0 17-11.5 28.5T800-220H480ZM320-360Z",
+  bolt:"m422-232 207-248H469l29-227-185 267h139l-30 208ZM320-80l40-280H160l360-520h80l-40 320h240L400-80h-80Zm151-390Z",
+  smartphone:"M280-40q-33 0-56.5-23.5T200-120v-720q0-33 23.5-56.5T280-920h400q33 0 56.5 23.5T760-840v124q18 7 29 22t11 34v80q0 19-11 34t-29 22v404q0 33-23.5 56.5T680-40H280Zm0-80h400v-720H280v720Zm0 0v-720 720Zm228.5-611.5Q520-743 520-760t-11.5-28.5Q497-800 480-800t-28.5 11.5Q440-777 440-760t11.5 28.5Q463-720 480-720t28.5-11.5Z",
+  autorenew:"M204-318q-22-38-33-78t-11-82q0-134 93-228t227-94h7l-64-64 56-56 160 160-160 160-56-56 64-64h-7q-100 0-170 70.5T240-478q0 26 6 51t18 49l-60 60ZM481-40 321-200l160-160 56 56-64 64h7q100 0 170-70.5T720-482q0-26-6-51t-18-49l60-60q22 38 33 78t11 82q0 134-93 228t-227 94h-7l64 64-56 56Z",
+  shield:"M480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-84q104-33 172-132t68-220v-189l-240-90-240 90v189q0 121 68 220t172 132Zm0-316Z",
+  train:"M160-340v-380q0-53 27.5-84.5t72.5-48q45-16.5 102.5-22T480-880q66 0 124.5 5.5t102 22q43.5 16.5 68.5 48t25 84.5v380q0 59-40.5 99.5T660-200l60 60v20h-80l-80-80H400l-80 80h-80v-20l60-60q-59 0-99.5-40.5T160-340Zm320-460q-106 0-155 12.5T258-760h448q-15-17-64.5-28.5T480-800ZM240-560h200v-120H240v120Zm420 80H240h480-60Zm-140-80h200v-120H520v120ZM383-337q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm280 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-363 57h360q26 0 43-17t17-43v-140H240v140q0 26 17 43t43 17Zm180-480h226-448 222Z",
+  directions_car:"M240-200v40q0 17-11.5 28.5T200-120h-40q-17 0-28.5-11.5T120-160v-320l84-240q6-18 21.5-29t34.5-11h440q19 0 34.5 11t21.5 29l84 240v320q0 17-11.5 28.5T800-120h-40q-17 0-28.5-11.5T720-160v-40H240Zm-8-360h496l-42-120H274l-42 120Zm-32 80v200-200Zm100 160q25 0 42.5-17.5T360-380q0-25-17.5-42.5T300-440q-25 0-42.5 17.5T240-380q0 25 17.5 42.5T300-320Zm360 0q25 0 42.5-17.5T720-380q0-25-17.5-42.5T660-440q-25 0-42.5 17.5T600-380q0 25 17.5 42.5T660-320Zm-460 40h560v-200H200v200Z",
+  medication:"M420-260h120v-100h100v-120H540v-100H420v100H320v120h100v100ZM280-120q-33 0-56.5-23.5T200-200v-440q0-33 23.5-56.5T280-720h400q33 0 56.5 23.5T760-640v440q0 33-23.5 56.5T680-120H280Zm0-80h400v-440H280v440Zm-40-560v-80h480v80H240Zm40 120v440-440Z",
+  child_care:"M544.5-504.5Q530-519 530-540t14.5-35.5Q559-590 580-590t35.5 14.5Q630-561 630-540t-14.5 35.5Q601-490 580-490t-35.5-14.5Zm-200 0Q330-519 330-540t14.5-35.5Q359-590 380-590t35.5 14.5Q430-561 430-540t-14.5 35.5Q401-490 380-490t-35.5-14.5Zm27 191.5Q323-346 300-400h360q-23 54-71.5 87T480-280q-60 0-108.5-33Zm-32 164.5q-65.5-28.5-114-77t-77-114Q120-405 120-480t28.5-140.5q28.5-65.5 77-114t114-77Q405-840 480-840t140.5 28.5q65.5 28.5 114 77t77 114Q840-555 840-480t-28.5 140.5q-28.5 65.5-77 114t-114 77Q555-120 480-120t-140.5-28.5ZM678-282q82-82 82-198t-82-198q-82-82-198-82h-12q-6 0-12 2-6 6-8 13t-2 15q0 21 14.5 35.5T496-680q9 0 16.5-3t15.5-3q12 0 20 9t8 21q0 23-21.5 29.5T496-620q-45 0-77.5-32.5T386-730v-6q0-3 1-8-83 30-135 101t-52 163q0 116 82 198t198 82q116 0 198-82ZM480-480Z",
+  school:"M480-120 200-272v-240L40-600l440-240 440 240v320h-80v-276l-80 44v240L480-120Zm0-332 274-148-274-148-274 148 274 148Zm0 241 200-108v-151L480-360 280-470v151l200 108Zm0-241Zm0 90Zm0 0Z",
+  content_cut:"M760-120 480-400l-94 94q8 15 11 32t3 34q0 66-47 113T240-80q-66 0-113-47T80-240q0-66 47-113t113-47q17 0 34 3t32 11l94-94-94-94q-15 8-32 11t-34 3q-66 0-113-47T80-720q0-66 47-113t113-47q66 0 113 47t47 113q0 17-3 34t-11 32l494 494v40H760ZM600-520l-80-80 240-240h120v40L600-520ZM296.5-663.5Q320-687 320-720t-23.5-56.5Q273-800 240-800t-56.5 23.5Q160-753 160-720t23.5 56.5Q207-640 240-640t56.5-23.5ZM494-466q6-6 6-14t-6-14q-6-6-14-6t-14 6q-6 6-6 14t6 14q6 6 14 6t14-6ZM296.5-183.5Q320-207 320-240t-23.5-56.5Q273-320 240-320t-56.5 23.5Q160-273 160-240t23.5 56.5Q207-160 240-160t56.5-23.5Z",
+  sports_esports:"M182-200q-51 0-79-35.5T82-322l42-300q9-60 53.5-99T282-760h396q60 0 104.5 39t53.5 99l42 300q7 51-21 86.5T778-200q-21 0-39-7.5T706-230l-90-90H344l-90 90q-15 15-33 22.5t-39 7.5Zm16-86 114-114h336l114 114q2 2 16 6 11 0 17.5-6.5T800-304l-44-308q-4-29-26-48.5T678-680H282q-30 0-52 19.5T204-612l-44 308q-2 11 4.5 17.5T182-280q2 0 16-6Zm510.5-165.5Q720-463 720-480t-11.5-28.5Q697-520 680-520t-28.5 11.5Q640-497 640-480t11.5 28.5Q663-440 680-440t28.5-11.5Zm-80-120Q640-583 640-600t-11.5-28.5Q617-640 600-640t-28.5 11.5Q560-617 560-600t11.5 28.5Q583-560 600-560t28.5-11.5ZM310-440h60v-70h70v-60h-70v-70h-60v70h-70v60h70v70Zm170-40Z",
+  flight:"M280-80v-100l120-84v-144L80-280v-120l320-224v-176q0-33 23.5-56.5T480-880q33 0 56.5 23.5T560-800v176l320 224v120L560-408v144l120 84v100l-200-60-200 60Z",
+  checkroom:"M120-160q-17 0-28.5-11.5T80-200q0-10 4-18.5T96-232l344-258v-70q0-17 12-28.5t29-11.5q25 0 42-18t17-43q0-25-17.5-42T480-720q-25 0-42.5 17.5T420-660h-80q0-58 41-99t99-41q58 0 99 40.5t41 98.5q0 47-27.5 84T520-526v36l344 258q8 5 12 13.5t4 18.5q0 17-11.5 28.5T840-160H120Zm120-80h480L480-420 240-240Z",
+  redeem:"M160-280v80h640v-80H160Zm0-440h88q-5-9-6.5-19t-1.5-21q0-50 35-85t85-35q30 0 55.5 15.5T460-826l20 26 20-26q18-24 44-39t56-15q50 0 85 35t35 85q0 11-1.5 21t-6.5 19h88q33 0 56.5 23.5T880-640v440q0 33-23.5 56.5T800-120H160q-33 0-56.5-23.5T80-200v-440q0-33 23.5-56.5T160-720Zm0 320h640v-240H596l84 114-64 46-136-184-136 184-64-46 82-114H160v240Zm228.5-331.5Q400-743 400-760t-11.5-28.5Q377-800 360-800t-28.5 11.5Q320-777 320-760t11.5 28.5Q343-720 360-720t28.5-11.5ZM600-720q17 0 28.5-11.5T640-760q0-17-11.5-28.5T600-800q-17 0-28.5 11.5T560-760q0 17 11.5 28.5T600-720Z",
+  account_balance:"M200-280v-280h80v280h-80Zm240 0v-280h80v280h-80ZM80-120v-80h800v80H80Zm600-160v-280h80v280h-80ZM80-640v-80l400-200 400 200v80H80Zm178-80h444-444Zm0 0h444L480-830 258-720Z",
+  savings:"M668.5-531.5Q680-543 680-560t-11.5-28.5Q657-600 640-600t-28.5 11.5Q600-577 600-560t11.5 28.5Q623-520 640-520t28.5-11.5ZM320-600h200v-80H320v80ZM180-120q-34-114-67-227.5T80-580q0-92 64-156t156-64h200q29-38 70.5-59t89.5-21q25 0 42.5 17.5T720-820q0 6-1.5 12t-3.5 11q-4 11-7.5 22.5T702-751l91 91h87v279l-113 37-67 224H480v-80h-80v80H180Zm60-80h80v-80h240v80h80l62-206 98-33v-141h-40L620-720q0-20 2.5-38.5T630-796q-29 8-51 27.5T547-720H300q-58 0-99 41t-41 99q0 98 27 191.5T240-200Zm240-298Z",
+  more_horiz:"M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
+};
+function icon(n, cls){
+  return `<svg class="i${cls?" "+cls:""}" viewBox="0 -960 960 960" aria-hidden="true"><path d="${ICON_D[n]||ICON_D.more_horiz}"/></svg>`;
+}
+
 /* ============================================================
    月の出費 — 二人でつける家計簿
    支払元(payer: c=共有カード / r / m) と 負担(burden: share / r / m) を
@@ -242,21 +356,33 @@ table.csv td{border:1px solid var(--line);padding:5px 6px;text-align:left;white-
    ============================================================ */
 
 const CATS = [
-  {k:"食費",   ic:"🍚", c:"blue"},
-  {k:"日用品", ic:"🧺", c:"teal"},
-  {k:"光熱費", ic:"💡", c:"amber"},
-  {k:"通信",   ic:"📱", c:"purple"},
-  {k:"住居",   ic:"🏠", c:"pink"},
-  {k:"保険",   ic:"🛡️", c:"teal"},
-  {k:"交通",   ic:"🚃", c:"blue"},
-  {k:"医療",   ic:"💊", c:"red"},
-  {k:"娯楽",   ic:"🎮", c:"purple"},
-  {k:"衣服",   ic:"👕", c:"pink"},
-  {k:"交際",   ic:"🎁", c:"amber"},
-  {k:"その他", ic:"✨", c:"teal"}
+  {k:"食費",     ic:"shopping_basket"},
+  {k:"外食",     ic:"restaurant"},
+  {k:"日用品",   ic:"soap"},
+  {k:"光熱費",   ic:"bolt"},
+  {k:"通信",     ic:"smartphone"},
+  {k:"サブスク", ic:"autorenew"},
+  {k:"住居",     ic:"home"},
+  {k:"保険",     ic:"shield"},
+  {k:"交通",     ic:"train"},
+  {k:"車",       ic:"directions_car"},
+  {k:"医療",     ic:"medication"},
+  {k:"子ども",   ic:"child_care"},
+  {k:"教育",     ic:"school"},
+  {k:"美容",     ic:"content_cut"},
+  {k:"娯楽",     ic:"sports_esports"},
+  {k:"旅行",     ic:"flight"},
+  {k:"衣服",     ic:"checkroom"},
+  {k:"交際",     ic:"redeem"},
+  {k:"税・公金", ic:"account_balance"},
+  {k:"貯蓄",     ic:"savings"},
+  /* ⚠ 「その他」は必ず末尾に置くこと。`catOf()` が知らぬ費目の受け皿に使ってござる。 */
+  {k:"その他",   ic:"more_horiz"}
 ];
 const catOf = k => CATS.find(c=>c.k===k) || CATS[CATS.length-1];
-const CVAR = {blue:"--blue",teal:"--teal",amber:"--amber",purple:"--purple",pink:"--pink",red:"--red"};
+/* 費目に色は割り当てぬ（2026-08-30 の刷新）。**多い順の濃淡で額の大小を表す。**
+   色を費目ごとに配ると画面が虹になり、元の「AIっぽさ」に逆戻りいたす。 */
+const toneOf = i => `var(--ramp-${Math.min(i+1,6)})`;
 
 /* 期(いつからの決め事か)
    base   … 年収比で按分する固定額。二人合わせた額
@@ -306,29 +432,105 @@ const DEFAULT_CFG = {
   /* ⚠ 上から順に当たった最初のものを採る。**書く順が意味を持つ。**
      「ライフ」(スーパー)を「生命」より先に置くと、メットライフ生命が食費になる。
      語は 2026-08-18 に明細CSV 775行の実際の店名から起こした。 */
+  /* 明細CSVを取り込むとき、店名から費目を当てる辞書。
+     ⚠⚠ **上から順に当てて、最初に当たったものを採る。並び順が効く。**
+       広い語（病院・クリニック・食・ライフ）より、狭い語（レディース・西松屋・焼肉・生命）を**先に**置くこと。
+       例: 「戸越銀座レディースクリニック」は「クリニック」より先に「レディ」で拾わねば医療に落ちる。
+           「メットライフ生命」は「ライフ」より先に「生命」で拾わねば食費に落ちる。
+     2026-08-22 に費目を12→21へ増やし、15ヶ月ぶんのカード明細830件で当て直した。 */
   dict:[
+    // 貯蓄 ―― そもそも出費ではないので、何より先に外す
+    {kw:"SBI証券",cat:"貯蓄"},{kw:"投信",cat:"貯蓄"},{kw:"積立貯蓄",cat:"貯蓄"},
+
+    // 子ども ―― 「病院」「クリニック」より必ず先
+    {kw:"東京品川病院",cat:"子ども"},{kw:"レディ",cat:"子ども"},{kw:"西松屋",cat:"子ども"},
+    {kw:"トイザ",cat:"子ども"},{kw:"ベビー",cat:"子ども"},{kw:"アカチャン",cat:"子ども"},
+    {kw:"バイエル",cat:"子ども"},{kw:"トツキトオカ",cat:"子ども"},{kw:"産後",cat:"子ども"},
+    {kw:"ニューボーン",cat:"子ども"},{kw:"お食い初め",cat:"子ども"},{kw:"妊娠",cat:"子ども"},
+    {kw:"排卵",cat:"子ども"},{kw:"出産",cat:"子ども"},
+
+    // 教育・資格
+    {kw:"宅建",cat:"教育"},{kw:"総合資格",cat:"教育"},{kw:"大家サロン",cat:"教育"},
+    {kw:"Peatix",cat:"教育"},{kw:"講習",cat:"教育"},{kw:"セミナー",cat:"教育"},{kw:"スクール",cat:"教育"},
+
+    // 税・公金
+    {kw:"税務",cat:"税・公金"},{kw:"所得税",cat:"税・公金"},{kw:"電子申請",cat:"税・公金"},
+    {kw:"ハンコヤ",cat:"税・公金"},{kw:"ふるさと",cat:"税・公金"},{kw:"ニカホシ",cat:"税・公金"},
+    {kw:"納税",cat:"税・公金"},{kw:"税金",cat:"税・公金"},{kw:"区税",cat:"税・公金"},{kw:"都税",cat:"税・公金"},{kw:"法務局",cat:"税・公金"},{kw:"住民票",cat:"税・公金"},
+
+    // 車 ―― 「交通」より必ず先
+    {kw:"テスラ",cat:"車"},{kw:"オートバックス",cat:"車"},{kw:"イデミツ",cat:"車"},
+    {kw:"出光",cat:"車"},{kw:"アポロステーション",cat:"車"},{kw:"エネオス",cat:"車"},{kw:"ENEOS",cat:"車"},
+    {kw:"車ローン",cat:"車"},{kw:"車のローン",cat:"車"},{kw:"車検",cat:"車"},{kw:"ガソリン",cat:"車"},
+
+    // サブスク ―― 「通信」「娯楽」より先
+    {kw:"マネーフォワード",cat:"サブスク"},{kw:"マカフ",cat:"サブスク"},
+    {kw:"GOOGLE ONE",cat:"サブスク"},{kw:"ANTHROPIC",cat:"サブスク"},{kw:"CLAUDE",cat:"サブスク"},
+    {kw:"Amazon Downloads",cat:"サブスク"},{kw:"Netflix",cat:"サブスク"},{kw:"Spotify",cat:"サブスク"},
+    {kw:"Adobe",cat:"サブスク"},{kw:"Dropbox",cat:"サブスク"},
+
+    // 美容
+    {kw:"サロウィン",cat:"美容"},{kw:"Bee LAB",cat:"美容"},{kw:"ヒロ銀座",cat:"美容"},
+    {kw:"美容",cat:"美容"},{kw:"理容",cat:"美容"},{kw:"床屋",cat:"美容"},{kw:"眉",cat:"美容"},{kw:"ネイル",cat:"美容"},
+
+    // 旅行 ―― 宿と観光。移動そのものは「交通」のまま
+    {kw:"ホテル",cat:"旅行"},{kw:"HOTEL",cat:"旅行"},{kw:"アマン東京",cat:"旅行"},
+    {kw:"RAKUSPA",cat:"旅行"},{kw:"美術館",cat:"旅行"},{kw:"旅館",cat:"旅行"},
+    {kw:"じゃらん",cat:"旅行"},{kw:"楽天トラベル",cat:"旅行"},{kw:"空港",cat:"旅行"},{kw:"お土産",cat:"旅行"},
+    // 台湾旅行ぶん。渡航先の名で括ると、現地の移動・買い物までまとめて旅行に寄せられる
+    {kw:"TAIPEI",cat:"旅行"},{kw:"HOLAFLY",cat:"旅行"},{kw:"乗船",cat:"旅行"},
+
+    // 保険 ―― 「ライフ」（食費）より必ず先
     {kw:"生命",cat:"保険"},{kw:"損害保険",cat:"保険"},{kw:"損保",cat:"保険"},{kw:"保険料",cat:"保険"},
-    {kw:"Amazon Downloads",cat:"娯楽"},{kw:"GOOGLE PLAY",cat:"娯楽"},{kw:"GOOGLE GENSHIN",cat:"娯楽"},
+    {kw:"チューリッヒ",cat:"保険"},{kw:"火災保険",cat:"保険"},{kw:"保険金",cat:"保険"},
+
+    // 外食 ―― 「食費」より必ず先
+    {kw:"焼肉",cat:"外食"},{kw:"今半",cat:"外食"},{kw:"牛繁",cat:"外食"},{kw:"寿司",cat:"外食"},
+    {kw:"ラーメン",cat:"外食"},{kw:"居酒屋",cat:"外食"},{kw:"ドミノピザ",cat:"外食"},
+    {kw:"ミスタ",cat:"外食"},{kw:"マクドナルド",cat:"外食"},{kw:"サイゼリヤ",cat:"外食"},
+    {kw:"ガスト",cat:"外食"},{kw:"スターバックス",cat:"外食"},{kw:"ほっともっと",cat:"外食"},
+    {kw:"銀のさら",cat:"外食"},{kw:"チエツクオンライン",cat:"外食"},{kw:"カフェ",cat:"外食"},
+    {kw:"食堂",cat:"外食"},{kw:"しゃぶしゃぶ",cat:"外食"},{kw:"喫茶",cat:"外食"},{kw:"ケンタッキ",cat:"外食"},{kw:"お昼",cat:"外食"},{kw:"ひるご",cat:"外食"},
+    {kw:"よるご",cat:"外食"},{kw:"ランチ",cat:"外食"},
+
+    // 娯楽
+    {kw:"歌広場",cat:"娯楽"},{kw:"戸越公園",cat:"娯楽"},   // ＡＦ戸越公園＝ジム
+    {kw:"GOOGLE PLAY",cat:"娯楽"},{kw:"GOOGLE GENSHIN",cat:"娯楽"},{kw:"課金",cat:"娯楽"},
+    {kw:"ゴルフ",cat:"娯楽"},{kw:"カントリークラブ",cat:"娯楽"},{kw:"練習場",cat:"娯楽"},
+    {kw:"打ちっぱなし",cat:"娯楽"},{kw:"グリーンクロス",cat:"娯楽"},{kw:"アコーディア",cat:"娯楽"},
+    {kw:"PUTTOUT",cat:"娯楽"},{kw:"ウィンズ",cat:"娯楽"},{kw:"Tジョイ",cat:"娯楽"},
+    {kw:"宝くじ",cat:"娯楽"},{kw:"映画",cat:"娯楽"},{kw:"マンガ",cat:"娯楽"},
+
+    // 医療
+    {kw:"歯医者",cat:"医療"},{kw:"矯正歯科",cat:"医療"},{kw:"薬局",cat:"医療"},
+    {kw:"クリニック",cat:"医療"},{kw:"病院",cat:"医療"},{kw:"人間ドック",cat:"医療"},
+
+    // 日用品
     {kw:"Amazon",cat:"日用品"},{kw:"ヨドバシ",cat:"日用品"},{kw:"ニトリ",cat:"日用品"},
-    {kw:"マツモトキヨシ",cat:"日用品"},{kw:"ツルハ",cat:"日用品"},{kw:"ドラッグ",cat:"日用品"},{kw:"ぱぱす",cat:"日用品"},
+    {kw:"ビックカメラ",cat:"日用品"},{kw:"マツモトキヨシ",cat:"日用品"},{kw:"ツルハ",cat:"日用品"},
+    {kw:"ドラッグ",cat:"日用品"},{kw:"ぱぱす",cat:"日用品"},{kw:"ココカラファイン",cat:"日用品"},
+    {kw:"カインズ",cat:"日用品"},{kw:"サンドラッグ",cat:"日用品"},{kw:"コインランドリー",cat:"日用品"},
+    {kw:"ラクテンイチバ",cat:"日用品"},
+
+    // 食費（スーパー・コンビニ）
     {kw:"まいばすけっと",cat:"食費"},{kw:"文化堂",cat:"食費"},{kw:"マルエツ",cat:"食費"},
-    {kw:"イオン",cat:"食費"},{kw:"セブン",cat:"食費"},{kw:"ローソン",cat:"食費"},
-    {kw:"ファミリーマート",cat:"食費"},{kw:"サイゼリヤ",cat:"食費"},{kw:"ガスト",cat:"食費"},
-    {kw:"スターバックス",cat:"食費"},{kw:"ほっともっと",cat:"食費"},{kw:"銀のさら",cat:"食費"},
-    {kw:"ライフ",cat:"食費"},
+    {kw:"オーケー",cat:"食費"},{kw:"イオン",cat:"食費"},{kw:"セブン",cat:"食費"},
+    {kw:"ローソン",cat:"食費"},{kw:"ファミリーマート",cat:"食費"},{kw:"デイリーヤマザキ",cat:"食費"},
+    {kw:"ミニストップ",cat:"食費"},{kw:"スーパーキタムラ",cat:"食費"},{kw:"オオゼキ",cat:"食費"},{kw:"ライフ",cat:"食費"},
+    {kw:"買い出し",cat:"食費"},{kw:"買出し",cat:"食費"},{kw:"買喰い",cat:"食費"},
+
+    // 光熱費・通信
     {kw:"東京電力",cat:"光熱費"},{kw:"東京ガス",cat:"光熱費"},{kw:"水道",cat:"光熱費"},
     {kw:"ドコモ",cat:"通信"},{kw:"ソフトバンク",cat:"通信"},{kw:"NTT",cat:"通信"},
+
+    // 交通
     {kw:"ETC",cat:"交通"},{kw:"Suica",cat:"交通"},{kw:"タイムズ",cat:"交通"},
-    {kw:"テスラ",cat:"交通"},{kw:"JR",cat:"交通"},{kw:"メトロ",cat:"交通"},
-    {kw:"歯医者",cat:"医療"},{kw:"矯正歯科",cat:"医療"},{kw:"薬局",cat:"医療"},
-    {kw:"クリニック",cat:"医療"},{kw:"病院",cat:"医療"},
-    {kw:"ゴルフ",cat:"娯楽"},{kw:"カントリークラブ",cat:"娯楽"},{kw:"練習場",cat:"娯楽"},
+    {kw:"JR",cat:"交通"},{kw:"メトロ",cat:"交通"},{kw:"UBER RIDES",cat:"交通"},
+    {kw:"駐車",cat:"交通"},{kw:"パーキング",cat:"交通"},
+
+    // 衣服
     {kw:"ZARA",cat:"衣服"},{kw:"ユニクロ",cat:"衣服"},{kw:"しまむら",cat:"衣服"},
-    {kw:"デイリーヤマザキ",cat:"食費"},{kw:"マクドナルド",cat:"食費"},{kw:"ミニストップ",cat:"食費"},
-    {kw:"ココカラファイン",cat:"日用品"},{kw:"カインズ",cat:"日用品"},
-    {kw:"UBER RIDES",cat:"交通"},{kw:"オートバックス",cat:"交通"},{kw:"アポロステーション",cat:"交通"},
-    {kw:"エネオス",cat:"交通"},{kw:"駐車",cat:"交通"},{kw:"パーキング",cat:"交通"},
-    {kw:"GOOGLE ONE",cat:"通信"}
+    {kw:"ミズノ",cat:"衣服"},{kw:"好日山荘",cat:"衣服"},{kw:"スニーカー",cat:"衣服"}
   ],
   /* 精算日 ―― 二人が共有口座へ振り込む日（2026-08-21 上様の指図により制定）。
      ⚠ これは**決まりではなく見込み**である。真は `closed`（締めた記録）のほう。
@@ -834,9 +1036,9 @@ function header(){
     : (S.online ? '' : '<span class="pill warn">圏外</span>'));
   return `<header><div class="wrap"><div class="hrow">
     <div class="month-pick">
-      <button class="arrowbtn" data-mv="-1">‹</button>
+      <button class="arrowbtn" data-mv="-1">${icon("chevron_left")}</button>
       <b class="num">${ymLabel(S.month)}</b>
-      <button class="arrowbtn" data-mv="1" ${cur?"disabled":""}>›</button>
+      <button class="arrowbtn" data-mv="1" ${cur?"disabled":""}>${icon("chevron_right")}</button>
     </div>
     <div>${cur?'<span class="pill">今月</span>':''}${st}</div>
   </div></div></header>`;
@@ -874,7 +1076,7 @@ function billCard(m){
   const b=t.bill;
   const chip=(lbl,v)=>v>0?`<span class="chip num">${esc(lbl)} ${yenPlain(v)}</span>`:"";
   return `<div class="bill">
-    <div class="hd"><span class="ic">💳</span><div class="lbl">${ymLabel(m)}26日 引き落とし ―― 共有カードのご請求</div></div>
+    <div class="hd"><span class="ic">${icon("credit_card")}</span><div class="lbl">${ymLabel(m)}26日 引き落とし ―― 共有カードのご請求</div></div>
     <div class="big num">${yen(b.total)}</div>
     <div class="brk">${chip("共有",b.share)}${chip(N.r,b.r)}${chip(N.m,b.m)}<span class="chip num">${b.n}件</span></div>
     <div class="memo num">${b.refund?`返金 ${yen(b.refund)} を差し引いた正味の請求にござる。<br>`:""}これに家賃ほか ${yen(b.other)} を足し${b.in?`、共有口座への入金 ${yen(b.in)} を差し引い`:""}た <b>${yen(t.out)}</b> が、この日に共有口座から出ていき申す。</div>
@@ -893,7 +1095,7 @@ function sendCard(m){
   if(done){
     const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,done[k]||0))}</div></div>`;
     return `<div class="send done">
-      <div class="hd"><span class="ic">✅</span><div class="lbl">${ymLabel(m)}の精算 ―― 済んでござる</div></div>
+      <div class="hd"><span class="ic">${icon("check_circle")}</span><div class="lbl">${ymLabel(m)}の精算 ―― 済んでござる</div></div>
       <div class="two">${one("r")}${one("m")}</div>
       <div class="memo num">${esc(String(done.on||"").replace(/-/g,"/"))} に締め申した。
         口座から出るのは ${yen(done.out||0)}${done.sv?`、ほかに<b>積立貯蓄</b> ${yenPlain(done.sv)}×2 が残り申す`:""}。この月の記録は凍らせてあり、
@@ -912,13 +1114,13 @@ function sendCard(m){
   /* 精算日を過ぎており、かつ前の月まで締んでいるなら、締めを促す。 */
   const due = today() >= m+"-"+String(settleDay()).padStart(2,"0");
   return `<div class="send">
-    <div class="hd"><span class="ic">🏦</span><div class="lbl">${ymLabel(m)}${settleDay()}日 精算 ―― 共有口座へ振り込む額</div></div>
+    <div class="hd"><span class="ic">${icon("account_balance_wallet")}</span><div class="lbl">${ymLabel(m)}${settleDay()}日 精算 ―― 共有口座へ振り込む額</div></div>
     <div class="two">${one("r")}${one("m")}</div>
     <div class="memo num">この口座からは、のちの26日に ${yen(t.out)} が出てゆき申す
       ―― この月に引き落とされるカードと家賃。${t.savings
         ? `二人の振込 ${yen(t.put)} との差 ${yen(t.savings*2)} は<b>積立貯蓄</b>（一人 ${yenPlain(t.savings)} ずつ）として口座に残り申す。`
         : "二人の振込を足すとちょうど同じ額になり申す。"}
-      ${t.loan?`<br>🤝 の貸し借り ${yen(Math.abs(t.loan))} を折り込んだ額にござる（合計は変わらず）。`:""}
+      ${t.loan?`<br>二人のあいだの貸し借り ${yen(Math.abs(t.loan))} を折り込んだ額にござる（合計は変わらず）。`:""}
       ${back("r")}${back("m")}</div>
     <button class="settle ${due?"":"ghost"}" data-open="close">${due?"振り込んだ ―― この月を締める":"先んじて締める"}</button>
   </div>`;
@@ -933,7 +1135,7 @@ function loanCard(m){
   const from = bal>0 ? N.r : N.m, to = bal>0 ? N.m : N.r;   // 正 = 諒 → 万貴
   const a=Math.abs(bal);
   return `<div class="loan${done?" done":""}">
-    <div class="hd"><span class="ic">🤝</span><div class="lbl">${ymLabel(m)}の精算で 二人のあいだを動かす金</div></div>
+    <div class="hd"><span class="ic">${icon("handshake")}</span><div class="lbl">${ymLabel(m)}の精算で 二人のあいだを動かす金</div></div>
     <div class="big num">${esc(from)} → ${esc(to)}　${yen(a)}</div>
     <div class="memo">${done
       ? `${ymLabel(m)}の精算で渡し終えてござる。`
@@ -989,7 +1191,7 @@ function rowHTML(x){
   const knd = inn  ? `<span class="tag in">入金</span>`
             : loan ? `<span class="tag gray">${esc(N[x.payer]||"")}→${esc(N[x.burden]||"")} へ渡す</span>` : "";
   return `<div class="row" ${x.fixed?"":`data-edit="${esc(x.id)}"`}>
-    <div class="ic-circle" style="background:var(${loan?"--card2":CVAR[c.c]+"-bg"})">${loan?"🤝":inn?"💰":c.ic}</div>
+    <div class="ic-circle${loan||inn?" accent":""}">${icon(loan?"handshake":inn?"payments":c.ic)}</div>
     <div class="body">
       <div class="t1">${esc(x.shop||x.cat)}${x.fixed?' <span class="tag gray">固定</span>':''}</div>
       <div class="t2">${d[1]?Number(d[1])+"/"+Number(d[2]):""}${loan?"":"・"+esc(x.cat)}${knd}${pay}${bur}${nxt}</div>
@@ -997,7 +1199,7 @@ function rowHTML(x){
     <div class="amt num ${inn?"plus":""}">${inn?"＋":""}${yen(x.amount)}</div>
   </div>`;
 }
-function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">🌱</span>${esc(a)}<br>${esc(b)}</div>`; }
+function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">${icon("inbox")}</span>${esc(a)}<br>${esc(b)}</div>`; }
 
 function viewStats(){
   const s=summary(S.month), N=S.cfg.names;
@@ -1010,11 +1212,11 @@ function viewStats(){
   return header() + `<div class="wrap">
     <div class="sechead"><h2>誰の負担か</h2></div>
     <div class="card">
-      ${[["共有",s.shared,"purple"],[N.r+" 個人",s.personal.r,"teal"],[N.m+" 個人",s.personal.m,"pink"]].map(([k,v,c])=>{
+      ${[["共有",s.shared,"primary"],[N.r+" 個人",s.personal.r,"secondary"],[N.m+" 個人",s.personal.m,"tertiary"]].map(([k,v,c])=>{
         const pc=s.total?Math.round(v/s.total*100):0;
         return `<div class="barrow"><div class="bh"><span class="nm">${esc(k)}</span>
           <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
-          <div class="track"><div class="fill" style="width:${s.total?(v/s.total*100).toFixed(1):0}%;background:var(--${c})"></div></div></div>`;
+          <div class="track"><div class="fill" style="width:${s.total?(v/s.total*100).toFixed(1):0}%;background:var(--m-${c})"></div></div></div>`;
       }).join("")}
       <div class="note num">支払元の内訳 ―― 共有カード ${yen(s.paid.c)}／${esc(N.r)} ${yen(s.paid.r)}／${esc(N.m)} ${yen(s.paid.m)}</div>
       <div class="note num">共有の受け持ち ―― ${esc(N.r)} ${yen(s.due.r)}／${esc(N.m)} ${yen(s.due.m)}。
@@ -1026,12 +1228,12 @@ function viewStats(){
     </div>
 
     <div class="sechead"><h2>費目の内訳</h2></div>
-    <div class="card">${cats.length?cats.map(([k,v])=>{
+    <div class="card">${cats.length?cats.map(([k,v],i)=>{
       const c=catOf(k), pc=s.total?Math.round(v/s.total*100):0;
       return `<div class="barrow">
-        <div class="bh"><span class="nm">${c.ic} ${esc(k)}</span>
+        <div class="bh"><span class="nm">${icon(c.ic,"s18")}${esc(k)}</span>
           <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
-        <div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%;background:var(${CVAR[c.c]})"></div></div>
+        <div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%;background:${toneOf(i)}"></div></div>
       </div>`;
     }).join(""):emptyHTML("この月の記録がござらぬ","")}</div>
 
@@ -1137,16 +1339,17 @@ function closeSheet(){
   sheetCtx=null;
 }
 function sheetShell(title, body){
-  return `<div class="grab"></div><div class="sheet-head"><h3>${esc(title)}</h3><button class="xbtn" data-close="1">✕</button></div>${body}`;
+  return `<div class="grab"></div><div class="sheet-head"><h3>${esc(title)}</h3><button class="xbtn" data-close="1">${icon("close")}</button></div>${body}`;
 }
 function chipRow(id, items, cur, key){
   return `<div class="trio" id="${id}">${items.map(o=>`
     <button class="chip ${cur===o.k?"on":""}" data-${key}="${o.k}"
       style="${cur===o.k?chipStyle(o.cls):""}">${esc(o.label)}</button>`).join("")}</div>`;
 }
+/* 選んだチップの色。**役割色しか使わない** ―― 共有=primary / 諒=secondary / 万貴=tertiary。 */
 function chipStyle(cls){
-  const map={c:"--purple",r:"--teal",m:"--pink",in:"--teal",loan:"--amber"};
-  return `background:var(${map[cls]||"--purple"}-bg);color:var(${map[cls]||"--purple"}-ink)`;
+  const r={c:"primary",r:"secondary",m:"tertiary",in:"primary",loan:"tertiary"}[cls]||"primary";
+  return `background:var(--m-${r}-container);color:var(--m-on-${r}-container)`;
 }
 
 /* 入力画面。**種別で問うことが変わる。**
@@ -1161,9 +1364,9 @@ function editorHTML(it, dupWarn){
   const k=kindOf(it), loan=k==="貸借", inn=k==="入金";
   const title = it.id ? "記録を直す" : (loan?"貸し借りを記す":inn?"入金を記す":"記録する");
   const kindRow = it.id ? "" : `<div class="trio kinds" id="f-kind">
-    ${[["","🧾 出費"],["入金","💰 入金"],["貸借","🤝 貸し借り"]].map(([v,lbl])=>
+    ${[["","receipt_long","出費"],["入金","payments","入金"],["貸借","handshake","貸し借り"]].map(([v,ic,lbl])=>
       `<button class="chip ${k===v?"on":""}" data-kind="${v}"
-        style="${k===v?chipStyle(v==="入金"?"in":v==="貸借"?"loan":"c"):""}">${lbl}</button>`).join("")}</div>`;
+        style="${k===v?chipStyle(v==="入金"?"in":v==="貸借"?"loan":"c"):""}">${icon(ic,"s18")}${lbl}</button>`).join("")}</div>`;
 
   return sheetShell(title, `
     ${kindRow}
@@ -1179,8 +1382,7 @@ function editorHTML(it, dupWarn){
     ` : `
       <div class="flabel">費目</div>
       <div class="chips" id="f-cats">${CATS.map(c=>`
-        <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}"
-          style="${it.cat===c.k?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:""}">${c.ic} ${esc(c.k)}</button>`).join("")}</div>
+        <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}">${icon(c.ic,"s18")}${esc(c.k)}</button>`).join("")}</div>
       <div class="flabel">${inn?"どこへ入ったか":"どこから払ったか"}</div>
       ${chipRow("f-payer", inn?IN_TO():PAYERS(), it.payer, "payer")}
       <div class="flabel">${inn?"誰のものか":"誰の分か"}
@@ -1217,9 +1419,7 @@ function bindSheet(){
   root.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{
     sheetCtx.it.cat=b.dataset.cat;
     root.querySelectorAll("[data-cat]").forEach(x=>{
-      const on=x.dataset.cat===sheetCtx.it.cat, c=catOf(x.dataset.cat);
-      x.classList.toggle("on",on);
-      x.style.cssText = on?`background:var(${CVAR[c.c]}-bg);color:var(${CVAR[c.c]}-ink)`:"";
+      x.classList.toggle("on", x.dataset.cat===sheetCtx.it.cat);
     });
   });
 
@@ -1382,7 +1582,7 @@ function openConfig(kind){
         <div class="setrow"><div><div class="sl">${esc(f.name)}</div>
           <div class="sd num">${yen(f.amount)}・${esc(f.cat)}・${esc(payerLabel(f.payer))}から・${esc(burdenLabel(f.burden))}の分</div></div>
           <button class="mini ghost" data-fxdel="${i}">消す</button></div>`).join("")
-        || '<div class="empty"><span class="e-ic">📅</span>まだ無し</div>'}</div>
+        || '<div class="empty"><span class="e-ic">${icon("calendar_month")}</span>まだ無し</div>'}</div>
       <div class="note">毎月かならず出ていくものを入れておくと、ひとりでに数え上げ申す。<b>共有カードで払っている個人の保険</b>のようなものは、払う元を「共有カード」・誰の分かを「個人」にすると正しく精算されるでござる。</div>
       <div class="field"><label>名前</label><input id="fx-name" placeholder="家賃"></div>
       <div class="field"><label>金額</label><input id="fx-amt" type="tel" inputmode="numeric" placeholder="133330"></div>
@@ -1449,7 +1649,7 @@ function openConfig(kind){
         ${cl.map(k=>{ const d=c.closed[k]; return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}</div>
           <div class="sd num">${esc(String(d.on||"").replace(/-/g,"/"))} に締め・${esc(c.names.r)} ${yenPlain(d.r||0)} ／ ${esc(c.names.m)} ${yenPlain(d.m||0)}</div></div></div>`;
           }).join("")}
-        <div class="note">締めを解くには、その月を開いて 🏦 の札から「締めを解く」を押されよ。</div>`:""}`), {kind:"settle"});
+        <div class="note">締めを解くには、その月を開いて精算の札から「締めを解く」を押されよ。</div>`:""}`), {kind:"settle"});
   }
   if(kind==="close"){
     const m=S.month, t=transfer(m), N=c.names;
@@ -1495,7 +1695,7 @@ function openConfig(kind){
         return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}利用・${byM[k].length}件</div>
           <div class="sd num">${yen(sum)} → <b>${ymLabel(shiftMonth(k,1))}</b>引落へ</div></div></div>`;
         }).join("")
-      : `<div class="empty"><span class="e-ic">✅</span>引落月の抜けはござらぬ</div>`}
+      : `<div class="empty"><span class="e-ic">${icon("check_circle")}</span>引落月の抜けはござらぬ</div>`}
       ${keys.length?`<button class="save" id="fp-go">${bad.length}件に振り直す</button>`:""}`), {kind:"fixpay"});
   }
 }
@@ -1551,7 +1751,7 @@ function bindConfigSheet(root){
     let cfgMsg="";
     try{ const c=await hit("config", tok0); cfgMsg = (c && c.ok) ? "決め事のやり取りもでき申す。" : stale; }
     catch(e){ cfgMsg = stale; }
-    box.innerHTML = `<div class="warnbox" style="background:var(--teal-bg);color:var(--teal-ink)">
+    box.innerHTML = `<div class="warnbox" style="background:var(--m-primary-container);color:var(--m-on-primary-container)">
       <b>繋がってござる。</b>明細 ${((j.items||[]).length)} 件が読め申した。${cfgMsg}</div>`;
   };
 
