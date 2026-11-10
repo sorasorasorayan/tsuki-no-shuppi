@@ -260,6 +260,14 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container)
 .setrow .sd{font-size:12px;line-height:18px;color:var(--m-on-surface-variant);margin-top:2px}
 .mini{font-size:14px;font-weight:500;letter-spacing:.1px;min-height:32px;padding:6px 16px;border-radius:var(--sh-full);background:var(--m-primary);color:var(--m-on-primary);white-space:nowrap}
 .mini.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
+/* 個人帳面（資産タブ）。色は既存の役割色・濃淡だけを使う。 */
+.setrow .amt-nw{white-space:nowrap;flex:0 0 auto;font-weight:500}
+.mbar .ml .rt{display:block;font-size:10px;line-height:14px;margin-top:2px;text-align:center}
+.acct-row{background:var(--m-surface-container-low);border-radius:var(--sh-m);padding:12px 16px;margin-bottom:8px}
+.acct-row .field{margin-bottom:8px}
+.acct-row .flags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acct-row .chip{min-height:28px;padding:4px 12px;font-size:12px}
+.hero .sub b{font-weight:500}
 .dot{display:inline-block;width:8px;height:8px;border-radius:var(--sh-full);margin-right:6px}
 .dot.ok{background:var(--m-primary)} .dot.ng{background:var(--m-outline)} .dot.er{background:var(--m-error)}
 
@@ -291,7 +299,7 @@ table.csv td{border:1px solid var(--m-outline-variant);padding:6px 8px;text-alig
     <button class="nb" data-tab="stats"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M640-160v-280h160v280H640Zm-240 0v-640h160v640H400Zm-240 0v-440h160v440H160Z"/></svg></span>分析</button>
     <button class="fab" id="fab"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg></button>
     <button class="nb" data-tab="list"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v40q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z"/></svg></span>履歴</button>
-    <button class="nb" data-tab="settings"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg></span>設定</button>
+    <button class="nb" data-tab="mine"><span class="ni"><svg class="i" viewBox="0 -960 960 960" aria-hidden="true"><path d="M668.5-531.5Q680-543 680-560t-11.5-28.5Q657-600 640-600t-28.5 11.5Q600-577 600-560t11.5 28.5Q623-520 640-520t28.5-11.5ZM320-600h200v-80H320v80ZM180-120q-34-114-67-227.5T80-580q0-92 64-156t156-64h200q29-38 70.5-59t89.5-21q25 0 42.5 17.5T720-820q0 6-1.5 12t-3.5 11q-4 11-7.5 22.5T702-751l91 91h87v279l-113 37-67 224H480v-80h-80v80H180Zm60-80h80v-80h240v80h80l62-206 98-33v-141h-40L620-720q0-20 2.5-38.5T630-796q-29 8-51 27.5T547-720H300q-58 0-99 41t-41 99q0 98 27 191.5T240-200Zm240-298Z"/></svg></span>資産</button>
   </div>
 </nav>
 
@@ -343,6 +351,8 @@ const ICON_D = {
   redeem:"M160-280v80h640v-80H160Zm0-440h88q-5-9-6.5-19t-1.5-21q0-50 35-85t85-35q30 0 55.5 15.5T460-826l20 26 20-26q18-24 44-39t56-15q50 0 85 35t35 85q0 11-1.5 21t-6.5 19h88q33 0 56.5 23.5T880-640v440q0 33-23.5 56.5T800-120H160q-33 0-56.5-23.5T80-200v-440q0-33 23.5-56.5T160-720Zm0 320h640v-240H596l84 114-64 46-136-184-136 184-64-46 82-114H160v240Zm228.5-331.5Q400-743 400-760t-11.5-28.5Q377-800 360-800t-28.5 11.5Q320-777 320-760t11.5 28.5Q343-720 360-720t28.5-11.5ZM600-720q17 0 28.5-11.5T640-760q0-17-11.5-28.5T600-800q-17 0-28.5 11.5T560-760q0 17 11.5 28.5T600-720Z",
   account_balance:"M200-280v-280h80v280h-80Zm240 0v-280h80v280h-80ZM80-120v-80h800v80H80Zm600-160v-280h80v280h-80ZM80-640v-80l400-200 400 200v80H80Zm178-80h444-444Zm0 0h444L480-830 258-720Z",
   savings:"M668.5-531.5Q680-543 680-560t-11.5-28.5Q657-600 640-600t-28.5 11.5Q600-577 600-560t11.5 28.5Q623-520 640-520t28.5-11.5ZM320-600h200v-80H320v80ZM180-120q-34-114-67-227.5T80-580q0-92 64-156t156-64h200q29-38 70.5-59t89.5-21q25 0 42.5 17.5T720-820q0 6-1.5 12t-3.5 11q-4 11-7.5 22.5T702-751l91 91h87v279l-113 37-67 224H480v-80h-80v80H180Zm60-80h80v-80h240v80h80l62-206 98-33v-141h-40L620-720q0-20 2.5-38.5T630-796q-29 8-51 27.5T547-720H300q-58 0-99 41t-41 99q0 98 27 191.5T240-200Zm240-298Z",
+  swap_horiz:"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z",
+  settings:"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z",
   more_horiz:"M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
 };
 function icon(n, cls){
@@ -543,8 +553,43 @@ const DEFAULT_CFG = {
      ⚠ 締めた月へは、以後どの記録も入らぬ（`defaultPay()` が飛び越える）。 */
   closed:{},
   csvMap:null,
-  lastSync:""
+  lastSync:"",
+  /* 個人帳面（資産タブ）の接続先。**端末ごと**で、共有の決め事（SHARED_KEYS）には入れない。
+     共有の家計簿とは別のスプレッドシートを指す。 */
+  mineApi:"", mineToken:"",
+  /* この端末の持ち主。"r"（一人目）か "m"（二人目）。資産タブはこの人の目で数える。 */
+  me:"r"
 };
+
+/* ---------- 個人帳面（資産タブ）の定数 ----------
+   区分は 収入 / 支出 / 移動 の三つ。金額は常に正の数で持ち、符号は区分が決める。
+     収入 … 口座に入った金（acct = 入った先）
+     支出 … 口座から出た金（acct = 払った元）
+     移動 … 自分の口座間の動き（acct = 元、to = 先）。収入にも支出にも数えない。 */
+const MY_TYPES = ["収入","支出","移動"];
+const MY_KINDS = ["銀行","カード","投資","現金"];
+const MY_INCOME_CATS = ["給与","賞与","給付金","その他"];
+const DEFAULT_ACCTS = [
+  {id:"yucho",  name:"ゆうちょ",     kind:"銀行",   order:1},
+  {id:"mufg",   name:"三菱UFJ",      kind:"銀行",   order:2},
+  {id:"smbc",   name:"三井住友",     kind:"銀行",   order:3},
+  {id:"resona", name:"埼玉りそな",   kind:"銀行",   order:4},
+  {id:"paypay", name:"PayPayカード", kind:"カード", order:5},
+  {id:"card2",  name:"カード2",      kind:"カード", order:6},
+  {id:"nisa",   name:"SBI NISA",     kind:"投資",   order:7},
+  {id:"ideco",  name:"SBI iDeCo",    kind:"投資",   order:8, locked:true},
+  {id:"nomura", name:"野村 持株",    kind:"投資",   order:9},
+  {id:"dmmfx",  name:"DMM FX",       kind:"投資",   order:10, dormant:true}
+];
+/* 口座の控えは load() を通さない。load() は既定の配列に保存値を重ねるので、
+   口座を減らして保存したあとに、既定の口座が末尾に復活してしまう。 */
+function loadAccts(){
+  try{
+    const v = JSON.parse(localStorage.getItem("shuppi.myaccts")||"null");
+    if(Array.isArray(v) && v.length) return v;
+  }catch(e){}
+  return structuredClone(DEFAULT_ACCTS);
+}
 
 /* 二人で揃える決め事。これだけがスプレッドシートの `設定` シートへ行き来する。
    ⚠ `api`・`token`・`csvMap`・`lastSync` は**端末ごと**ゆえ、決してここへ入れない。 */
@@ -554,7 +599,10 @@ function sharedCfg(){ const o={}; SHARED_KEYS.forEach(k=>{ if(S.cfg[k]!==undefin
 const S = {
   tab:"home", month:ym(new Date()),
   items:[], cfg:load("cfg", DEFAULT_CFG), queue:load("queue", []),
-  online:false, syncing:false, err:"", cfgStale:false
+  online:false, syncing:false, err:"", cfgStale:false,
+  /* 個人帳面。共有の明細（items）とは別に持ち、通信も別の接続先・別の溜め置き（myq）で行う。 */
+  my:{ tx:load("mytx", []), accts:loadAccts(), online:false, syncing:false, err:"" },
+  myq:load("myq", [])
 };
 
 function load(k,def){ try{ const v=localStorage.getItem("shuppi."+k); return v?Object.assign(structuredClone(def),JSON.parse(v)):structuredClone(def); }catch(e){ return structuredClone(def); } }
@@ -582,10 +630,32 @@ const burdenLabel = k => (BURDENS().find(b=>b.k===k)||{label:"?"}).label;
 function cached(){ return load("items", []); }
 function setCached(list){ save("items", list); }
 
-async function api(action, payload){
-  const cfg=S.cfg;
-  if(!cfg.api) throw new Error("未接続");
-  const url = cfg.api + (cfg.api.includes("?")?"&":"?") + "action="+encodeURIComponent(action) + "&token="+encodeURIComponent(cfg.token||"");
+/* 共有の家計簿と個人帳面は、別のスプレッドシート・別の接続先・別の合言葉。
+   通信の本体は callApi 一つで、接続先と合言葉だけを差し替える。 */
+async function api(action, payload){ return callApi(S.cfg.api, S.cfg.token, action, payload); }
+/* ⚠ 個人帳面の接続先が共有の家計簿と同じなら、通信しない。個人の取引が共有の明細へ書かれてしまう。
+   保存時にも断っているが、共有側の接続先をあとで同じに変えた場合に備えて、通信のたびに見る。 */
+const normApi = u => String(u||"").trim().replace(/\/exec.*$/,"/exec");
+async function apiMine(action, payload){
+  if(S.cfg.mineApi && S.cfg.api && normApi(S.cfg.mineApi)===normApi(S.cfg.api))
+    throw new Error("個人帳面の接続先が、共有の家計簿と同じになっています");
+  return callApi(S.cfg.mineApi, S.cfg.mineToken, action, payload, true);
+}
+
+/* 合言葉なしで叩ける問い合わせ（ping）などを、JSONで返す。接続先の確認に使う。
+   HTMLが返ったときは "HTML"、JSONでないときは "読めません" の Error を投げる。 */
+async function mineHit(base, action, tok){
+  const url = base + (base.includes("?")?"&":"?") + "action="+encodeURIComponent(action) + "&token="+encodeURIComponent(tok||"");
+  const res = await fetch(url, {redirect:"follow"});
+  const txt = await res.text();
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  try{ return JSON.parse(txt); }
+  catch(e){ throw new Error(/<html|<!DOCTYPE/i.test(txt) ? "HTML" : "読めません"); }
+}
+
+async function callApi(base, tok, action, payload, plain){
+  if(!base) throw new Error("未接続");
+  const url = base + (base.includes("?")?"&":"?") + "action="+encodeURIComponent(action) + "&token="+encodeURIComponent(tok||"");
   const opt = payload
     ? {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(payload), redirect:"follow"}
     : {method:"GET", redirect:"follow"};
@@ -599,14 +669,21 @@ async function api(action, payload){
   try{ j = JSON.parse(txt); }
   catch(e){
     if(/<html|<!DOCTYPE/i.test(txt))
-      throw new Error("帳面がJSONを返し申さぬ。デプロイの「アクセスできるユーザー」が『全員』になっておらぬ見込み");
-    throw new Error("返りが読めず申さぬ ―― "+txt.slice(0,60));
+      throw new Error(plain ? "個人帳面がJSONを返しません。デプロイの「アクセスできるユーザー」が『全員』になっていない見込みです"
+                            : "帳面がJSONを返し申さぬ。デプロイの「アクセスできるユーザー」が『全員』になっておらぬ見込み");
+    throw new Error(plain ? "返りが読めません ―― "+txt.slice(0,60) : "返りが読めず申さぬ ―― "+txt.slice(0,60));
   }
   if(j.ok===false) throw new Error(j.error||"エラー");
   return j;
 }
 
+/* 共有の家計簿と個人帳面を順に引く。個人側が落ちても共有側の状態（online）には響かせない。 */
 async function pullAll(){
+  await pullShared();
+  await pullMine();
+}
+
+async function pullShared(){
   if(!S.cfg.api){ S.items=cached(); S.online=false; return; }
   S.syncing=true; render();
   try{
@@ -686,6 +763,99 @@ async function pushItem(action, item){
   if(!S.cfg.api) return;
   try{ await api(action,item); S.online=true; }
   catch(e){ S.queue.push({action,payload:item}); save("queue",S.queue); S.online=false; toast("圏外のため後で送り申す"); }
+}
+
+/* ---------- 個人帳面のデータ層 ----------
+ *
+ * 共有の家計簿（items）とは混ぜない。理由は二つ。
+ *   1. 家の「今月の出費」は支払元・負担を問わず全部足す。個人の支出を明細に混ぜると膨らむ。
+ *   2. 給与など本人だけの数字を、共有の合言葉を持つ人から読める場所に置かない。
+ * 接続先を持たないときは、この端末だけに保存する（共有側と同じ流儀）。
+ */
+/* 同時に二本走らせない。起動・復帰・接続の保存が重なると、溜めた分を二重に送って同じ記録が2行になる。 */
+let mineInflight=null;
+function pullMine(){
+  if(mineInflight) return mineInflight;
+  mineInflight = pullMineRun().finally(()=>{ mineInflight=null; });
+  return mineInflight;
+}
+
+async function pullMineRun(){
+  if(!S.cfg.mineApi){ S.my.online=false; S.my.err=""; S.my.syncing=false; return; }
+  S.my.syncing=true; if(S.tab==="mine") render();
+  try{
+    /* ⚠ 溜めた分を送る前に、相手が個人帳面かを確かめる（共有の Code.gs だと、取引が共有の明細へ入ってしまう）。 */
+    const p = await apiMine("ping");
+    if(!p || p.kind!=="mine") throw new Error("接続先が個人帳面ではありません");
+    await flushMyQueue();
+    const a = await apiMine("accounts");
+    if(a.accounts && a.accounts.length){ S.my.accts=a.accounts; save("myaccts", S.my.accts); }
+    else{
+      /* 帳面の口座が空 ＝ 初回。この端末の初期の口座を送って揃える。 */
+      try{ await apiMine("saveAccounts", {accounts:S.my.accts}); }catch(e){}
+    }
+    const j = await apiMine("list");
+    /* 帳面に同じ id が2行あっても、画面では1件にする（収入の二重計上を避ける）。 */
+    const seen={};
+    S.my.tx = (j.items||[]).filter(x=>!seen[x.id] && (seen[x.id]=true));
+    save("mytx", S.my.tx);
+    S.my.online=true; S.my.err="";
+  }catch(e){
+    S.my.online=false; S.my.err=e.message;
+  }finally{ S.my.syncing=false; render(); }
+}
+
+async function flushMyQueue(){
+  if(!S.cfg.mineApi || !S.myq.length) return;
+  const rest=[];
+  for(const q of S.myq){
+    try{ await apiMine(q.action, q.payload); }catch(e){ rest.push(q); }
+  }
+  S.myq=rest; save("myq", S.myq);
+}
+
+async function pushMy(action, item){
+  if(action==="add") S.my.tx.unshift(item);
+  else if(action==="update") S.my.tx=S.my.tx.map(x=>x.id===item.id?item:x);
+  else if(action==="delete") S.my.tx=S.my.tx.filter(x=>x.id!==item.id);
+  save("mytx", S.my.tx); render();
+  if(!S.cfg.mineApi) return;
+  try{ await apiMine(action, item); S.my.online=true; }
+  catch(e){ S.myq.push({action, payload:item}); save("myq", S.myq); S.my.online=false; toast("通信できないため、あとで送ります"); }
+}
+
+/* まとめて送る。同じ id は上書きになるので、同じ内容を何度取り込んでも二重にならない。 */
+async function pushMyMany(list){
+  if(!list.length) return;
+  const ids={}; list.forEach(x=>ids[x.id]=x);
+  S.my.tx = list.concat(S.my.tx.filter(x=>!ids[x.id]));
+  save("mytx", S.my.tx); render();
+  if(!S.cfg.mineApi) return;
+  try{ await apiMine("bulk", {items:list}); S.my.online=true; }
+  catch(e){ S.myq.push({action:"bulk", payload:{items:list}}); save("myq", S.myq); S.my.online=false; toast("通信できないため、あとで送ります"); }
+}
+
+/* 口座の一覧は丸ごと置き換えて送る。溜めるのは最後の一つだけ（古い一覧を送り直さない）。 */
+function saveMyAccts(){
+  save("myaccts", S.my.accts);
+  if(!S.cfg.mineApi) return;
+  const payload={accounts:S.my.accts};
+  apiMine("saveAccounts", payload).then(()=>{ S.my.online=true; }).catch(()=>{
+    S.myq = S.myq.filter(q=>q.action!=="saveAccounts");
+    S.myq.push({action:"saveAccounts", payload}); save("myq", S.myq); S.my.online=false;
+  });
+}
+
+/* 外から来た取引（給与JSONなど）を検査して整える。形が合わないものは null。 */
+function normMyTx(x){
+  if(!x || !x.id) return null;
+  const type=String(x.type||""); if(!MY_TYPES.includes(type)) return null;
+  const amount=Number(x.amount); if(!(amount>0) || Math.round(amount)!==amount) return null;
+  const date=String(x.date||"").slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const acct=String(x.acct||""), to=String(x.to||"");
+  if(type==="移動" && (!to || to===acct)) return null;
+  return {id:String(x.id).slice(0,80), date, type, amount, acct, to,
+          cat:String(x.cat||""), shop:String(x.shop||""), memo:String(x.memo||""), src:String(x.src||"取込")};
 }
 
 /* ---------- 期(いつからの決め事か) ---------- */
@@ -972,6 +1142,90 @@ function transfer(m){
   return Object.assign(c, {send, out, put, savings:sv, bill, loan, diff: (send.r+send.m) - put});
 }
 
+/* ============================================================
+   個人帳面 ― 収入の行き先を数える（資産タブ）
+   ============================================================
+
+   収入 ＝ 総支給から税・社会保険料を引いた額（持株の天引き分を含む）。
+   これを次の五つに振り分ける。
+
+     ① 家の受け持ち        … transfer(m).due[me]（共有の出費のうち自分の持ち分）
+     ② 自分の消費          … 共有カードで買った自分個人のもの ＋ 個人帳面の「支出」
+     ③ 貯蓄                … 共有の積立 ＋ 共有カード経由の積立 ＋ 口座を通らない積立 ＋ 投資口座への移動
+     ④ 二人のあいだの受け渡し … 貸借の精算（振込に折り込まれている）
+     ⑤ 未記録の手元        … 残り。まだ記録されていない使い道、または銀行に残った分
+
+   ⚠ 時計は一つ。家に関わる金は transfer(m)＝精算月で数える。
+     給与は「◯月分」の月に入れる（支給日が月末なら翌月の精算に効くが、ずれは許容している）。
+
+   ⚠ 個人帳面の「支出」「収入」には、共有の家計簿へ記録済みのもの（自分の財布で立て替えた共有の物、
+     20日の振込、共有口座に入った入金）を入れない。家に関わる出金（homeOut）として既に数えており、二重になる。
+     入力画面に注意書きを出し、同じ額・近い日付の立て替えが共有側にあれば、保存時に確かめる。
+   ⚠ 共有口座に入った自分の入金（保険金など。カード明細の返金は除く）は、消費のマイナスではなく収入に数える（takeIn）。
+   ⚠ 費目「貯蓄」の個人の支出は、消費ではなく貯蓄に数える（積立は「移動」で記録するのが本来の形）。
+
+   ⚠⚠ 検算（diff）：家に関わる出金は、振込 ＋ 立て替えで出る。
+        send = due + take − lend + loan + sv   （transfer() の式）
+        ゆえに  due + take + sv + loan  ＝  send + lend   が常に成り立つ。
+     立て替え（lend）は自分の財布から出た金で、振込の側では差し引かれている。
+     足して戻さないと、財布から出た分が「未記録」に混ざる。
+     締めた月は send を控え（cfg.closed）から取るので、控えと現在の計算が違えば diff に出る。
+
+   ⚠ 共有カードの明細が未取り込みの月は、家の受け持ちが歪む（家賃だけで按分するため）。
+     sendCard() と同じ関門で、その月は家に関わる数字を出さない（ok=false）。 */
+function myMe(){ return S.cfg.me==="m" ? "m" : "r"; }
+const myAcct = id => S.my.accts.find(a=>a.id===id) || null;
+const myIsInv = id => { const a=myAcct(id); return !!a && a.kind==="投資"; };
+const mySum = list => list.reduce((a,b)=>a+(Number(b.amount)||0), 0);
+function myMonthTx(m){ return S.my.tx.filter(x=>String(x.date||"").slice(0,7)===m); }
+
+function mineFlow(m){
+  const me=myMe();
+  const t=transfer(m), cl=closedOf(m);
+  const ok = !!cl || t.bill.n>0;
+  const tx=myMonthTx(m);
+
+  const income  = mySum(tx.filter(x=>x.type==="収入"));
+  const direct  = mySum(tx.filter(x=>x.type==="収入" && myIsInv(x.acct)));     // 口座を通らずに投資へ入る分（持株の天引きなど）
+  const mySpend = mySum(tx.filter(x=>x.type==="支出"));
+  /* 費目「貯蓄」の支出は消費ではなく貯蓄に数える（支出の入力では選べないが、取り込みで入りうる）。
+     現金は出ていくので mySpend には残し、行き先の側だけを貯蓄へ振る。 */
+  const mySpendSave = mySum(tx.filter(x=>x.type==="支出" && x.cat==="貯蓄"));
+  const movedIn  = mySum(tx.filter(x=>x.type==="移動" && myIsInv(x.to)   && !myIsInv(x.acct)));
+  const movedOut = mySum(tx.filter(x=>x.type==="移動" && myIsInv(x.acct) && !myIsInv(x.to)));
+  const movedNet = movedIn - movedOut;                                          // 投資口座への正味の拠出（取り崩しは差し引く）
+
+  let due=0, takeOther=0, takeSave=0, takeIn=0, sv=0, loanOut=0, lend=0, send=0, homeOut=0, diff=0, residual=null;
+  if(ok){
+    send = cl ? (Number(cl[me])||0) : t.send[me];
+    lend = t.lend[me];
+    /* 締めた月の積立は、控え（cl.sv）を使う。期の積立をあとで変えても、振込（控え）は動かないため。
+       古い控えには sv が無いので、そのときだけ現在の値を使う。 */
+    sv   = (cl && cl.sv!=null) ? (Number(cl.sv)||0) : t.savings;
+    loanOut = me==="r" ? t.loan : -t.loan;                 // 正 = 自分から相手へ渡すぶん
+    const take = t.take[me];
+    takeSave  = t.fin.filter(x=>x.payer==="c" && x.burden===me && x.cat==="貯蓄").reduce((a,b)=>a+signed(b), 0);
+    /* 共有口座に入った自分の入金（保険金・助成金。カード明細の返金ではないもの）は、take を負に押し下げる。
+       これは消費のマイナスではなく、自分の収入が共有口座に入ったものなので、収入へ移す。
+       カード明細の返金（src==="CSV"）は、買い物の取り消しなので、消費のマイナスのままにする。 */
+    takeIn = t.fin.filter(x=>x.payer==="c" && !x.fixed && x.burden===me && isIn(x) && x.src!=="CSV")
+                  .reduce((a,b)=>a+(Number(b.amount)||0), 0);
+    takeOther = take - takeSave;
+    /* 端数は transfer() が一人目に寄せ、二人目を「合計 − 一人目」にしている。同じ丸め方に揃える。
+       揃えないと、二人目だけ内訳が1円ずれる。 */
+    due = me==="r" ? Math.round(t.due.r) : Math.round(t.due.r + t.due.m) - Math.round(t.due.r);
+    homeOut = send + lend;
+    diff = (due + take + sv + loanOut) - homeOut;
+    residual = (income - direct) - homeOut - mySpend - movedNet;
+  }
+  const own = takeOther + takeIn + (mySpend - mySpendSave);
+  const savings = sv + takeSave + mySpendSave + direct + movedNet;
+  const incomeAll = income + takeIn;                       // 画面に出す収入。共有口座に入った自分の入金を含む
+  const rate = (ok && incomeAll>0) ? savings/incomeAll : null;
+  return {m, me, ok, closed:!!cl, income:incomeAll, incomeBook:income, takeIn, direct, mySpend, movedNet, due, takeOther, takeSave, sv, loanOut,
+          lend, send, homeOut, diff, residual, own, savings, rate};
+}
+
 /* 明細CSVの店名は全角英数（ＡＭＡＺＯＮ・Ｓｕｉｃａ・ＪＲ）。辞書は半角で書きたい。
    ⚠ 両方を半角へ畳んでから照らすこと。畳まずに toLowerCase だけで比べると、
      半角で書いた語（Amazon・JR）は全角の店名に一件も当たらず、辞書が黙って死ぬ。 */
@@ -1024,23 +1278,28 @@ function findDup(it, list){
 
 function render(){
   document.getElementById("app").innerHTML =
-    ({home:viewHome, stats:viewStats, list:viewList, settings:viewSettings})[S.tab]();
+    ({home:viewHome, stats:viewStats, list:viewList, mine:viewMine, settings:viewSettings})[S.tab]();
   document.querySelectorAll(".nb").forEach(b=>b.classList.toggle("on", b.dataset.tab===S.tab));
   bindAll();
 }
 
-function header(){
+function header(mine){
   const cur = S.month===ym(new Date());
-  const st = S.syncing ? '<span class="pill">同期中…</span>'
-    : (!S.cfg.api ? '<span class="pill warn">この端末のみ</span>'
-    : (S.online ? '' : '<span class="pill warn">圏外</span>'));
+  /* 資産タブでは、個人帳面の接続状態を出す（共有の状態ではない）。 */
+  const st = mine
+    ? (S.my.syncing ? '<span class="pill">同期中…</span>'
+      : (!S.cfg.mineApi ? '<span class="pill warn">この端末のみ</span>'
+      : (S.my.online ? '' : '<span class="pill warn">圏外</span>')))
+    : (S.syncing ? '<span class="pill">同期中…</span>'
+      : (!S.cfg.api ? '<span class="pill warn">この端末のみ</span>'
+      : (S.online ? '' : '<span class="pill warn">圏外</span>')));
   return `<header><div class="wrap"><div class="hrow">
     <div class="month-pick">
       <button class="arrowbtn" data-mv="-1">${icon("chevron_left")}</button>
       <b class="num">${ymLabel(S.month)}</b>
       <button class="arrowbtn" data-mv="1" ${cur?"disabled":""}>${icon("chevron_right")}</button>
     </div>
-    <div>${cur?'<span class="pill">今月</span>':''}${st}</div>
+    <div>${cur?'<span class="pill">今月</span>':''}${st}<button class="arrowbtn gear" aria-label="設定">${icon("settings")}</button></div>
   </div></div></header>`;
 }
 
@@ -1268,6 +1527,121 @@ function viewList(){
   </div>`;
 }
 
+/* ---------- 資産タブ（個人帳面） ----------
+   ⚠ 色は意味にしか使わない。濃い緑＝貯蓄、中間の緑＝使い道、灰＝まだ分からない分。 */
+const syen = v => (v<0 ? "−" : "") + yen(Math.abs(v));
+function myAcctName(id){ const a=myAcct(id); return a ? a.name : ""; }
+
+function myRowHTML(x){
+  const d=String(x.date||"").split("-");
+  const mv=x.type==="移動", inc=x.type==="収入";
+  const ic = inc ? "payments" : mv ? "swap_horiz" : catOf(x.cat).ic;
+  const t1 = x.shop || (mv ? `${myAcctName(x.acct)||"元は未指定"} → ${myAcctName(x.to)||x.to}` : x.cat);
+  const acctTag = (!mv && x.acct) ? `<span class="tag gray">${esc(myAcctName(x.acct)||x.acct)}</span>` : "";
+  return `<div class="row" data-medit="${esc(x.id)}">
+    <div class="ic-circle${inc||mv?" accent":""}">${icon(ic)}</div>
+    <div class="body">
+      <div class="t1">${esc(t1)}</div>
+      <div class="t2">${d[1]?Number(d[1])+"/"+Number(d[2]):""}・${esc(mv?"移動":(x.cat||x.type))}${acctTag}</div>
+    </div>
+    <div class="amt num ${inc?"plus":""}">${inc?"＋":""}${yen(x.amount)}</div>
+  </div>`;
+}
+
+function viewMine(){
+  const m=S.month, f=mineFlow(m), N=S.cfg.names, who=N[myMe()];
+  const rateTxt = f.rate==null ? "―" : Math.round(f.rate*100)+"%";
+  const conn = S.cfg.mineApi ? "" :
+    `<div class="warnbox">個人帳面にはまだ接続していません。いまの記録はこの端末にだけ保存されます。
+      <button class="mini" data-open="m-conn" style="margin-left:6px">接続する</button></div>`;
+  const err = (S.cfg.mineApi && !S.my.online && !S.my.syncing && S.my.err)
+    ? `<div class="warnbox">個人帳面と通信できません（${esc(S.my.err)}）。表示は前回の控えです。</div>` : "";
+  const unk = f.ok ? "" :
+    `<div class="warnbox">${ymLabel(m)}に引き落とされる共有カードの明細が、共有の家計簿にまだありません。
+      家の受け持ちを正しく計算できないため、この月は貯蓄率と「未記録の手元」を出しません。
+      「自分の消費」「貯蓄」は、個人帳面に記録したものだけの値です。</div>`;
+
+  const rows=[];
+  if(f.ok) rows.push({k:"家の受け持ち", v:f.due, c:"var(--ramp-3)"});
+  /* 明細が未取り込みの月は、共有カード経由の消費・積立が分からない。個人帳面の記録だけの値だと断る。 */
+  const only = f.ok ? "" : "（個人帳面の記録のみ）";
+  rows.push({k:"自分の消費"+only, v:f.own, c:"var(--ramp-4)"});
+  rows.push({k:"貯蓄"+only, v:f.savings, c:"var(--ramp-1)"});
+  if(f.ok && f.loanOut) rows.push({k:"二人のあいだの受け渡し", v:f.loanOut, c:"var(--ramp-5)"});
+  if(f.ok) rows.push({k:"未記録の手元", v:f.residual, c:"var(--m-outline)"});
+  const den=Math.max(f.income, ...rows.map(r=>Math.max(0,r.v)), 1);
+  const bars=rows.map(r=>`<div class="barrow">
+      <div class="bh"><span class="nm">${esc(r.k)}</span>
+        <span><span class="vl num">${syen(r.v)}</span><span class="pc num">${f.income>0?Math.round(r.v/f.income*100)+"%":""}</span></span></div>
+      <div class="track"><div class="fill" style="width:${(Math.max(0,r.v)/den*100).toFixed(1)}%;background:${r.c}"></div></div>
+    </div>`).join("");
+
+  /* 検算：家に関わる出金（振込 ＋ 立て替え）と、内訳の合計が合うこと。 */
+  const chk = !f.ok ? "" : (Math.abs(f.diff)<=1
+    ? `<div class="note num">家に関わる出金 ${yen(f.homeOut)}（振込 ${yen(f.send)} ＋ 立て替え ${yen(f.lend)}）は、家の受け持ち・共有カード経由の消費・積立・受け渡しの合計と一致しています。</div>`
+    : `<div class="warnbox">家に関わる出金（振込 ＋ 立て替え）は ${yen(f.homeOut)} ですが、内訳の合計と ${syen(f.diff)} の差があります。
+        ${f.closed?"締めた月の控えと、現在の計算が食い違っている可能性があります。":"共有の家計簿の記録を確かめてください。"}</div>`);
+
+  const parts=[["共有の積立貯蓄（毎月）",f.sv],["共有カード経由の積立（SBI証券など）",f.takeSave],
+               ["口座を通らない積立（持株の天引きなど）",f.direct],["投資口座への移動",f.movedNet]].filter(p=>p[1]);
+  const partsHTML = parts.length
+    ? parts.map(([k,v])=>`<div class="setrow"><div class="sl">${esc(k)}</div><div class="num amt-nw">${syen(v)}</div></div>`).join("")
+    : emptyHTML("この月の貯蓄の記録はありません","");
+
+  const months=[]; for(let i=5;i>=0;i--) months.push(shiftMonth(m,-i));
+  const fl=months.map(mineFlow);
+  /* 明細が未取り込みの月（ok=false）は、積立の一部しか分からない。棒を描かず、他の月と並べて比べさせない。 */
+  const smax=Math.max(...fl.filter(x=>x.ok).map(x=>x.savings),1);
+  const trend=fl.map((x,i)=>{
+    const h = x.ok ? Math.max(4, Math.round(Math.max(0,x.savings)/smax*104)) : 4;
+    return `<div class="mbar"><div class="bb ${months[i]===m && x.ok ?"":"dim"}" style="height:${h}px"></div>
+      <div class="ml">${Number(months[i].split("-")[1])}月<span class="rt num">${x.rate==null?"–":Math.round(x.rate*100)+"%"}</span></div></div>`;
+  }).join("");
+
+  const list=myMonthTx(m).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+  return header(true) + `<div class="wrap">
+    ${conn}${err}
+    <div class="hero">
+      <div class="lbl">${esc(who)}の貯蓄率 ― ${ymLabel(m)}</div>
+      <div class="big num">${rateTxt}</div>
+      <div class="sub num">収入 <b>${yen(f.income)}</b>　貯蓄 <b>${f.ok?yen(f.savings):"―"}</b>${f.income>0?"":"<br>この月の収入はまだ記録されていません。"}</div>
+    </div>
+    ${unk}
+    <div class="sechead"><h2>収入の行き先</h2></div>
+    <div class="card">${bars}</div>
+    ${chk}
+    <div class="note">収入は、総支給から税・社会保険料を引いた額（持株の天引き分を含む）です。共有口座に入った自分の入金（保険金など）も含めます。
+      個人帳面の支出・収入には、<b>共有の家計簿に記録した立て替えや20日の振込を入れないでください</b>（二重に数えます）。
+      「未記録の手元」は、まだ記録されていない使い道（個人のカード・財布・現金の支出）と、銀行に残った分の合計です。記録が増えるほど小さくなります。</div>
+
+    <div class="sechead"><h2>貯蓄の内訳</h2></div>
+    <div class="card">${partsHTML}</div>
+
+    <div class="sechead"><h2>6ヶ月の推移（貯蓄額と貯蓄率）</h2></div>
+    <div class="card"><div class="mbars">${trend}</div></div>
+
+    <div class="sechead"><h2>この月の個人の記録（${list.length}件）</h2><span class="more num">＋ から記録</span></div>
+    <div class="card">${list.length?list.map(myRowHTML).join(""):emptyHTML("この月の個人の記録はありません","＋ から入れてください")}</div>
+  </div>`;
+}
+
+function mineSettingsHTML(){
+  const c=S.cfg, me=c.names[myMe()];
+  const st = !c.mineApi ? '<span class="dot ng"></span>未接続（この端末のみ）'
+    : (S.my.online ? '<span class="dot ok"></span>接続中' : '<span class="dot er"></span>'+esc(S.my.err||"通信できません"));
+  const dorm=S.my.accts.filter(a=>a.dormant).length;
+  return `<div class="sechead"><h2>個人帳面（資産タブ）</h2></div>
+    <div class="card">
+      <div class="setrow"><div><div class="sl">個人帳面の接続</div><div class="sd">${st}・この端末の持ち主：${esc(me)}</div></div>
+        <button class="mini" data-open="m-conn">設定</button></div>
+      <div class="setrow"><div><div class="sl">口座</div><div class="sd num">${S.my.accts.length}件${dorm?`（うち休眠 ${dorm}件）`:""}</div></div>
+        <button class="mini ghost" data-open="m-accts">開く</button></div>
+      <div class="setrow"><div><div class="sl">給与の取り込み</div><div class="sd">salary-export.ps1 で書き出したJSONを読み込む</div></div>
+        <button class="mini ghost" data-open="m-sal">取り込む</button></div>
+    </div>`;
+}
+
 function viewSettings(){
   const c=S.cfg, p=planFor(S.month), cb=contribOf(p);
   const st = !c.api ? '<span class="dot ng"></span>未接続（この端末のみ）'
@@ -1293,6 +1667,8 @@ function viewSettings(){
         <div class="sd num">${needPay().length ? needPay().length+"件に引落月が入っており申さぬ" : "抜けはござらぬ"}</div></div>
         <button class="mini ${needPay().length?"":"ghost"}" data-open="fixpay">開く</button></div>
     </div>
+
+    ${mineSettingsHTML()}
 
     <div class="sechead"><h2>暮らしの決め事（${ymLabel(p.from)}から）</h2></div>
     <div class="card">
@@ -1479,7 +1855,7 @@ function bindSheet(){
     const g=guessCat(shop.value);
     if(g && g!==sheetCtx.it.cat){
       const btn=root.querySelector(`[data-cat="${CSS.escape(g)}"]`);
-      if(btn){ btn.click(); toast(g+" と見立て申した"); }
+      if(btn){ btn.click(); toast(sheetCtx && sheetCtx.kind==="mrec" ? g+" と判断しました" : g+" と見立て申した"); }
     }
   };
 
@@ -1518,6 +1894,7 @@ function bindSheet(){
   bindConfigSheet(root);
   bindCsvSheet(root);
   bindReceiptSheet(root);
+  bindMineSheet(root);
 }
 
 function learnDict(shop, cat){
@@ -1759,7 +2136,12 @@ function bindConfigSheet(root){
   if(sv) sv.onclick=async ()=>{
     const k=sheetCtx.kind;
     if(k==="conn"){
-      c.api=root.querySelector("#c-api").value.trim().replace(/\/exec.*$/,"/exec");
+      const nu=normApi(root.querySelector("#c-api").value);
+      /* ⚠ 個人帳面と同じURLは受け付けない。共有の明細へ個人の取引が混ざる、または個人帳面へ共有の明細が混ざる。
+         個人帳面の別の接続先を入れた場合に備え、ping の kind も見る（確かめられないときは従来どおり保存する）。 */
+      if(nu && c.mineApi && nu===normApi(c.mineApi)){ toast("個人帳面と同じURLです。共有の家計簿には、別のスプレッドシートのURLを入れてください"); return; }
+      if(nu){ try{ const p=await mineHit(nu,"ping",""); if(p && p.kind==="mine"){ toast("これは個人帳面のURLです。共有の家計簿のURLを入れてください"); return; } }catch(e){} }
+      c.api=nu;
       c.token=root.querySelector("#c-token").value.trim();
       save("cfg",c); closeSheet(); toast("繋ぎにゆき申す"); await pullAll();
       toast(S.online?"繋がり申した":"繋がらず："+S.err); return;
@@ -2135,6 +2517,286 @@ function csvToItems(rows,map){
   return out;
 }
 
+/* ---------- 個人帳面のシート（記録・口座・接続・給与の取り込み） ---------- */
+
+function acctOpts(sel, withNone){
+  const list=S.my.accts.slice().sort((a,b)=>(a.dormant?1:0)-(b.dormant?1:0) || (a.order||0)-(b.order||0));
+  /* 保存値が一覧に無いとき、先頭の口座へ黙って化けないよう、その値を残す。 */
+  const lost = sel && !list.some(a=>a.id===sel) ? `<option value="${esc(sel)}" selected>（不明な口座：${esc(sel)}）</option>` : "";
+  return (withNone?`<option value="">指定しない</option>`:"") + lost
+    + list.map(a=>`<option value="${esc(a.id)}" ${a.id===sel?"selected":""}>${esc(a.name)}${a.dormant?"（休眠）":""}</option>`).join("");
+}
+
+function myEditorHTML(it){
+  const t=it.type, isNew=!it.id;
+  const typeRow = isNew ? `<div class="trio kinds" id="m-type">${[["支出","receipt_long"],["収入","payments"],["移動","swap_horiz"]].map(([v,ic])=>
+    `<button class="chip ${t===v?"on":""}" data-mtype="${v}">${icon(ic,"s18")}${v}</button>`).join("")}</div>` : "";
+  let mid;
+  if(t==="移動"){
+    mid = `<div class="field"><label>元の口座</label><select id="m-acct">${acctOpts(it.acct,true)}</select></div>
+      <div class="field"><label>先の口座</label><select id="m-to">${acctOpts(it.to,true)}</select></div>
+      <div class="note">自分の口座間の動きです。収入にも支出にも数えません。投資口座へ移すと、貯蓄として数えます。</div>`;
+  }else{
+    /* 支出の費目に「貯蓄」は出さない。積立・投資への入金は「移動」で記録する（消費に数えられてしまうため）。 */
+    const cats = t==="収入" ? MY_INCOME_CATS.map(k=>({k,ic:"payments"})) : CATS.filter(c=>c.k!=="貯蓄");
+    mid = `<div class="flabel">費目</div>
+      <div class="chips" id="f-cats">${cats.map(c=>`
+        <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}">${icon(c.ic,"s18")}${esc(c.k)}</button>`).join("")}</div>
+      <div class="field"><label>${t==="収入"?"入った先":"払った元"}</label><select id="m-acct">${acctOpts(it.acct,true)}</select></div>
+      <div class="field"><label>${t==="収入"?"何の収入か":"店・内容"}</label>
+        <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${t==="収入"?"給与":"店名など"}"></div>
+      <div class="note">${t==="収入"
+        ? "共有口座に入った入金（保険金・助成金など）は、共有の家計簿に記録します。ここには入れないでください。"
+        : "共有の家計簿に記録した立て替えや、20日の振込は入れないでください（二重に数えます）。積立・投資への入金は「移動」で記録します。"}</div>`;
+  }
+  return sheetShell(isNew?"個人の記録":"記録を直す", `${typeRow}
+    <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
+    ${mid}
+    <div class="field"><label>日付</label><input id="m-date" type="date" value="${esc(it.date||today())}"></div>
+    <div class="field"><label>メモ</label><textarea id="m-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
+    <button class="save" id="m-save">保存する</button>
+    ${isNew?"":'<button class="save del" id="m-del">この記録を消す</button>'}`);
+}
+
+function openMyEditor(item){
+  const it = item ? Object.assign({}, item)
+    : {id:"", date:today(), type:"支出", amount:0, acct:"", to:"", cat:"食費", shop:"", memo:"", src:"手入力"};
+  openSheet(myEditorHTML(it), {kind:"mrec", it});
+  setTimeout(()=>{ const a=document.getElementById("f-amt"); if(!it.id&&!it.amount&&a) a.focus(); },320);
+}
+
+function acctRowHTML(a, isNew){
+  return `<div class="acct-row" data-aid="${esc(a.id)}" ${isNew?'data-new="1"':""}>
+    <div class="field"><label>名称</label><input data-f="name" value="${esc(a.name||"")}" placeholder="例：楽天銀行"></div>
+    <div class="field"><label>種別</label><select data-f="kind">${MY_KINDS.map(k=>`<option ${a.kind===k?"selected":""}>${k}</option>`).join("")}</select></div>
+    <div class="flags">
+      <button class="chip ${a.locked?"on":""}" data-flag="locked">拘束（引き出せない）</button>
+      <button class="chip ${a.dormant?"on":""}" data-flag="dormant">休眠</button>
+      <button class="chip" data-adel="1">削除</button>
+    </div>
+  </div>`;
+}
+
+function openMine(kind){
+  const c=S.cfg;
+  if(kind==="m-conn"){
+    const N=c.names;
+    openSheet(sheetShell("個人帳面に接続", `
+      <div class="note">資産タブ用の個人帳面（共有の家計簿とは別のスプレッドシート）に接続します。
+      URLと合言葉は、共有の家計簿とは別のものを入れてください。空のままでも、この端末だけで記録できます。</div>
+      <div class="field"><label>ウェブアプリのURL</label><input id="m-api" value="${esc(c.mineApi)}" placeholder="https://script.google.com/macros/s/..."></div>
+      <div class="field"><label>合言葉</label><input id="m-token" value="${esc(c.mineToken)}" placeholder="個人帳面用の合言葉"></div>
+      <div class="flabel">この端末の持ち主</div>
+      <div class="trio" id="m-owner">${["r","m"].map(k=>`<button class="chip ${myMe()===k?"on":""}" data-owner="${k}">${esc(N[k])}</button>`).join("")}</div>
+      <button class="save" id="m-save-conn">接続する</button>
+      <button class="save ghost" id="m-test">試して確かめる</button>
+      <div id="m-diag"></div>`), {kind:"m-conn", owner:myMe()});
+  }
+  if(kind==="m-accts"){
+    const list=S.my.accts.slice().sort((a,b)=>(a.order||0)-(b.order||0));
+    openSheet(sheetShell("口座", `
+      <div class="note">資産として数える口座です。使っていない口座は「休眠」にすると、選択肢の後ろに回ります。
+      「拘束」は、iDeCoのように引き出せない資産に付けます。取引で使われている口座は削除できません。</div>
+      <div id="ma-list">${list.map(a=>acctRowHTML(a,false)).join("")}</div>
+      <button class="save ghost" id="ma-add">口座を追加</button>
+      <button class="save" id="ma-save">保存する</button>`), {kind:"m-accts"});
+  }
+  if(kind==="m-sal"){
+    openSheet(sheetShell("給与の取り込み", `
+      <div class="note">salary-export.ps1 で書き出した「給与取り込み.json」を選びます。給与・賞与・給付金を収入として取り込みます。
+      同じ内容を何度取り込んでも二重にはなりません（idで上書きします）。</div>
+      <div class="field"><label>JSONファイル</label><input id="ms-file" type="file" accept=".json,application/json"></div>
+      <div id="ms-body"></div>`), {kind:"m-sal"});
+  }
+}
+
+function bindMineSheet(root){
+  const k = sheetCtx && sheetCtx.kind;
+  if(!k) return;
+
+  /* ---- 記録 ---- */
+  if(k==="mrec"){
+    root.querySelectorAll("[data-mtype]").forEach(b=>b.onclick=()=>{
+      const it=sheetCtx.it, v=b.dataset.mtype;
+      it.amount=Number(String((root.querySelector("#f-amt")||{}).value||"").replace(/[^0-9]/g,""))||0;
+      const sh=root.querySelector("#f-shop"); if(sh) it.shop=sh.value;
+      const dt=root.querySelector("#m-date"); if(dt && dt.value) it.date=dt.value;
+      it.type=v; it.cat = v==="収入" ? "給与" : v==="支出" ? "食費" : "";
+      if(v!=="移動") it.to="";
+      openSheet(myEditorHTML(it), {kind:"mrec", it});
+    });
+    const sv=root.querySelector("#m-save");
+    if(sv) sv.onclick=async ()=>{
+      const it=sheetCtx.it;
+      const n=Number(String(root.querySelector("#f-amt").value).replace(/[^0-9]/g,""));
+      if(!n){ toast("金額を入力してください"); root.querySelector("#f-amt").focus(); return; }
+      it.amount=n;
+      it.shop=(root.querySelector("#f-shop")||{value:""}).value.trim();
+      it.date=root.querySelector("#m-date").value||today();
+      it.acct=(root.querySelector("#m-acct")||{value:""}).value;
+      it.to = it.type==="移動" ? root.querySelector("#m-to").value : "";
+      if(it.type==="移動"){
+        if(!it.to){ toast("先の口座を選んでください"); return; }
+        if(it.acct===it.to){ toast("元と先が同じです"); return; }
+        it.cat="";
+      }
+      it.memo=root.querySelector("#m-memo").value.trim();
+      /* 共有の家計簿に、同じ額・近い日付の記録があれば確かめる。
+         立て替えや振込を個人帳面にも入れると、家に関わる出金と重なって二重に数えるため。 */
+      if(!it.id && (it.type==="支出" || it.type==="収入")){
+        const dup = S.items.find(x=>x.payer===myMe() && !x.fixed && !isLoan(x)
+          && (it.type==="収入" ? isIn(x) : !isIn(x))
+          && Number(x.amount)===n && dayDiff(x.date,it.date)<=3);
+        if(dup && !confirm("共有の家計簿に、同じ額・近い日付の記録があります（"+(dup.shop||dup.cat)+"）。\n同じものを二重に記録すると、家に関わる出金と重なって数えます。それでも記録しますか。")) return;
+      }
+      const isNew=!it.id;
+      if(isNew){ it.id=uid(); it.src="手入力"; }
+      closeSheet();
+      await pushMy(isNew?"add":"update", it);
+      toast(isNew?"記録しました":"直しました");
+    };
+    const dl=root.querySelector("#m-del");
+    if(dl) dl.onclick=async ()=>{
+      if(!confirm("この記録を削除しますか。")) return;
+      const it=sheetCtx.it; closeSheet();
+      await pushMy("delete", it); toast("削除しました");
+    };
+  }
+
+  /* ---- 接続 ---- */
+  if(k==="m-conn"){
+    const norm=u=>String(u||"").trim().replace(/\/exec.*$/,"/exec");
+    root.querySelectorAll("[data-owner]").forEach(b=>b.onclick=()=>{
+      sheetCtx.owner=b.dataset.owner;
+      root.querySelectorAll("[data-owner]").forEach(x=>x.classList.toggle("on", x.dataset.owner===sheetCtx.owner));
+    });
+    /* ⚠ 共有の家計簿と同じURLは受け付けない。個人の記録が共有の明細の列へ書かれてしまう。 */
+    const sameAsShared = u => !!u && !!S.cfg.api && u===norm(S.cfg.api);
+    const sv=root.querySelector("#m-save-conn");
+    if(sv) sv.onclick=async ()=>{
+      const u=norm(root.querySelector("#m-api").value), tk=root.querySelector("#m-token").value.trim();
+      if(sameAsShared(u)){ toast("共有の家計簿と同じURLです。個人帳面は別のスプレッドシートを使ってください"); return; }
+      /* ⚠ 保存する前に、相手が個人帳面か確かめる。共有の家計簿の別のデプロイのURLを入れると、
+         URLが違うので上の検査をすり抜け、個人の取引が共有の明細へ書かれてしまう。
+         確認できないとき（圏外・URLの誤り）も保存しない。 */
+      if(u){
+        sv.disabled=true;
+        try{
+          const p = await mineHit(u, "ping", "");
+          if(!p || p.kind!=="mine"){ toast("このURLは個人帳面ではありません。共有の家計簿のURLを入れていないか確認してください"); sv.disabled=false; return; }
+        }catch(e){ toast("接続先を確認できませんでした。通信できる状態で、URLを確かめてもう一度お試しください"); sv.disabled=false; return; }
+        sv.disabled=false;
+      }
+      S.cfg.mineApi=u; S.cfg.mineToken=tk; S.cfg.me=sheetCtx.owner||"r";
+      save("cfg", S.cfg); closeSheet(); render();
+      if(u){ toast("接続します"); await pullMine(); toast(S.my.online?"接続しました":"接続できません："+S.my.err); }
+    };
+    const tst=root.querySelector("#m-test");
+    if(tst) tst.onclick=async ()=>{
+      const box=root.querySelector("#m-diag");
+      const u=norm(root.querySelector("#m-api").value), tk=root.querySelector("#m-token").value.trim();
+      const ng=(t,h)=>`<div class="warnbox"><b>${t}</b><br>${h}</div>`;
+      if(!u){ box.innerHTML=ng("URLが空です。",""); return; }
+      if(sameAsShared(u)){ box.innerHTML=ng("共有の家計簿と同じURLです。","個人帳面は、別のスプレッドシートに作ったApps ScriptのURLを入れてください。"); return; }
+      box.innerHTML=`<div class="note">確認しています…</div>`;
+      const hit = (action, t) => mineHit(u, action, t);
+      try{
+        const p = await hit("ping","");
+        if(p.kind!=="mine"){
+          box.innerHTML=ng("このURLは個人帳面ではないようです。","共有の家計簿のURLを入れていないか確認してください。Code-mine.gs を貼ったスクリプトのURLが必要です。");
+          return;
+        }
+      }catch(e){
+        box.innerHTML = e.message==="HTML"
+          ? ng("デプロイの「アクセスできるユーザー」が『全員』になっていません。","Apps Script → デプロイ → デプロイを管理 → 鉛筆 →「アクセスできるユーザー」を全員に。")
+          : ng("URLに届きません（"+esc(e.message)+"）。","末尾が /exec のURLか、デプロイ済みかを確認してください。");
+        return;
+      }
+      let j;
+      try{ j = await hit("list", tk); }
+      catch(e){ box.innerHTML=ng("URLは生きていますが、取引が読めません（"+esc(e.message)+"）。","setup() を実行したかを確認してください。"); return; }
+      if(j.ok===false){
+        box.innerHTML = /合言葉/.test(j.error||"")
+          ? ng("URLは正しいですが、合言葉の問題です。（"+esc(j.error)+"）","スクリプト プロパティに TOKEN を登録し、アプリに同じ合言葉を入れてください。")
+          : ng("個人帳面が断りました（"+esc(j.error||"")+"）。","「未対応の用向き」と出るなら、新バージョンでのデプロイがまだです。");
+        return;
+      }
+      let a=null; try{ a = await hit("accounts", tk); }catch(e){}
+      box.innerHTML = `<div class="warnbox" style="background:var(--m-primary-container);color:var(--m-on-primary-container)">
+        <b>接続できました。</b>取引 ${(j.items||[]).length} 件、口座 ${a&&a.accounts?a.accounts.length:"?"} 件を確認しました。</div>`;
+    };
+  }
+
+  /* ---- 口座 ---- */
+  if(k==="m-accts"){
+    const wrap=root.querySelector("#ma-list");
+    const bindRow=row=>{
+      row.querySelectorAll("[data-flag]").forEach(b=>b.onclick=()=>b.classList.toggle("on"));
+      const del=row.querySelector("[data-adel]");
+      if(del) del.onclick=()=>{
+        const id=row.dataset.aid;
+        if(S.my.tx.some(x=>x.acct===id||x.to===id)){ toast("取引で使われている口座は削除できません。休眠にしてください"); return; }
+        if(row.dataset.new!=="1" && !confirm("この口座を削除しますか。")) return;
+        row.remove();
+      };
+    };
+    wrap.querySelectorAll(".acct-row").forEach(bindRow);
+    root.querySelector("#ma-add").onclick=()=>{
+      const tmp=document.createElement("div");
+      tmp.innerHTML=acctRowHTML({id:"a"+uid(), name:"", kind:"銀行"}, true);
+      const row=tmp.firstElementChild; wrap.appendChild(row); bindRow(row);
+      row.querySelector('[data-f="name"]').focus();
+    };
+    root.querySelector("#ma-save").onclick=()=>{
+      const list=[...wrap.querySelectorAll(".acct-row")].map((row,i)=>({
+        id:row.dataset.aid,
+        name:row.querySelector('[data-f="name"]').value.trim(),
+        kind:row.querySelector('[data-f="kind"]').value,
+        locked:row.querySelector('[data-flag="locked"]').classList.contains("on"),
+        dormant:row.querySelector('[data-flag="dormant"]').classList.contains("on"),
+        order:i+1
+      }));
+      if(list.some(a=>!a.name)){ toast("名称が空の口座があります"); return; }
+      S.my.accts=list; saveMyAccts(); closeSheet(); render(); toast("口座を保存しました");
+    };
+  }
+
+  /* ---- 給与の取り込み ---- */
+  if(k==="m-sal"){
+    const f=root.querySelector("#ms-file"), box=root.querySelector("#ms-body");
+    f.onchange=()=>{
+      const file=f.files[0]; if(!file) return;
+      const rd=new FileReader();
+      rd.onload=()=>{
+        let j;
+        try{ j=JSON.parse(String(rd.result).replace(/^﻿/,"")); }
+        catch(e){ box.innerHTML=`<div class="warnbox">JSONとして読めませんでした。</div>`; return; }
+        const src = Array.isArray(j && j.items) ? j.items : [];
+        const ok=[]; let bad=0;
+        src.forEach(x=>{ const v=normMyTx(x); if(v) ok.push(v); else bad++; });
+        if(!ok.length){ box.innerHTML=`<div class="warnbox">取り込める取引がありませんでした（読めなかった行 ${bad} 件）。</div>`; return; }
+        const cur={}; S.my.tx.forEach(x=>cur[x.id]=x);
+        const same=(a,b)=>["date","type","amount","acct","to","cat","shop","memo","src"].every(q=>String(a[q]||"")===String(b[q]||""));
+        const fresh=ok.filter(x=>!cur[x.id]);
+        const chg=ok.filter(x=>cur[x.id] && !same(cur[x.id],x));
+        const todo=fresh.concat(chg);
+        const unk=[...new Set(ok.flatMap(x=>[x.acct,x.to]).filter(id=>id && !myAcct(id)))];
+        const ms=ok.map(x=>x.date.slice(0,7)).sort();
+        box.innerHTML=`
+          <div class="note num">読み取れた ${ok.length} 件（${ymLabel(ms[0])}〜${ymLabel(ms[ms.length-1])}）のうち、
+            新規 <b>${fresh.length}</b> 件・内容が変わったもの <b>${chg.length}</b> 件・変更なし ${ok.length-todo.length} 件です。</div>
+          ${bad?`<div class="warnbox">形が合わず読めなかった行が ${bad} 件あります。</div>`:""}
+          ${unk.length?`<div class="warnbox">口座の一覧にない口座があります：${unk.map(esc).join("、")}。取り込みはできますが、口座の画面で追加してください。</div>`:""}
+          <button class="save" id="ms-go" ${todo.length?"":"disabled"}>${todo.length}件を取り込む</button>`;
+        box.querySelector("#ms-go").onclick=async ()=>{
+          closeSheet(); await pushMyMany(todo); toast(todo.length+"件を取り込みました");
+        };
+      };
+      rd.readAsText(file,"UTF-8");
+    };
+  }
+}
+
 /* ---------- 繋ぎこみ ---------- */
 
 function bindAll(){
@@ -2147,13 +2809,21 @@ function bindAll(){
   document.querySelectorAll(".more[data-tab]").forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); });
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const k=b.dataset.open;
-    if(k==="csv") openCsv(); else if(k==="receipt") openReceipt(); else openConfig(k);
+    if(k==="csv") openCsv(); else if(k==="receipt") openReceipt();
+    else if(k.indexOf("m-")===0) openMine(k);
+    else openConfig(k);
   });
   document.querySelectorAll("[data-sync]").forEach(b=>b.onclick=()=>pullAll());
+  /* 設定は右上の歯車から開く（ナビは資産タブに譲った）。 */
+  document.querySelectorAll(".gear").forEach(b=>b.onclick=()=>{ S.tab="settings"; render(); window.scrollTo(0,0); });
+  document.querySelectorAll("[data-medit]").forEach(r=>r.onclick=()=>{
+    const it=S.my.tx.find(x=>x.id===r.dataset.medit); if(it) openMyEditor(it);
+  });
 }
 
 document.querySelectorAll(".nb").forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); window.scrollTo(0,0); });
-document.getElementById("fab").onclick=()=>openEditor(null);
+/* 「＋」は、いま見ているタブの帳面へ記録する（資産タブなら個人帳面）。 */
+document.getElementById("fab").onclick=()=>{ if(S.tab==="mine") openMyEditor(null); else openEditor(null); };
 document.getElementById("sheetbg").onclick=closeSheet;
 
 S.items=cached();
