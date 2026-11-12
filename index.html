@@ -611,8 +611,11 @@ function loadAccts(){
 /* 個人の支出の費目。共有の費目（CATS）から「貯蓄」を除き、「奨学金」「カード引落」を足す。
    ⚠ 共有の CATS 自体は変えない（共有の家計簿の費目一覧・店名辞書・分析に響く）。「その他」は必ず末尾。
    「カード引落」は、カード明細を取り込む前の暫定の消費。取り込んだら移動へ切り替える（to にカードの口座idを持つ）。 */
+/* 「共有立替」は、個人のカードで払ったが、共有の家計簿に立て替えとして記録済みの買い物。
+   家に関わる出金（homeOut）で数え済みなので、個人の消費には数えない（mineFlow を見よ）。カード明細の取り込みが付ける。 */
+const SHARED_PAID = "共有立替";
 const MY_CATS = CATS.filter(c=>c.k!=="貯蓄" && c.k!=="その他")
-  .concat([{k:"奨学金",ic:"school"},{k:"カード引落",ic:"credit_card"}, CATS[CATS.length-1]]);
+  .concat([{k:"奨学金",ic:"school"},{k:"カード引落",ic:"credit_card"},{k:SHARED_PAID,ic:"handshake"}, CATS[CATS.length-1]]);
 const myCatOf = k => MY_CATS.find(c=>c.k===k) || CATS[CATS.length-1];
 
 /* 二人で揃える決め事。これだけがスプレッドシートの `設定` シートへ行き来する。
@@ -869,19 +872,21 @@ async function pushMy(action, item){
 }
 
 /* まとめて送る。同じ id は上書きになるので、同じ内容を何度取り込んでも二重にならない。 */
+/* 戻り値：false = 帳面が断って取り消した。それ以外（送れた・あとで送る・接続なし）は true。 */
 async function pushMyMany(list){
-  if(!list.length) return;
+  if(!list.length) return true;
   const ids={}; list.forEach(x=>ids[x.id]=x);
   const prev=S.my.tx;
   S.my.tx = list.concat(S.my.tx.filter(x=>!ids[x.id]));
   save("mytx", S.my.tx); render();
-  if(!S.cfg.mineApi) return;
+  if(!S.cfg.mineApi) return true;
   try{ await apiMine("bulk", {items:list}); S.my.online=true; }
   catch(e){
     /* 帳面が断った（形の不正など）なら、取り込み前の状態に戻し、理由を知らせる。溜め置いても永久に通らない。 */
-    if(e.rejected){ S.my.tx=prev; save("mytx", S.my.tx); render(); toast("個人帳面が受け付けませんでした："+e.message); return; }
+    if(e.rejected){ pushMyMany.lastError=e.message; S.my.tx=prev; save("mytx", S.my.tx); render(); toast("個人帳面が受け付けませんでした："+e.message); return false; }
     S.myq.push({action:"bulk", payload:{items:list}}); save("myq", S.myq); S.my.online=false; toast("通信できないため、あとで送ります");
   }
+  return true;
 }
 
 /* 口座の一覧は丸ごと置き換えて送る。溜めるのは最後の一つだけ（古い一覧を送り直さない）。 */
@@ -1089,6 +1094,7 @@ function bankPlan(parsed, acctId, existing, userRules){
   const push=x=>{ items.push(x); work.push(x); };
 
   const used=new Set();                                     // 組にした行（二重に組にしない）
+  const stm=cardStatements(existing), stUsed=new Set();     // 取り込み済みのカード明細（カード引落の突き合わせ用）
   const seen=new Map();                                     // 同じ（日付・残高・向き・額）の行の通し番号
   ch.rows.forEach(r=>{
     /* ⚠ 同じ日・同じ額・同じ残高の行は、並べ直したうえで通し番号を付けて別の id にする。
@@ -1153,7 +1159,14 @@ function bankPlan(parsed, acctId, existing, userRules){
       return;
     }
     if(rule && (rule.type==="収入" || rule.type==="支出")){
-      push(Object.assign(base, {type:rule.type, cat:rule.cat||"その他", to:rule.type==="支出"?(rule.to||""):"", shop:rule.shop||base.shop}));
+      const to = rule.type==="支出" ? (rule.to||"") : "";
+      /* カード引落：同じカード・同額で、支払日の前後5日以内の明細が取り込み済みなら、消費ではなく移動（銀行→カード）にする。
+         消費は明細の各行で数え済みのため。明細がまだなら、暫定の支出のまま（カード明細を取り込むときに移動へ切り替わる）。 */
+      if(to){
+        const s=cardMatch(stm, stUsed, to, amt, r.date);
+        if(s){ stUsed.add(s.key); push(Object.assign(base, {type:"移動", acct:acctId, to, cat:"", shop:rule.shop||base.shop})); return; }
+      }
+      push(Object.assign(base, {type:rule.type, cat:rule.cat||"その他", to, shop:rule.shop||base.shop}));
       return;
     }
     dflt();
@@ -1189,6 +1202,256 @@ function salaryMerge(items, existing){
     return x;
   });
   return {items:out, deletes};
+}
+
+/* ============================================================
+   個人カード（PayPayカード・JCBカード）の利用明細CSVの取り込み ― 純粋関数
+   ============================================================
+
+   明細の1行を、利用日の「支出」として、カードの口座（paypay / card2）に入れる。
+   銀行の引落は、金額が明細の合計と一致すれば「移動」（銀行→カード）にする。消費は明細の各行で数え済みのため。
+   明細より先に銀行の明細を取り込んでいれば、その暫定の支出（費目「カード引落」）を移動へ切り替える（updates）。
+   明細を先に取り込んでいれば、あとで銀行の明細を取り込むとき、bankPlan が移動にする。どちらの順でも同じ結果になる。
+
+   ⚠ このコードは公開される。**本人の名前・カード番号・店名を、ここへ書かない。**
+      店名の分類は、本人の規則（S.my.rules。個人帳面の `設定`）と、共有の店名辞書（読むだけ）で行う。
+
+   ⚠ 行の id は「カード・支払日・利用日・額（・通し番号）」で決める。同じ明細を何度取り込んでも二重にならない。
+      同じ日・同じ店・同じ額の行がありうるので、同じ id になる行には通し番号を付ける。
+   ⚠ 明細1枚（カード×支払日）の合計は、台帳の行の合計から求め直せる（cardStatements）。
+      ゆえに、取り込んだ行は消さない・分けない（共有に記録済みの買い物も行は残し、費目だけを「共有立替」にする）。 */
+const CARD_ACCT = {paypay:"paypay", jcb:"card2"};          // 明細の種類 → 口座id（口座idは変えない）
+const CARD_NAME = {paypay:"PayPayカード", jcb:"JCBカード"};
+const cardPad = n => String(n).padStart(2,"0");
+function cardYmd(s){
+  const m=String(s==null?"":s).trim().match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  return m ? m[1]+"-"+cardPad(m[2])+"-"+cardPad(m[3]) : "";
+}
+/* 店名を均す：全角英数を半角へ、空白を一つに。PayPayの古い明細に付く「PayPay 」の頭は外す。 */
+function cardShop(s){
+  const raw=String(s==null?"":s).normalize("NFKC").replace(/\s+/g," ").trim();
+  return raw.replace(/^paypay\s+/i,"") || raw;
+}
+
+/* CSV（parseCSV の結果）を読む。PayPayカードとJCBカードを見出しで見分ける。読めなければ null。
+   取り込めない行（返金・分割・リボ・訂正など）は unsupported に分け、その明細は引落の突き合わせをしない。 */
+function cardParse(rows){
+  const str=v=>String(v==null?"":v).replace(/^﻿/,"").trim();
+  /* 負の数（返金）を見落とさない。全角のマイナス・U+2212・△▲・括弧も負に読む（符号を捨てると返金が正の額になる）。 */
+  const num=v=>{
+    const s=String(v||"").normalize("NFKC");
+    const n=Number(s.replace(/[^0-9]/g,""))||0;
+    return (/[-−△▲]/.test(s) || /^\s*\(.*\)\s*$/.test(s)) ? -n : n;
+  };
+  const one=v=>String(v||"").normalize("NFKC").replace(/\s+/g,"")==="1回";           // 一括払いか
+  const lines=[], unsup=[]; let bad=0, kind="", headTotal=null, headPay="", sumAll=0;
+  for(let i=0; i<Math.min(14, rows.length) && !kind; i++){
+    const h=rows[i].map(str);
+    const ix=pre=>h.findIndex(x=>x.indexOf(pre)===0);
+    if(h.includes("利用日/キャンセル日") && h.includes("利用店名・商品名")){
+      const c={d:ix("利用日/キャンセル日"), s:ix("利用店名・商品名"), k:ix("支払区分"), a:ix("利用金額"), f:ix("手数料"),
+               p:ix("当月支払金額"), cf:ix("翌月以降繰越金額"), aj:ix("調整額"), pay:ix("当月お支払日")};
+      if(c.a<0 || c.p<0 || c.pay<0) return null;
+      kind="paypay";
+      rows.slice(i+1).forEach(r=>{
+        const use=cardYmd(r[c.d]), pay=cardYmd(r[c.pay]);
+        if(!use || !pay){ bad++; return; }
+        const amt=num(r[c.a]), shop=cardShop(r[c.s]);
+        const why = amt<=0 ? "返金・取り消しの行" : !one(r[c.k]) ? "分割・リボ払い"
+          : (num(r[c.f]) || num(r[c.cf]) || num(r[c.aj])) ? "手数料・繰越・調整のある行"
+          : num(r[c.p])!==amt ? "当月の支払額と利用金額が違う行" : "";
+        if(why){ unsup.push({date:use, shop, amount:amt, pay, why}); return; }
+        lines.push({use, shop, amt, pay});
+      });
+    }else if(h.includes("ご利用日") && h.some(x=>x.indexOf("ご利用先")===0)){
+      const c={d:ix("ご利用日"), s:ix("ご利用先"), a:ix("ご利用金額"), k:ix("支払区分"), sg:ix("訂正サイン"), p:ix("お支払い金額")};
+      if(c.a<0 || c.p<0) return null;
+      kind="jcb";
+      rows.slice(0,i).forEach(r=>{
+        const t=r.map(str);
+        const j=t.findIndex(x=>x==="今回のお支払日"); if(j>=0) headPay=cardYmd(t[j+1]);
+        const q=t.findIndex(x=>x.indexOf("今回のお支払金額合計")===0); if(q>=0) headTotal=num(t[q+1]);
+      });
+      rows.slice(i+1).forEach(r=>{
+        const use=cardYmd(r[c.d]);
+        if(!use || !headPay){ bad++; return; }
+        const amt=num(r[c.a]), shop=cardShop(r[c.s]), paid=num(r[c.p]);
+        sumAll+=paid;
+        const why = amt<=0 ? "返金・取り消しの行" : (c.sg>=0 && str(r[c.sg])) ? "訂正のある行"
+          : !one(r[c.k]) ? "分割・リボ払い" : paid!==amt ? "お支払い金額と利用金額が違う行" : "";
+        if(why){ unsup.push({date:use, shop, amount:amt, pay:headPay, why}); return; }
+        lines.push({use, shop, amt, pay:headPay});
+      });
+    }
+  }
+  if(!kind) return null;
+  const st=new Map();
+  lines.forEach(l=>{ const s=st.get(l.pay)||{pay:l.pay, total:0, n:0, ok:true}; s.total+=l.amt; s.n++; st.set(l.pay, s); });
+  unsup.forEach(u=>{ const s=st.get(u.pay)||{pay:u.pay, total:0, n:0, ok:true}; s.ok=false; st.set(u.pay, s); });
+  /* JCBは見出しの合計と、行の合計が合わなければ、読み落としがある。その明細は突き合わせない。 */
+  if(kind==="jcb" && headTotal!=null && sumAll!==headTotal){ const s=st.get(headPay); if(s) s.ok=false; }
+  return {kind, card:CARD_ACCT[kind], name:CARD_NAME[kind], lines, unsupported:unsup, bad,
+          statements:[...st.values()].sort((a,b)=>a.pay<b.pay?-1:1)};
+}
+
+const cardIdOf = (card, pay, l, n) => "c:"+card+":"+pay.replace(/-/g,"")+":"+l.use.replace(/-/g,"")+":"+l.amt+(n>1?":"+n:"");
+
+/* 台帳のカードの行から、明細1枚（カード×支払日）ごとの合計を求める。id は c:カード:支払日:利用日:額[:通し番号]。 */
+function cardStatements(tx){
+  const m=new Map();
+  tx.forEach(x=>{
+    if(x.type!=="支出" || String(x.id||"").indexOf("c:")!==0) return;
+    const p=String(x.id).split(":");
+    if(p.length<5 || !/^\d{8}$/.test(p[2])) return;
+    const key=p[1]+"|"+p[2];
+    const s=m.get(key)||{key, card:p[1], pay:p[2].slice(0,4)+"-"+p[2].slice(4,6)+"-"+p[2].slice(6,8), total:0, n:0};
+    s.total+=Number(x.amount)||0; s.n++; m.set(key, s);
+  });
+  return m;
+}
+/* 引落（カード・額・日付）に当たる明細。額が同じで、支払日の前後5日以内のうち、いちばん近いもの。まだ使っていないものだけ。 */
+function cardMatch(stm, used, card, amt, date){
+  let best=null, bd=9;
+  stm.forEach(s=>{
+    if(s.card!==card || s.total!==amt || used.has(s.key)) return;
+    const d=dayDiff(s.pay, date);
+    if(d<=5 && d<bd){ best=s; bd=d; }
+  });
+  return best;
+}
+
+/* 店名から費目を決める。カードから覚えた規則 → 共有の店名辞書（読むだけ）→ その他（要確認）の順。
+   known=false は要確認。PayPayの「チャージ」はPayPay残高への入金で、残高払いの中身は明細に出ない。
+   消費の記録が欠けるのを避けるため、チャージの時点で消費（その他）に数える。
+   ⚠ カードから覚えた規則には acct:"card" の印を付ける。銀行の分類（bankMatch は rule.acct が銀行のidと違えば当たらない）には効かず、
+     逆に、銀行の規則（本人名義・勤務先などの語）も、カードの店名には効かせない。短い店名の規則が、銀行の摘要やカード引落を取ってしまうのを防ぐため。 */
+const CARD_RULE_ACCT = "card";
+function cardClassify(shop, kind, userRules, env){
+  if(kind==="paypay" && shop==="チャージ")
+    return {cat:"その他", shop:"PayPayチャージ", memo:"PayPay残高への入金。残高払いの中身は明細に出ないため、入金の時点で消費に数える", known:true};
+  const t=nfk(shop), okCat=k=>MY_CATS.some(c=>c.k===k) && k!==CARD_PROV_CAT && k!==SHARED_PAID;
+  const r=(userRules||[]).find(q=>q && q.type==="支出" && q.cat && okCat(q.cat) && q.acct===CARD_RULE_ACCT && !q.own && !q.other && !q.to && bankMatch(q, t, "out", CARD_RULE_ACCT));
+  if(r) return {cat:r.cat, known:true};
+  const g=env && env.guess ? env.guess(shop) : "";
+  if(g && g!=="その他" && g!=="貯蓄" && okCat(g)) return {cat:g, known:true};
+  return {cat:"その他", known:false};
+}
+const CARD_PROV_CAT = "カード引落";
+
+/* カード明細を、取り込む取引へ直す。**画面に依らず、副作用なし。**
+     list      … cardParse の結果の配列（複数のファイルをまとめて渡せる）
+     existing  … いまの取引（S.my.tx）
+     userRules … 本人の分類規則（S.my.rules）
+     env       … {guess(店名)→費目, cands(行)→共有の家計簿の立て替えの候補[{id, shop}]}（省略可）
+   返り値: items（新規）, updates（引落を移動へ切り替える既存行）, groups（明細ごとの {items, updates}。送るときの単位）,
+           skipped（取り込み済み）, uncertain（費目が決まらない行）, dups（共有の立て替えと重なる行）,
+           unsupported（取り込めない行）, skippedStatements（明細ごと取り込まなかったもの）, matched/already/pending（引落の突き合わせ）, warnings
+
+   ⚠ 取り込めない行（返金・分割・リボ・訂正など）が1行でもある明細は、**明細ごと取り込まない。**
+     一部だけ取り込むと、台帳の行の合計が引落の額と合わず、引落が暫定の支出のまま残って、同じ買い物が二重に数えられる
+     （軍師の指摘）。取り込まなければ、引落は暫定の支出（引落の日の消費）のままで、額は正しい。
+   ⚠ 引落の突き合わせは、取り込んだ行の合計（cardStatements）と、引落の額・支払日で行う。ゆえに、明細は全体を入れるか、入れないか。 */
+function cardPlan(list, existing, userRules, env){
+  env=env||{};
+  const have=new Set(existing.map(x=>x.id));
+  const items=[], uncertain=[], dups=[], unsupported=[], warnings=[], updates=[], pending=[], groups=[], skippedStatements=[];
+  const seen=new Map(), seenSt=new Set(), usedB=new Set(), alt=new Map();
+  let skipped=0, count=0, bad=0, matched=0, already=0, files=0, from="", to="";
+  let cur=null;
+  const nearest=pred=>{
+    let best=null, bd=9;
+    existing.forEach(x=>{ if(usedB.has(x.id) || !pred(x)) return; const d=dayDiff(x.date, cur.pay); if(d<=5 && d<bd){ best=x; bd=d; } });
+    return best;
+  };
+  list.forEach(p=>{
+    bad+=p.bad||0;
+    const twice=p.statements.find(s=>seenSt.has(p.card+"|"+s.pay));
+    if(twice){ warnings.push(p.name+"の支払日 "+twice.pay.replace(/-/g,"/")+" の明細が重複しています（同じファイルを二度選んでいませんか）。後のものは飛ばしました。"); return; }
+    p.statements.forEach(s=>seenSt.add(p.card+"|"+s.pay));
+    files++;
+    p.unsupported.forEach(u=>unsupported.push(Object.assign({name:p.name}, u)));
+    const badPay=new Set(p.statements.filter(s=>!s.ok).map(s=>s.pay));
+    const grp=new Map();                                          // 支払日 → {items, updates}
+    const gOf=pay=>{ let g=grp.get(pay); if(!g){ g={items:[], updates:[]}; grp.set(pay, g); groups.push(g); } return g; };
+    p.statements.forEach(s=>{
+      if(!s.ok) skippedStatements.push({name:p.name, pay:s.pay});
+    });
+    p.lines.forEach(l=>{
+      if(badPay.has(l.pay)) return;                               // 取り込めない行のある明細は、明細ごと取り込まない
+      count++; if(!from || l.use<from) from=l.use; if(l.use>to) to=l.use;
+      /* 同じ日・同じ店・同じ額の行は、通し番号を付けて別の行にする（黙って1件消えないように）。 */
+      const b=cardIdOf(p.card, l.pay, l, 1), n=(seen.get(b)||0)+1; seen.set(b, n);
+      const id = n===1 ? b : cardIdOf(p.card, l.pay, l, n);
+      if(have.has(id)){ skipped++; return; }
+      const cl=cardClassify(l.shop, p.kind, userRules, env);
+      const it={id, date:l.use, type:"支出", amount:l.amt, acct:p.card, to:"", cat:cl.cat, shop:cl.shop||l.shop, memo:cl.memo||"", src:"カード", bal:null};
+      alt.set(id, cl.cat);
+      if(!cl.known) uncertain.push({id, date:it.date, shop:it.shop, amount:it.amount});
+      items.push(it); gOf(l.pay).items.push(it);
+    });
+    /* 引落の突き合わせ：同じカード・同額・支払日の前後5日以内。先に取り込んだ銀行の暫定の支出（to がカード）を、移動へ切り替える。
+       ⚠ 目印は `to`（カードの口座id）。費目は見ない（編集画面で費目を変えても、切り替えられるように）。 */
+    p.statements.forEach(s=>{
+      cur=s;
+      if(!s.ok){ warnings.push(p.name+"の支払日 "+s.pay.replace(/-/g,"/")+" の明細は、取り込めない行があるため、明細ごと取り込みませんでした。この引落は、暫定の消費（引落の日）のままです。"); return; }
+      if(!s.total) return;
+      const prov=nearest(x=>x.type==="支出" && x.to===p.card && x.amount===s.total && x.acct!==p.card);
+      if(prov){
+        usedB.add(prov.id); matched++;
+        const u=Object.assign({}, prov, {type:"移動", cat:"", to:p.card});
+        updates.push(u); gOf(s.pay).updates.push(u); return;
+      }
+      const mv=nearest(x=>x.type==="移動" && x.to===p.card && x.amount===s.total);
+      if(mv){ usedB.add(mv.id); already++; return; }
+      pending.push({name:p.name, pay:s.pay, total:s.total});
+    });
+  });
+
+  /* 共有の家計簿の立て替えとの照合（1対1）。
+     候補は「自分が払い、負担が共有」の記録（家に関わる出金 lend で数え済みのもの）だけ。負担が自分個人のものは、どこにも数えられていないので除く。
+     共有側の1件は、カードの1行にだけ当てる。店名が寄る組を先に、残りを店名が違う候補（既定は消費に数える）として当てる。
+     共有の店名が空のものは、店名が分からないので候補止まり。すでに「共有立替」になっている既存の行が使った分は、使用済みにする。 */
+  if(env.cands){
+    const same=(a,b)=>{ const n=normShop(a), m=normShop(b); return !!n && !!m && (n===m || n.includes(m) || m.includes(n)); };
+    const usedS=new Set();
+    const best=(it, pred)=>{
+      let h=null, hd=9;
+      (env.cands(it)||[]).forEach(s=>{ if(usedS.has(s.id) || !pred(s)) return; const d=dayDiff(s.date||it.date, it.date); if(d<hd){ h=s; hd=d; } });
+      return h;
+    };
+    existing.filter(x=>x.type==="支出" && x.cat===SHARED_PAID && x.src==="カード").forEach(x=>{
+      const h=best(x, s=>same(s.shop, x.shop)) || best(x, ()=>true); if(h) usedS.add(h.id);
+    });
+    const hit=new Map();
+    items.forEach(it=>{ const h=best(it, s=>same(s.shop, it.shop)); if(h){ usedS.add(h.id); hit.set(it.id, {s:h, likely:true}); } });
+    items.forEach(it=>{ if(hit.has(it.id)) return; const h=best(it, ()=>true); if(h){ usedS.add(h.id); hit.set(it.id, {s:h, likely:false}); } });
+    items.forEach(it=>{
+      const h=hit.get(it.id); if(!h) return;
+      dups.push({id:it.id, date:it.date, amount:it.amount, shop:it.shop, withShop:h.s.shop, likely:h.likely, alt:alt.get(it.id)});
+      if(h.likely) it.cat=SHARED_PAID;
+    });
+  }
+  return {items, updates, groups, skipped, uncertain, dups, unsupported, skippedStatements, warnings, matched, already, pending, bad, count, files, from, to};
+}
+
+/* 個人のカードの口座ごとの、取り込み済みの利用日の範囲。月の注意書きに使う。休眠にした口座は見ない（使わなくなったカードで注意が出続けないように）。 */
+function cardCover(){
+  const out=[];
+  S.my.accts.filter(a=>a.kind==="カード" && !a.dormant).forEach(a=>{
+    const ds=S.my.tx.filter(x=>x.acct===a.id && x.src==="カード").map(x=>String(x.date));
+    if(!ds.length) return;
+    out.push({id:a.id, name:a.name, first:ds.reduce((p,q)=>q<p?q:p), last:ds.reduce((p,q)=>q>p?q:p)});
+  });
+  return out;
+}
+/* その月の終わりより前までしか明細が取り込まれていないカードがあれば知らせる（その月の消費が少なく出るため）。 */
+function cardNoteHTML(m){
+  const end=m+"-"+cardPad(new Date(Number(m.slice(0,4)), Number(m.slice(5,7)), 0).getDate());
+  const lag=cardCover().filter(c=>c.first<=end && c.last<end);
+  if(!lag.length) return "";
+  const ymd=d=>Number(d.slice(0,4))+"/"+Number(d.slice(5,7))+"/"+Number(d.slice(8,10));
+  return `<div class="warnbox">${lag.map(c=>esc(c.name)+"は "+ymd(c.last)+" の利用分まで").join("、")}の取り込みです。
+    それ以降の利用は次の明細を取り込むと入り、<b>${ymLabel(m)}の消費は実際より少なく（貯蓄率は高く）出ます。</b></div>`;
 }
 
 /* ---------- 期(いつからの決め事か) ---------- */
@@ -1532,7 +1795,8 @@ function mineFlow(m){
   const income  = mySum(tx.filter(x=>x.type==="収入" && x.cat!=="立替精算"));
   const reimb   = mySum(tx.filter(x=>x.type==="収入" && x.cat==="立替精算"));
   const direct  = mySum(tx.filter(x=>x.type==="収入" && myIsInv(x.acct)));     // 口座を通らずに投資へ入る分（持株の天引きなど）
-  const mySpend = mySum(tx.filter(x=>x.type==="支出"));
+  /* ⚠ 共有立替（個人のカードで払い、共有の家計簿に立て替えとして記録済みの買い物）は数えない。homeOut（立て替え）で数え済み。 */
+  const mySpend = mySum(tx.filter(x=>x.type==="支出" && x.cat!==SHARED_PAID));
   /* 費目「貯蓄」の支出は消費ではなく貯蓄に数える（支出の入力では選べないが、取り込みで入りうる）。
      現金は出ていくので mySpend には残し、行き先の側だけを貯蓄へ振る。 */
   const mySpendSave = mySum(tx.filter(x=>x.type==="支出" && x.cat==="貯蓄"));
@@ -2000,7 +2264,7 @@ function viewMine(){
       <div class="big num">${rateTxt}</div>
       <div class="sub num">収入 <b>${yen(f.income)}</b>　貯蓄 <b>${f.ok?yen(f.saved):"―"}</b>${f.provisional&&f.ok?"（暫定）":""}${f.income>0?"":"<br>この月の収入はまだ記録されていません。"}</div>
     </div>
-    ${unk}${prov}
+    ${unk}${prov}${cardNoteHTML(m)}
     <div class="sechead"><h2>収入の行き先</h2></div>
     <div class="card">${bars}</div>
     ${chk}
@@ -2039,6 +2303,8 @@ function mineSettingsHTML(){
         <button class="mini ghost" data-open="m-sal">取り込む</button></div>
       <div class="setrow"><div><div class="sl">銀行の取引明細CSV</div><div class="sd">三井住友・三菱UFJの取引履歴を読み込む</div></div>
         <button class="mini" data-open="m-bank">取り込む</button></div>
+      <div class="setrow"><div><div class="sl">個人カードの利用明細CSV</div><div class="sd">PayPayカード・JCBカードの明細を読み込む（複数可）</div></div>
+        <button class="mini" data-open="m-card">取り込む</button></div>
       <div class="setrow"><div><div class="sl">銀行の分類規則</div><div class="sd num">${S.my.rules.length}件（本人名義・勤務先などの規則）</div></div>
         <button class="mini ghost" data-open="m-rules">開く</button></div>
     </div>`;
@@ -2940,7 +3206,11 @@ function myEditorHTML(it){
       <div class="note">自分の口座間の動きです。収入にも支出にも数えません。投資口座へ移すと、貯蓄として数えます。</div>`;
   }else{
     /* 支出の費目に「貯蓄」は出さない。積立・投資への入金は「移動」で記録する（消費に数えられてしまうため）。 */
-    const cats = t==="収入" ? MY_INCOME_CATS.map(k=>({k,ic:"payments"})) : MY_CATS;
+    /* 「共有立替」はカード明細の取り込みが付ける費目。手入力の新規では出さず、カードの行を直すときだけ出す。 */
+    const cardRow = it.cat===SHARED_PAID || (myAcct(it.acct)||{}).kind==="カード";
+    /* 「カード引落」は銀行の取り込みが付ける暫定の費目。手入力の新規では出さない。 */
+    const cats = t==="収入" ? MY_INCOME_CATS.map(k=>({k,ic:"payments"}))
+      : MY_CATS.filter(c=>(c.k!==SHARED_PAID || cardRow) && (c.k!==CARD_PROV_CAT || it.cat===CARD_PROV_CAT));
     mid = `<div class="flabel">費目</div>
       <div class="chips" id="f-cats">${cats.map(c=>`
         <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}">${icon(c.ic,"s18")}${esc(c.k)}</button>`).join("")}</div>
@@ -2949,7 +3219,8 @@ function myEditorHTML(it){
         <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${t==="収入"?"給与":"店名など"}"></div>
       <div class="note">${t==="収入"
         ? "共有口座に入った入金（保険金・助成金など）は、共有の家計簿に記録します。ここには入れないでください。"
-        : "共有の家計簿に記録した立て替えや、20日の振込は入れないでください（二重に数えます）。積立・投資への入金は「移動」で記録します。"}</div>`;
+        : "共有の家計簿に記録した立て替えや、20日の振込は入れないでください（二重に数えます）。積立・投資への入金は「移動」で記録します。"}</div>
+      ${(t==="支出" && it.to && myAcct(it.to) && myAcct(it.to).kind==="カード") ? `<div class="note">銀行から取り込んだ、${esc(myAcctName(it.to))}の引落です。<b>カード明細を取り込むと、移動に切り替わります。</b>金額・日付は直さないでください（明細の合計と合わなくなります）。</div>` : ""}`;
   }
   return sheetShell(isNew?"個人の記録":"記録を直す", `${typeRow}
     <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
@@ -3018,6 +3289,14 @@ function openMine(kind){
       <div class="field"><label>CSVファイル</label><input id="mb-file" type="file" accept=".csv,text/csv"></div>
       <div id="mb-body"></div>`), {kind:"m-bank"});
   }
+  if(kind==="m-card"){
+    openSheet(sheetShell("個人カードの明細を取り込む", `
+      <div class="note">PayPayカード・JCBカードの利用明細CSVを選びます。複数のファイルを一度に選べます（文字コードは自動で読み分けます）。
+      銀行の引落は、金額が明細の合計と一致すれば「移動」に切り替わり、消費を二重に数えません。
+      同じ明細を何度取り込んでも、二重にはなりません。</div>
+      <div class="field"><label>CSVファイル</label><input id="mc-file" type="file" multiple accept=".csv,text/csv"></div>
+      <div id="mc-body"></div>`), {kind:"m-card"});
+  }
   if(kind==="m-rules"){
     openSheet(sheetShell("銀行の分類規則", `
       <div class="note">本人の名義・勤務先・相手先などに当たる規則です。個人帳面の <b>設定</b> に保存され、公開されるアプリのコードには入りません。
@@ -3063,6 +3342,20 @@ function normRule(r){
 }
 const ruleKey = r => (r.kw ? "k:"+nfk(r.kw) : "r:"+r.re)+"|"+(r.dir||"")+"|"+r.type+"|"+(r.acct||"");
 
+/* カード明細の取り込みが使う、共有の店名辞書（読むだけ）と、共有の家計簿の立て替えの候補。
+   候補 = 自分が払い、**負担が共有**の、同じ額・3日以内の記録。家に関わる出金（calcOn の lend = payer が自分・burden が share）で
+   数え済みのものと、同じ条件にそろえる。負担が自分個人の記録は、どこにも数えられていないので、候補にしない（消費が消えてしまう）。
+   1対1の割り当ては cardPlan が行う。 */
+function cardEnv(){
+  const me=myMe();
+  return {
+    guess: shop => guessCat(shop),
+    cands: it => S.items.filter(x=>x.payer===me && x.burden==="share" && !x.fixed && !isLoan(x) && !isIn(x)
+        && Number(x.amount)===it.amount && dayDiff(x.date, it.date)<=3)
+      .map(x=>({id:x.id, date:x.date, shop:x.shop||""}))
+  };
+}
+
 function bindMineSheet(root){
   const k = sheetCtx && sheetCtx.kind;
   if(!k) return;
@@ -3087,7 +3380,10 @@ function bindMineSheet(root){
       it.shop=(root.querySelector("#f-shop")||{value:""}).value.trim();
       it.date=root.querySelector("#m-date").value||today();
       it.acct=(root.querySelector("#m-acct")||{value:""}).value;
-      it.to = it.type==="移動" ? root.querySelector("#m-to").value : "";
+      /* ⚠ 支出の `to` は消さない。銀行から入ったカード引落（暫定の支出）は、`to` のカードを目印に、カード明細の取り込みで移動へ切り替わる。
+         消すと切り替わらず、引落と利用額の両方が消費に入る（軍師の指摘）。 */
+      if(it.type==="移動") it.to = root.querySelector("#m-to").value;
+      else if(it.type!=="支出") it.to = "";
       if(it.type==="移動"){
         if(!it.to){ toast("先の口座を選んでください"); return; }
         if(it.acct===it.to){ toast("元と先が同じです"); return; }
@@ -3264,7 +3560,7 @@ function bindMineSheet(root){
       const acct=root.querySelector("#mb-acct").value;
       const plan=bankPlan(parsed, acct, S.my.tx, S.my.rules);
       const prev=root.querySelector("#mb-prev");
-      const catsOf=dir=>dir==="out" ? MY_CATS.map(c=>c.k) : MY_INCOME_CATS;
+      const catsOf=dir=>dir==="out" ? MY_CATS.map(c=>c.k).filter(k=>k!==SHARED_PAID) : MY_INCOME_CATS;
       const md=d=>Number(d.slice(5,7))+"/"+Number(d.slice(8,10));
       const unc=plan.uncertain.map(u=>`<div class="field"><label>${md(u.date)}　${yen(u.amount)}（${u.dir==="out"?"出金":"入金"}）　${esc(u.text.slice(0,40))}</label>
           <select data-ub="${esc(u.id)}">${catsOf(u.dir).map(c=>`<option ${c==="その他"?"selected":""}>${esc(c)}</option>`).join("")}</select></div>`).join("");
@@ -3314,6 +3610,96 @@ function bindMineSheet(root){
           口座を取り違えると、前回の残高とつながらない警告が出ます。</div>
         <div id="mb-prev"></div>`;
       root.querySelector("#mb-acct").onchange=show;
+      show();
+    };
+  }
+
+  /* ---- 個人カードの利用明細 ---- */
+  if(k==="m-card"){
+    const f=root.querySelector("#mc-file"), box=root.querySelector("#mc-body");
+    let list=[], failed=[];
+    const md=d=>Number(d.slice(5,7))+"/"+Number(d.slice(8,10));
+    const ymdS=d=>d.replace(/-/g,"/");
+    const show=()=>{
+      const plan=cardPlan(list, S.my.tx, S.my.rules, cardEnv());
+      const prev=root.querySelector("#mc-prev");
+      /* 費目が決まらない行は、店名ごとにまとめて選ばせる（額の大きい順）。 */
+      const groups=[], gi=new Map();
+      plan.uncertain.forEach(u=>{
+        let g=gi.get(u.shop); if(!g){ g={shop:u.shop, ids:[], sum:0}; gi.set(u.shop, g); groups.push(g); }
+        g.ids.push(u.id); g.sum+=u.amount;
+      });
+      groups.sort((a,b)=>b.sum-a.sum);
+      const catOpts=MY_CATS.map(c=>c.k).filter(c=>c!==SHARED_PAID && c!==CARD_PROV_CAT);
+      const unc=groups.map((g,i)=>`<div class="field"><label>${esc(g.shop)}　${g.ids.length}件・${yen(g.sum)}</label>
+          <select data-uc="${i}">${catOpts.map(c=>`<option ${c==="その他"?"selected":""}>${esc(c)}</option>`).join("")}</select></div>`).join("");
+      const dupHTML=plan.dups.map((d,i)=>`<label class="note" style="display:block"><input type="checkbox" data-ud="${i}" ${d.likely?"checked":""}>
+          ${md(d.date)}　${esc(d.shop)}　${yen(d.amount)}　（共有の記録：${esc(d.withShop)}${d.likely?"":"・店名は違う"}）</label>`).join("");
+      const names=[...new Set(list.map(p=>p.name))].join("・");
+      const n=plan.items.length+plan.updates.length;
+      prev.innerHTML=`
+        <div class="note num">${esc(names)}・${plan.files}本・利用日 ${plan.from?ymdS(plan.from)+"〜"+ymdS(plan.to):"―"}・${plan.count}件のうち、
+          新規 <b>${plan.items.length}</b> 件・取り込み済み ${plan.skipped} 件です。</div>
+        <div class="note num">銀行の引落との突き合わせ：移動へ切り替え <b>${plan.matched}</b> 件・切り替え済み ${plan.already} 件・
+          銀行の引落が見つからない明細 ${plan.pending.length} 件。${plan.pending.length?`<br>見つからない明細は、銀行の明細より前の支払いか、銀行の明細がまだ取り込まれていないものです
+          （${plan.pending.slice(0,3).map(p=>esc(p.name)+" "+md(p.pay)+" "+yen(p.total)).join("、")}${plan.pending.length>3?"…":""}）。後者は、銀行の明細を取り込むと自動で移動になります。`:""}</div>
+        ${failed.length?`<div class="warnbox">読めなかったファイル：${failed.map(esc).join("、")}</div>`:""}
+        ${plan.bad?`<div class="note">日付が読めず飛ばした行が ${plan.bad} 行あります。</div>`:""}
+        ${plan.warnings.map(w=>`<div class="warnbox">${esc(w)}</div>`).join("")}
+        ${plan.unsupported.length?`<div class="warnbox">取り込めない行が ${plan.unsupported.length} 件あります（返金・分割・リボ・訂正など）。<b>その行のある明細は、明細ごと取り込みません</b>（一部だけ入れると、引落と二重になるため）。その明細の引落は、暫定の消費（引落の日）のままです。
+          ${plan.unsupported.slice(0,4).map(u=>esc(u.name)+" "+md(u.date)+" "+esc(u.shop)+" "+yen(u.amount)+"（"+esc(u.why)+"）").join("、")}${plan.unsupported.length>4?"…":""}</div>`:""}
+        ${(S.cfg.api && !S.online)?`<div class="warnbox">共有の家計簿と同期できていません。共有の立て替えとの照合は、この端末の古い控えで行います。</div>`:""}
+        ${plan.dups.length?`<div class="flabel">共有の家計簿に、自分が払った共有の立て替えで、同じ額・3日以内のものがあります（${plan.dups.length}件）</div>
+          <div class="note">チェックを付けた行は費目「共有立替」で取り込み、個人の消費に数えません（家に関わる出金で数え済みのため）。外すと、個人の消費に数えます。共有側の1件は、カードの1行にだけ当てています。店名が違う候補は、チェックなしです。</div>${dupHTML}`:""}
+        ${groups.length?`<div class="flabel">要確認：費目が決まらない店 ${groups.length} 件（${plan.uncertain.length}行。選ばなければ「その他」）</div>${unc}
+          <label class="note" style="display:block"><input type="checkbox" id="mc-learn" checked> 選んだ費目を、規則として覚える（個人帳面にだけ保存。共有の店名辞書には入れません）</label>`:""}
+        <button class="save" id="mc-go" ${n?"":"disabled"}>${plan.items.length}件を取り込む</button>`;
+      prev.querySelector("#mc-go").onclick=async ()=>{
+        const learn=!!(prev.querySelector("#mc-learn") && prev.querySelector("#mc-learn").checked);
+        const pick=groups.map((g,i)=>{ const s=prev.querySelector('[data-uc="'+i+'"]'); return s ? s.value : "その他"; });
+        const dupOn=plan.dups.map((d,i)=>{ const c=prev.querySelector('[data-ud="'+i+'"]'); return !!(c && c.checked); });
+        const byId=new Map(plan.items.map(it=>[it.id, it]));
+        const learned=[];
+        groups.forEach((g,i)=>{
+          g.ids.forEach(id=>{ const it=byId.get(id); if(it) it.cat=pick[i]; });
+          if(learn && pick[i]!=="その他"){ const r=normRule({kw:nfk(g.shop), type:"支出", cat:pick[i], acct:CARD_RULE_ACCT}); if(r) learned.push(r); }
+        });
+        plan.dups.forEach((d,i)=>{ const it=byId.get(d.id); if(!it) return; if(dupOn[i]) it.cat=SHARED_PAID; else if(it.cat===SHARED_PAID) it.cat=d.alt; });
+        closeSheet();
+        /* 一度に送る量を抑える（約300件）。引落の切り替えは、その明細の行と同じ塊で送る（途中で止まっても、二重にならない）。 */
+        const chunks=[]; let cur={items:[], updates:[]};
+        plan.groups.forEach(g=>{
+          if((cur.items.length+cur.updates.length)>0 && cur.items.length+cur.updates.length+g.items.length+g.updates.length>300){ chunks.push(cur); cur={items:[], updates:[]}; }
+          cur.items.push(...g.items); cur.updates.push(...g.updates);
+        });
+        if(cur.items.length+cur.updates.length) chunks.push(cur);
+        let ok=true;
+        for(let i=0; i<chunks.length && ok; i++) ok=await pushMyMany(chunks[i].items.concat(chunks[i].updates));
+        if(!ok){ toast("取り込みを途中で止めました（"+(pushMyMany.lastError||"帳面が断りました")+"）。入った分は残っています。原因を直して、同じ明細をもう一度取り込んでください"); return; }
+        if(learned.length){
+          const map=new Map(S.my.rules.map(r=>[ruleKey(r), r])); learned.forEach(r=>map.set(ruleKey(r), r));
+          S.my.rules=[...map.values()]; saveMyRules();
+        }
+        toast(plan.items.length+"件を取り込み、引落 "+plan.updates.length+" 件を移動に切り替えました"+(learned.length?"（規則を "+learned.length+" 件覚えました）":""));
+      };
+    };
+    let gen=0;
+    f.onchange=async ()=>{
+      const my=++gen;                                    // 読み込みの途中でファイルを選び直しても、前の回の結果が混ざらない
+      const nl=[], nf=[];
+      for(const file of [...f.files]){
+        try{
+          const p=cardParse(parseCSV(await readTextAuto(file)));
+          if(p && (p.lines.length || p.unsupported.length)) nl.push(p); else nf.push(file.name);
+        }catch(e){ nf.push(file.name); }
+      }
+      if(my!==gen) return;
+      list=nl; failed=nf;
+      list.sort((a,b)=>((a.statements[0]||{}).pay||"")<((b.statements[0]||{}).pay||"") ? -1 : 1);
+      if(!list.length){ box.innerHTML=`<div class="warnbox">PayPayカード・JCBカードの利用明細として読めませんでした。${failed.length?"（"+failed.map(esc).join("、")+"）":""}</div>`; return; }
+      const miss=[...new Set(list.map(p=>p.card))].filter(id=>!myAcct(id));
+      if(miss.length){ box.innerHTML=`<div class="warnbox">口座の一覧に「PayPayカード」「JCBカード」がありません。口座を足してから取り込んでください。</div>`; return; }
+      box.innerHTML=`<div id="mc-prev"></div>`;
       show();
     };
   }
