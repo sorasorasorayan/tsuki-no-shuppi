@@ -1,6 +1,6 @@
 // 月の出費 — オフラインでも開けるようにするための最小の番人。
 // 中身を書き換えたら CACHE の版を上げること。上げないと古い画面が居座る。
-const CACHE = "shuppi-v17";
+const CACHE = "shuppi-v18";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
