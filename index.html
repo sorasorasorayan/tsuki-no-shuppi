@@ -2251,6 +2251,67 @@ function openVal(acct, date){
   const d=date || (S.month===ym(new Date()) ? today() : S.month+"-"+String(last).padStart(2,"0"));
   openSheet(valHTML(a,d), {kind:"m-val", acct:a});
 }
+
+/* ============================================================
+   年間の貯蓄と投資（2026-11-15 新設）
+   ============================================================
+   その年の1〜12月を、月ごとの mineFlow の合計で出す。新しい算は書かない（月の貯蓄・貯蓄率と同じ定義）。
+   ⚠ 集計に入れるのは「共有カードの明細が入っており（ok）、収入の記録がある」月だけ。
+     明細が無い月は家の受け持ちが分からず、収入が無い月（使い始める前）は貯蓄が負に見えるため。
+   ⚠ 銀行の取引が未取込の月（provisional）は入れるが、貯蓄が多めに出る。画面に断る。 */
+function mineYear(y){
+  const months=[]; for(let i=1;i<=12;i++) months.push(y+"-"+String(i).padStart(2,"0"));
+  const fl=months.map(mineFlow);
+  const isUsed=f=>f.ok && f.income>0;
+  const used=fl.filter(isUsed);
+  const sum=k=>used.reduce((s,f)=>s+(Number(f[k])||0),0);
+  const first=used.length ? used[0].m : "", cap=ym(new Date()) < y+"-12" ? ym(new Date()) : y+"-12";
+  /* 最初に集計できた月から今月（その年の終わり）までのうち、集計に入らなかった月。使い始める前や先の月は数えない。 */
+  const skipped=fl.filter(f=>first && f.m>=first && f.m<=cap && !isUsed(f)).map(f=>f.m);
+  const o={y, fl, used, n:used.length, skipped, provisional:used.filter(f=>f.provisional).length,
+    income:sum("income"), due:sum("due"), own:sum("own"), loanOut:sum("loanOut"),
+    savings:sum("savings"), residual:sum("residual"), saved:sum("saved"),
+    sv:sum("sv"), takeSave:sum("takeSave"), direct:sum("direct"), movedIn:sum("movedIn"), movedOut:sum("movedOut")};
+  o.rate = o.income>0 ? o.saved/o.income : null;
+  o.other = o.savings - (o.sv+o.takeSave+o.direct+o.movedIn);      // 上の4つに入らぬ積立（費目「貯蓄」の支出）
+  return o;
+}
+
+function yearHTML(m){
+  const a=mineYear(m.slice(0,4));
+  const head=`<div class="sechead"><h2>${a.y}年の貯蓄と投資</h2></div>`;
+  if(!a.n) return head+`<div class="card">${emptyHTML("集計できる月がありません","")}</div>`;
+  const mm=s=>Number(s.slice(5,7))+"月";
+  const warn=(a.provisional||a.skipped.length)
+    ? `<div class="warnbox">${a.provisional?`<b>銀行の取引が未取込の月を ${a.provisional} か月含みます。</b>貯蓄が多めに出ます。`:""}${a.skipped.length?`${a.provisional?"<br>":""}<b>集計に入っていない月：</b>${a.skipped.map(mm).join("・")}（共有カード明細または収入が未取込）`:""}</div>` : "";
+  const bigCls=gainCls(a.saved);
+  const top=`<div class="card inv"><div class="inv-t"><div class="lbl">${a.n}か月分の貯蓄</div><div class="big num">${syen(a.saved)}</div>
+      <div class="gain num ${bigCls}">貯蓄率 ${a.rate==null?"―":Math.round(a.rate*100)+"%"}</div>
+      <div class="sub num">収入 ${yen(a.income)}・月平均の貯蓄 ${syen(a.saved/a.n)}</div></div></div>`;
+  const rows=[{k:"家の受け持ち", v:a.due, c:"var(--ramp-3)"},{k:"自分の消費", v:a.own, c:"var(--ramp-4)"}];
+  if(a.loanOut) rows.push({k:"二人のあいだの受け渡し", v:a.loanOut, c:"var(--ramp-5)"});
+  rows.push({k:"積立・投資への拠出", v:a.savings, c:"var(--ramp-1)"},{k:"預金に残った分", v:a.residual, c:"var(--m-outline)"});
+  const den=Math.max(a.income, ...rows.map(r=>Math.max(0,r.v)), 1);
+  const bars=`<div class="sechead"><h2>収入の行き先（年間）</h2></div><div class="card">${rows.map(r=>`<div class="barrow">
+      <div class="bh"><span class="nm">${esc(r.k)}</span><span><span class="vl num">${syen(r.v)}</span><span class="pc num">${a.income>0?Math.round(r.v/a.income*100)+"%":""}</span></span></div>
+      <div class="track"><div class="fill" style="width:${(Math.max(0,r.v)/den*100).toFixed(1)}%;background:${r.c}"></div></div></div>`).join("")}</div>`;
+  const parts=[["共有の積立貯蓄",a.sv],["共有カード経由の積立",a.takeSave],["持株などの天引き",a.direct],["投資口座への入金",a.movedIn],["その他の積立",a.other]].filter(p=>p[1]);
+  const partsHTML=`<div class="sechead"><h2>積立・投資の内訳（年間）</h2></div><div class="card">
+      ${parts.map(([k,v])=>`<div class="setrow"><div class="sl">${esc(k)}</div><div class="num amt-nw vv">${syen(v)}</div></div>`).join("")||emptyHTML("記録がありません","")}
+      ${parts.length?`<div class="setrow"><div class="sl">拠出の合計</div><div class="num amt-nw vv">${syen(a.savings)}</div></div>`:""}
+      ${a.movedOut?`<div class="setrow"><div class="sl" style="color:var(--m-on-surface-variant)">投資からの引き出し</div><div class="num amt-nw vv" style="color:var(--m-on-surface-variant)">${yen(a.movedOut)}</div></div>`:""}</div>`;
+  /* 月別：集計に入った月は貯蓄額と貯蓄率。最初に集計できた月から今月までを並べる（入らなかった月は「―」）。 */
+  const cap=ym(new Date()) < a.y+"-12" ? ym(new Date()) : a.y+"-12";
+  const list=a.fl.filter(f=>f.m>=a.used[0].m && f.m<=cap);
+  const smax=Math.max(...a.used.map(f=>f.saved),1);
+  const monthly=`<div class="sechead"><h2>月ごとの貯蓄</h2></div><div class="card">${list.map(f=>{
+      const u=f.ok && f.income>0;
+      return `<div class="barrow"><div class="bh"><span class="nm">${mm(f.m)}${u&&f.provisional?' <span class="tag gray">暫定</span>':""}</span>
+        <span><span class="vl num">${u?syen(f.saved):"―"}</span><span class="pc num">${u&&f.rate!=null?Math.round(f.rate*100)+"%":""}</span></span></div>
+        <div class="track"><div class="fill" style="width:${u?(Math.max(0,f.saved)/smax*100).toFixed(1):0}%;background:var(--ramp-1)"></div></div></div>`;
+    }).join("")}</div>`;
+  return head+warn+top+bars+partsHTML+monthly;
+}
 function myAcctName(id){ const a=myAcct(id); return a ? a.name : ""; }
 
 function myRowHTML(x){
@@ -2367,6 +2428,8 @@ function viewMine(){
 
     <div class="sechead"><h2>6ヶ月の貯蓄</h2></div>
     <div class="card"><div class="mbars">${trend}</div></div>
+
+    ${yearHTML(m)}
 
     <div class="sechead"><h2>この月の個人の記録（${list.length}件）</h2></div>
     <div class="card">${list.length?list.map(myRowHTML).join(""):emptyHTML("記録がありません","")}</div>
