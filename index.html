@@ -88,7 +88,7 @@ body{
   /* Roboto と Noto Sans JP は Android 端末に載っておる。**外部から読み込まぬこと** ――
      sw.js が外部通信を横取りせぬ造りゆえ、CDNから引くと圏外で字が崩れる。 */
   font-family:Roboto,"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans",system-ui,sans-serif;
-  font-size:14px; line-height:1.5;
+  font-size:16px; line-height:1.5;
   padding-bottom:calc(96px + env(safe-area-inset-bottom));
   -webkit-font-smoothing:antialiased;
 }
@@ -105,11 +105,11 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 .hrow{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:56px}
 .hrow>div:last-child{display:flex;align-items:center;flex:0 0 auto;white-space:nowrap}
 .month-pick{display:flex;align-items:center;gap:2px;min-width:0}
-.month-pick b{font-size:22px;line-height:28px;font-weight:400;padding:0 6px;white-space:nowrap}
+.month-pick b{font-size:24px;line-height:30px;font-weight:400;padding:0 6px;white-space:nowrap}
 .arrowbtn{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;color:var(--m-on-surface-variant);flex:0 0 40px}
 .arrowbtn:active{background:var(--m-surface-container-high)}
 .arrowbtn:disabled{opacity:.38}
-.pill{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.5px;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-high);color:var(--m-on-surface-variant);margin-left:6px}
+.pill{display:inline-block;font-size:13px;font-weight:500;letter-spacing:.5px;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-high);color:var(--m-on-surface-variant);margin-left:6px}
 .pill.warn{background:var(--m-error-container);color:var(--m-on-error-container)}
 
 .card{background:var(--m-surface-container-low);border-radius:var(--sh-m);padding:12px 16px;margin-bottom:8px}
@@ -119,15 +119,15 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 @media (prefers-color-scheme: dark){
   .hero{background:var(--m-primary-container);color:var(--m-on-primary-container)}
 }
-.hero .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;opacity:.9}
-.hero .big{font-size:36px;line-height:44px;font-weight:400;margin:4px 0 0}
-.hero .sub{font-size:12px;line-height:16px;opacity:.85;margin-top:6px}
+.hero .lbl{font-size:15px;font-weight:500;letter-spacing:.2px;opacity:.95}
+.hero .big{font-size:52px;line-height:60px;font-weight:400;margin:4px 0 0}
+.hero .sub{font-size:16px;line-height:24px;opacity:.9;margin-top:8px}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .tile{border-radius:var(--sh-m);padding:14px 16px}
-.tile .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;opacity:.9}
-.tile .val{font-size:22px;line-height:28px;font-weight:400;margin-top:2px}
-.tile .sub2{font-size:11px;line-height:16px;opacity:.8;margin-top:4px}
+.tile .lbl{font-size:15px;font-weight:500;letter-spacing:.2px;opacity:.95}
+.tile .val{font-size:30px;line-height:38px;font-weight:400;margin-top:2px}
+.tile .sub2{font-size:14px;line-height:20px;opacity:.85;margin-top:4px}
 /* クラス名は据え置き（JSが吐いておる）。中身は 諒=secondary / 万貴=tertiary。 */
 .t-teal{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
 .t-pink{background:var(--m-tertiary-container);color:var(--m-on-tertiary-container)}
@@ -135,33 +135,33 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 .bill,.send,.loan,.settle{background:var(--m-surface-container-high);color:var(--m-on-surface);border-radius:var(--sh-m);padding:16px;margin-bottom:8px}
 .bill .hd,.send .hd,.loan .hd,.settle .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .bill .hd .ic,.send .hd .ic,.loan .hd .ic,.settle .ic{display:flex;color:var(--m-primary)}
-.bill .hd .lbl,.send .hd .lbl,.loan .hd .lbl,.settle .lbl{font-size:11px;font-weight:500;letter-spacing:.5px;line-height:16px;color:var(--m-on-surface-variant)}
-.bill .big{font-size:28px;line-height:36px;font-weight:400}
-.loan .big{font-size:22px;line-height:28px;font-weight:400}
-.settle .val{font-size:16px;line-height:24px;font-weight:500}
+.bill .hd .lbl,.send .hd .lbl,.loan .hd .lbl,.settle .lbl{font-size:15px;font-weight:500;letter-spacing:.2px;line-height:22px;color:var(--m-on-surface-variant)}
+.bill .big{font-size:36px;line-height:44px;font-weight:400}
+.loan .big{font-size:30px;line-height:38px;font-weight:400}
+.settle .val{font-size:18px;line-height:26px;font-weight:500}
 .bill .brk{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.bill .chip{font-size:11px;font-weight:500;min-height:0;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-lowest);color:var(--m-on-surface-variant);box-shadow:none}
-.bill .memo,.send .memo,.loan .memo{font-size:12px;line-height:18px;margin-top:10px;color:var(--m-on-surface-variant)}
+.bill .chip{font-size:14px;font-weight:500;min-height:0;padding:4px 10px;border-radius:var(--sh-s);background:var(--m-surface-container-lowest);color:var(--m-on-surface-variant);box-shadow:none}
+.bill .memo,.send .memo,.loan .memo{font-size:15px;line-height:22px;margin-top:10px;color:var(--m-on-surface-variant)}
 .send .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.send .who{font-size:11px;font-weight:500;letter-spacing:.5px;color:var(--m-on-surface-variant);margin-bottom:2px}
-.send .amt{font-size:24px;line-height:32px;font-weight:400}
+.send .who{font-size:15px;font-weight:500;letter-spacing:.2px;color:var(--m-on-surface-variant);margin-bottom:2px}
+.send .amt{font-size:27px;line-height:36px;white-space:nowrap;font-weight:400}
 /* 済んだ月・渡し終えた貸借は secondary へ沈める。 */
 .send.done,.loan.done,.settle.even{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
 .send.done .hd .ic,.loan.done .hd .ic,.send.done .lbl,.loan.done .lbl,
 .send.done .who,.send.done .memo,.loan.done .memo{color:inherit;opacity:.9}
 /* 精算を締める釦（M3 の filled button）。上の .settle 札より詳しいゆえ勝つ。 */
-.send .settle{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;background:var(--m-primary);color:var(--m-on-primary);font-size:14px;font-weight:500;letter-spacing:.1px;padding:12px 24px;border-radius:var(--sh-full);margin:16px 0 0}
+.send .settle{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;background:var(--m-primary);color:var(--m-on-primary);font-size:17px;font-weight:500;letter-spacing:.1px;padding:12px 24px;border-radius:var(--sh-full);margin:16px 0 0}
 .send .settle.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
 .send .memo .mini,.loan .memo .mini{margin-left:6px;vertical-align:middle}
 
-.sumrow{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:20px;padding:10px 0;color:var(--m-on-surface-variant)}
+.sumrow{display:flex;justify-content:space-between;gap:12px;font-size:16px;line-height:24px;padding:10px 0;color:var(--m-on-surface-variant)}
 .sumrow+.sumrow{border-top:1px solid var(--m-outline-variant)}
 .sumrow b{font-weight:500;color:var(--m-on-surface)}
-.sumrow.big{font-size:16px;padding-top:14px;color:var(--m-on-surface)}
+.sumrow.big{font-size:19px;padding-top:14px;color:var(--m-on-surface)}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px}
-.sechead h2{font-size:11px;font-weight:500;color:var(--m-on-surface-variant);margin:0;letter-spacing:.5px}
-.sechead .more{font-size:14px;font-weight:500;color:var(--m-primary);letter-spacing:.1px}
+.sechead h2{font-size:17px;font-weight:500;color:var(--m-on-surface);margin:0;letter-spacing:.1px}
+.sechead .more{font-size:15px;font-weight:500;color:var(--m-primary);letter-spacing:.1px}
 .sechead .more.num{color:var(--m-on-surface-variant);font-weight:400}
 
 .row{display:flex;align-items:center;gap:16px;padding:8px 0;min-height:56px}
@@ -170,11 +170,11 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 .ic-circle{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;flex:0 0 40px;background:var(--m-surface-container-highest);color:var(--m-on-surface-variant)}
 .ic-circle.accent{background:var(--m-primary-container);color:var(--m-on-primary-container)}
 .row .body{flex:1;min-width:0}
-.row .t1{font-size:16px;line-height:22px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .t2{font-size:12px;line-height:18px;color:var(--m-on-surface-variant);margin-top:1px}
-.row .amt{font-size:16px;line-height:22px;font-weight:500;white-space:nowrap}
+.row .t1{font-size:18px;line-height:26px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:14px;line-height:20px;color:var(--m-on-surface-variant);margin-top:1px}
+.row .amt{font-size:19px;line-height:26px;font-weight:500;white-space:nowrap}
 
-.tag{display:inline-block;font-size:11px;font-weight:500;line-height:16px;padding:0 8px;border-radius:var(--sh-xs);margin-left:6px;vertical-align:1px}
+.tag{display:inline-block;font-size:13px;font-weight:500;line-height:20px;padding:0 8px;border-radius:var(--sh-xs);margin-left:6px;vertical-align:1px}
 .tag.c{background:var(--m-primary-container);color:var(--m-on-primary-container)}
 .tag.r{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
 .tag.m{background:var(--m-tertiary-container);color:var(--m-on-tertiary-container)}
@@ -182,17 +182,18 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 .tag.in{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
 .amt.plus{color:var(--m-primary)}
 
-.empty{text-align:center;padding:32px 12px;color:var(--m-on-surface-variant);font-size:14px;line-height:20px}
+.empty{text-align:center;padding:32px 12px;color:var(--m-on-surface-variant);font-size:16px;line-height:24px}
 .empty .e-ic{display:flex;justify-content:center;margin-bottom:10px;color:var(--m-outline)}
 .empty .e-ic svg{width:32px;height:32px}
 
 .barrow{margin-bottom:16px}
 .barrow:last-child{margin-bottom:4px}
-.barrow .bh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:6px}
+.barrow .bh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:17px;line-height:24px;margin-bottom:6px}
 .barrow .bh .nm{display:flex;align-items:center;gap:8px;min-width:0;font-weight:400}
 .barrow .bh .nm svg{color:var(--m-on-surface-variant)}
-.barrow .bh .vl{font-weight:500}
-.barrow .bh .pc{font-size:12px;color:var(--m-on-surface-variant);margin-left:8px;font-weight:400}
+.barrow .bh .vl{font-weight:500;font-size:19px}
+.barrow .bh>span:last-child{white-space:nowrap;flex:0 0 auto}
+.barrow .bh .pc{font-size:14px;color:var(--m-on-surface-variant);margin-left:8px;font-weight:400}
 .track{height:8px;border-radius:var(--sh-full);background:var(--m-surface-container-highest);overflow:hidden}
 .fill{height:100%;border-radius:var(--sh-full);transition:width .4s cubic-bezier(.2,0,0,1)}
 
@@ -200,12 +201,12 @@ header{padding:calc(8px + env(safe-area-inset-top)) 0 0}
 .mbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
 .mbar .bb{width:100%;background:var(--m-primary);border-radius:var(--sh-xs);min-height:4px;transition:height .4s cubic-bezier(.2,0,0,1)}
 .mbar .bb.dim{background:var(--m-secondary-container)}
-.mbar .ml{font-size:11px;color:var(--m-on-surface-variant);white-space:nowrap}
+.mbar .ml{font-size:13px;color:var(--m-on-surface-variant);white-space:nowrap}
 
 /* M3 の Navigation bar。選んだ札は丸薬型の下敷きで示す ―― 色を塗り分けない。 */
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
 .navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 72px 1fr 1fr;align-items:center;height:80px}
-.nb{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--m-on-surface-variant);font-size:12px;line-height:16px;font-weight:500;letter-spacing:.5px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--m-on-surface-variant);font-size:13px;line-height:16px;font-weight:500;letter-spacing:.2px}
 .nb .ni{width:64px;height:32px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;transition:background .2s}
 .nb.on{color:var(--m-on-surface)}
 .nb.on .ni{background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
@@ -220,35 +221,35 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container)
 .sheet-in{max-width:520px;margin:0 auto;padding:0 16px}
 .grab{width:32px;height:4px;border-radius:var(--sh-full);background:var(--m-outline-variant);margin:16px auto 0}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;margin-bottom:8px}
-.sheet-head h3{font-size:22px;line-height:28px;font-weight:400;margin:0}
+.sheet-head h3{font-size:24px;line-height:30px;font-weight:400;margin:0}
 .xbtn{width:40px;height:40px;border-radius:var(--sh-full);display:flex;align-items:center;justify-content:center;color:var(--m-on-surface-variant);flex:0 0 40px}
 .xbtn:active{background:var(--m-surface-container-high)}
 
 .amtbox{background:var(--m-surface-container-high);border-radius:var(--sh-l);padding:20px 16px;text-align:center;margin-bottom:20px}
-.amtbox input{width:100%;border:none;background:none;text-align:center;font-size:40px;line-height:48px;font-weight:400;color:var(--m-on-surface);outline:none;padding:0}
+.amtbox input{width:100%;border:none;background:none;text-align:center;font-size:46px;line-height:54px;font-weight:400;color:var(--m-on-surface);outline:none;padding:0}
 .amtbox input::placeholder{color:var(--m-outline)}
-.flabel{font-size:11px;font-weight:500;letter-spacing:.5px;color:var(--m-on-surface-variant);margin:0 4px 8px}
+.flabel{font-size:15px;font-weight:500;letter-spacing:.2px;color:var(--m-on-surface-variant);margin:0 4px 8px}
 .flabel .hint{font-weight:400;letter-spacing:0;color:var(--m-outline);margin-left:6px}
 
 /* M3 の filter chip。**角丸8px、選ばぬうちは輪郭線だけ。**丸薬型に戻さぬこと。 */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;letter-spacing:.1px;min-height:32px;padding:6px 14px;border-radius:var(--sh-s);background:transparent;color:var(--m-on-surface-variant);box-shadow:inset 0 0 0 1px var(--m-outline)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:500;letter-spacing:.1px;min-height:40px;padding:8px 16px;border-radius:var(--sh-s);background:transparent;color:var(--m-on-surface-variant);box-shadow:inset 0 0 0 1px var(--m-outline)}
 .chip svg{width:18px;height:18px}
 .chip.on{box-shadow:none;background:var(--m-secondary-container);color:var(--m-on-secondary-container)}
 .chip:active{opacity:.85}
 .trio{display:flex;gap:8px;margin-bottom:20px}
-.trio .chip{flex:1;justify-content:center;padding:10px 8px;font-size:13px;line-height:1.35;text-align:center}
+.trio .chip{flex:1;justify-content:center;padding:12px 8px;font-size:16px;line-height:1.35;text-align:center}
 .trio.kinds{margin-bottom:16px}
 
 /* M3 の filled text field。上だけ角を丸め、下に一本線を敷く。 */
 .field{background:var(--m-surface-container-high);border-radius:var(--sh-xs) var(--sh-xs) 0 0;padding:8px 16px 6px;margin-bottom:12px;border-bottom:1px solid var(--m-on-surface-variant)}
 .field:focus-within{border-bottom:2px solid var(--m-primary);padding-bottom:5px}
-.field label{display:block;font-size:12px;line-height:16px;color:var(--m-on-surface-variant)}
+.field label{display:block;font-size:14px;line-height:18px;color:var(--m-on-surface-variant)}
 .field:focus-within label{color:var(--m-primary)}
-.field input,.field select,.field textarea{width:100%;border:none;background:none;outline:none;padding:2px 0;font-size:16px;line-height:24px}
+.field input,.field select,.field textarea{width:100%;border:none;background:none;outline:none;padding:2px 0;font-size:18px;line-height:26px}
 .field textarea{resize:none;min-height:24px}
 
-.save{width:100%;background:var(--m-primary);color:var(--m-on-primary);font-size:14px;font-weight:500;letter-spacing:.1px;min-height:48px;padding:12px 24px;border-radius:var(--sh-full);margin-top:12px}
+.save{width:100%;background:var(--m-primary);color:var(--m-on-primary);font-size:17px;font-weight:500;letter-spacing:.1px;min-height:52px;padding:12px 24px;border-radius:var(--sh-full);margin-top:12px}
 .save:active{opacity:.9}
 .save.del{background:var(--m-error-container);color:var(--m-on-error-container);margin-top:8px;min-height:40px}
 .save.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline);margin-top:8px;min-height:40px}
@@ -256,34 +257,44 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--m-surface-container)
 
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;min-height:56px}
 .setrow+.setrow{border-top:1px solid var(--m-outline-variant)}
-.setrow .sl{font-size:16px;line-height:22px}
-.setrow .sd{font-size:12px;line-height:18px;color:var(--m-on-surface-variant);margin-top:2px}
-.mini{font-size:14px;font-weight:500;letter-spacing:.1px;min-height:32px;padding:6px 16px;border-radius:var(--sh-full);background:var(--m-primary);color:var(--m-on-primary);white-space:nowrap}
+.setrow .sl{font-size:18px;line-height:26px}
+.setrow .sd{font-size:14px;line-height:20px;color:var(--m-on-surface-variant);margin-top:2px}
+.mini{font-size:15px;font-weight:500;letter-spacing:.1px;min-height:36px;padding:6px 18px;border-radius:var(--sh-full);background:var(--m-primary);color:var(--m-on-primary);white-space:nowrap}
 .mini.ghost{background:transparent;color:var(--m-primary);box-shadow:inset 0 0 0 1px var(--m-outline)}
 /* 個人帳面（資産タブ）。色は既存の役割色・濃淡だけを使う。 */
 .setrow .amt-nw{white-space:nowrap;flex:0 0 auto;font-weight:500}
-.mbar .ml .rt{display:block;font-size:10px;line-height:14px;margin-top:2px;text-align:center}
+.mbar .ml .rt{display:block;font-size:13px;line-height:16px;margin-top:2px;text-align:center}
 .acct-row{background:var(--m-surface-container-low);border-radius:var(--sh-m);padding:12px 16px;margin-bottom:8px}
 .acct-row .field{margin-bottom:8px}
 .acct-row .flags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.acct-row .chip{min-height:28px;padding:4px 12px;font-size:12px}
+.acct-row .chip{min-height:34px;padding:4px 14px;font-size:14px}
 .hero .sub b{font-weight:500}
+/* 投資の評価額 */
+.inv-t{padding:4px 0 12px}
+.inv-t .lbl{font-size:15px;color:var(--m-on-surface-variant)}
+.inv-t .big{font-size:42px;line-height:50px;font-weight:400;margin-top:2px}
+.inv-t .gain{font-size:22px;line-height:30px;font-weight:500;margin-top:2px}
+.inv-t .sub{font-size:15px;line-height:22px;color:var(--m-on-surface-variant);margin-top:2px}
+.pos{color:var(--m-primary)} .neg{color:var(--m-error)}
+.inv-r{text-align:right;flex:0 0 auto}
+.inv-r .vv,.vv{font-size:19px;line-height:26px;font-weight:500;white-space:nowrap}
+.inv-r .gn{font-size:15px;line-height:22px;font-weight:500;white-space:nowrap}
 .dot{display:inline-block;width:8px;height:8px;border-radius:var(--sh-full);margin-right:6px}
 .dot.ok{background:var(--m-primary)} .dot.ng{background:var(--m-outline)} .dot.er{background:var(--m-error)}
 
 /* M3 の snackbar。角丸は 4px。 */
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:var(--m-inverse-surface);color:var(--m-inverse-on-surface);font-size:14px;line-height:20px;padding:14px 16px;border-radius:var(--sh-xs);z-index:70;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 6px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.24)}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:var(--m-inverse-surface);color:var(--m-inverse-on-surface);font-size:16px;line-height:22px;padding:14px 16px;border-radius:var(--sh-xs);z-index:70;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 6px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.24)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-table.csv{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+table.csv{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 table.csv td{border:1px solid var(--m-outline-variant);padding:6px 8px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--m-on-surface-variant)}
 .scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:16px}
 .maprow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.maprow .mk{font-size:14px;width:86px;flex:0 0 86px}
+.maprow .mk{font-size:15px;width:86px;flex:0 0 86px}
 .maprow select{flex:1;background:var(--m-surface-container-high);border:none;border-bottom:1px solid var(--m-on-surface-variant);border-radius:var(--sh-xs) var(--sh-xs) 0 0;padding:12px;outline:none}
-.note{font-size:12px;color:var(--m-on-surface-variant);line-height:18px;margin:12px 4px}
+.note{font-size:14px;color:var(--m-on-surface-variant);line-height:21px;margin:12px 4px}
 /* M3 に「警告」の役は無い。促しは error-container で受ける。 */
-.warnbox{background:var(--m-error-container);color:var(--m-on-error-container);border-radius:var(--sh-m);padding:14px 16px;font-size:12px;line-height:18px;margin-bottom:12px}
+.warnbox{background:var(--m-error-container);color:var(--m-on-error-container);border-radius:var(--sh-m);padding:14px 16px;font-size:16px;line-height:23px;margin-bottom:12px}
 .spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:var(--sh-full);animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .thumb{width:100%;border-radius:var(--sh-m);margin-bottom:12px;display:block}
@@ -629,7 +640,8 @@ const S = {
   online:false, syncing:false, err:"", cfgStale:false,
   /* 個人帳面。共有の明細（items）とは別に持ち、通信も別の接続先・別の溜め置き（myq）で行う。 */
   /* rules = 銀行の取引明細の分類規則（本人の名義・勤務先などを含むので、コードには置かず、個人帳面の `設定` に置く）。 */
-  my:{ tx:load("mytx", []), accts:loadAccts(), rules:load("myrules", []).map(normRule).filter(Boolean), online:false, syncing:false, err:"" },
+  my:{ tx:load("mytx", []), accts:loadAccts(), rules:load("myrules", []).map(normRule).filter(Boolean),
+       vals:load("myvals", []).map(normVal).filter(Boolean), online:false, syncing:false, err:"" },
   myq:load("myq", [])
 };
 
@@ -698,8 +710,8 @@ async function callApi(base, tok, action, payload, plain){
   catch(e){
     if(/<html|<!DOCTYPE/i.test(txt))
       throw new Error(plain ? "個人帳面がJSONを返しません。デプロイの「アクセスできるユーザー」が『全員』になっていない見込みです"
-                            : "帳面がJSONを返し申さぬ。デプロイの「アクセスできるユーザー」が『全員』になっておらぬ見込み");
-    throw new Error(plain ? "返りが読めません ―― "+txt.slice(0,60) : "返りが読めず申さぬ ―― "+txt.slice(0,60));
+                            : "帳面がJSONを返しません。デプロイの「アクセスできるユーザー」が『全員』になっていない可能性があります");
+    throw new Error(plain ? "返りが読めません ―― "+txt.slice(0,60) : "返りが読めません ―― "+txt.slice(0,60));
   }
   /* ⚠ 帳面が「断った」ことと、「通信できなかった」ことを区別する。断られた送信は何度送っても通らないので、
      溜め置いてはならない（溜めると、次の取得で手元の控えが帳面の内容に置き換わり、記録が画面から消える）。 */
@@ -782,7 +794,7 @@ async function pushMany(action, list){
   setCached(S.items); render();
   if(!S.cfg.api) return;
   try{ await api("bulk",{items:list}); S.online=true; }
-  catch(e){ S.queue.push({action:"bulk", payload:{items:list}}); save("queue",S.queue); S.online=false; toast("圏外のため後で送り申す"); }
+  catch(e){ S.queue.push({action:"bulk", payload:{items:list}}); save("queue",S.queue); S.online=false; toast("圏外のため後で送ります"); }
 }
 
 async function pushItem(action, item){
@@ -792,7 +804,7 @@ async function pushItem(action, item){
   setCached(S.items); render();
   if(!S.cfg.api) return;
   try{ await api(action,item); S.online=true; }
-  catch(e){ S.queue.push({action,payload:item}); save("queue",S.queue); S.online=false; toast("圏外のため後で送り申す"); }
+  catch(e){ S.queue.push({action,payload:item}); save("queue",S.queue); S.online=false; toast("圏外のため後で送ります"); }
 }
 
 /* ---------- 個人帳面のデータ層 ----------
@@ -839,6 +851,8 @@ async function pullMineRun(){
       const cj = await apiMine("config");
       /* 帳面の設定から来た規則も、検査を通す（壊れた要素が混じると、取り込み画面が落ちる）。 */
       if(cj && cj.config && Array.isArray(cj.config.rules)){ S.my.rules=cj.config.rules.map(normRule).filter(Boolean); save("myrules", S.my.rules); }
+      /* 投資の評価額。帳面にまだ無い（vals のキーが無い）ときは、この端末の控えを残す。 */
+      if(cj && cj.config && Array.isArray(cj.config.vals)){ S.my.vals=cj.config.vals.map(normVal).filter(Boolean); save("myvals", S.my.vals); }
     }catch(e){}
     S.my.online=true; S.my.err="";
   }catch(e){
@@ -900,18 +914,19 @@ function saveMyAccts(){
   });
 }
 
-/* 銀行の分類規則を控えて、個人帳面の `設定` へも送る。
-   ⚠ saveConfig は設定を丸ごと置き換える。いまは rules しか持たないので、これだけを送る。
-     設定のキーを増やすときは、ここで全部を送ること。 */
-function saveMyRules(){
-  save("myrules", S.my.rules);
+/* 銀行の分類規則と投資の評価額を控えて、個人帳面の `設定` へも送る。
+   ⚠ saveConfig は設定を丸ごと置き換える。持っているキー（rules・vals）を必ず全部送ること。
+     キーを増やしたら、ここの payload に足す。 */
+function saveMyConfig(){
+  save("myrules", S.my.rules); save("myvals", S.my.vals);
   if(!S.cfg.mineApi) return;
-  const payload={rules:S.my.rules};
+  const payload={rules:S.my.rules, vals:S.my.vals};
   apiMine("saveConfig", payload).then(()=>{ S.my.online=true; }).catch(()=>{
     S.myq = S.myq.filter(q=>q.action!=="saveConfig");
     S.myq.push({action:"saveConfig", payload}); save("myq", S.myq); S.my.online=false;
   });
 }
+const saveMyRules = saveMyConfig, saveMyVals = saveMyConfig;
 
 /* 外から来た取引（給与JSONなど）を検査して整える。形が合わないものは null。 */
 function normMyTx(x){
@@ -1450,8 +1465,7 @@ function cardNoteHTML(m){
   const lag=cardCover().filter(c=>c.first<=end && c.last<end);
   if(!lag.length) return "";
   const ymd=d=>Number(d.slice(0,4))+"/"+Number(d.slice(5,7))+"/"+Number(d.slice(8,10));
-  return `<div class="warnbox">${lag.map(c=>esc(c.name)+"は "+ymd(c.last)+" の利用分まで").join("、")}の取り込みです。
-    それ以降の利用は次の明細を取り込むと入り、<b>${ymLabel(m)}の消費は実際より少なく（貯蓄率は高く）出ます。</b></div>`;
+  return `<div class="warnbox"><b>カード明細が途中まで：</b>${lag.map(c=>esc(c.name)+" "+ymd(c.last)+"分まで").join("、")}。消費は実際より少なく出ます。</div>`;
 }
 
 /* ---------- 期(いつからの決め事か) ---------- */
@@ -1911,10 +1925,10 @@ function header(mine){
   /* 資産タブでは、個人帳面の接続状態を出す（共有の状態ではない）。 */
   const st = mine
     ? (S.my.syncing ? '<span class="pill">同期中…</span>'
-      : (!S.cfg.mineApi ? '<span class="pill warn">この端末のみ</span>'
+      : (!S.cfg.mineApi ? '<span class="pill warn">端末のみ</span>'
       : (S.my.online ? '' : '<span class="pill warn">圏外</span>')))
     : (S.syncing ? '<span class="pill">同期中…</span>'
-      : (!S.cfg.api ? '<span class="pill warn">この端末のみ</span>'
+      : (!S.cfg.api ? '<span class="pill warn">端末のみ</span>'
       : (S.online ? '' : '<span class="pill warn">圏外</span>')));
   return `<header><div class="wrap"><div class="hrow">
     <div class="month-pick">
@@ -1922,7 +1936,7 @@ function header(mine){
       <b class="num">${ymLabel(S.month)}</b>
       <button class="arrowbtn" data-mv="1" ${cur?"disabled":""}>${icon("chevron_right")}</button>
     </div>
-    <div>${cur?'<span class="pill">今月</span>':''}${st}<button class="arrowbtn gear" aria-label="設定">${icon("settings")}</button></div>
+    <div>${cur&&!st?'<span class="pill">今月</span>':''}${st}<button class="arrowbtn gear" aria-label="設定">${icon("settings")}</button></div>
   </div></div></header>`;
 }
 
@@ -1937,10 +1951,7 @@ function gapWarn(m){
      billCard() が「引落月を振り直してくだされ」と告げるゆえ、ここで重ねて
      「まだ取り込んでおらぬ」と言うと、取り込んだ上様を惑わせる（2026-08-20 に実際そうなった）。 */
   if(needPay().some(x=>shiftMonth(String(x.date).slice(0,7),1)===m)) return "";
-  return `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、
-    ${ymLabel(m)}引落のぶんにまだ ${yen(t.gap.r||t.gap.m)} 足りており申さぬ。
-    <b>この月に引き落とされる明細をまだ取り込んでおらぬ</b>と見え申す。
-    このままでは振込額が ${yen((t.gap.r+t.gap.m)/2)} ずれ申すゆえ、設定 → カード明細CSV から取り込んでくだされ。</div>`;
+  return `<div class="warnbox"><b>共有カードの明細が未取込です。</b>振込額が ${yen((t.gap.r+t.gap.m)/2)} ずれます。</div>`;
 }
 
 /* 「この月、共有カードからいくら引き落とされるか」の札（2026-08-19 追加）
@@ -1948,20 +1959,17 @@ function gapWarn(m){
 function billCard(m){
   const t=transfer(m), N=S.cfg.names;
   if(!t.bill.n){
-    return `<div class="warnbox">${ymLabel(m)}26日に引き落とされる<b>カード明細がまだ1件もござらぬ。</b>
-      共有カードは使った月の翌月に引き落とされ申すゆえ、${ymLabel(shiftMonth(m,-1))}利用ぶんの明細を
-      設定 → カード明細CSV から取り込んでくだされ。取り込むまで振込額は出せ申さぬ。
+    return `<div class="warnbox"><b>${Number(m.slice(5,7))}/26引落のカード明細が未取込です。</b>${ymLabel(shiftMonth(m,-1))}利用分を設定から取り込むと、振込額が出ます。
       ${needPay().some(x=>shiftMonth(String(x.date).slice(0,7),1)===m)
-        ? `<br><br><b>いや、取り込みは済んでおり申す。</b>ただ、その明細に<b>引落月が入っており申さぬ。</b>
-           設定 → <b>引落月の振り直し</b> から当て直してくだされ。` : ""}</div>`;
+        ? `<br><b>取込済みですが引落月が空です。</b>設定の「引落月の振り直し」を実行してください。` : ""}</div>`;
   }
   const b=t.bill;
   const chip=(lbl,v)=>v>0?`<span class="chip num">${esc(lbl)} ${yenPlain(v)}</span>`:"";
   return `<div class="bill">
-    <div class="hd"><span class="ic">${icon("credit_card")}</span><div class="lbl">${ymLabel(m)}26日 引き落とし ―― 共有カードのご請求</div></div>
+    <div class="hd"><span class="ic">${icon("credit_card")}</span><div class="lbl">${Number(m.slice(5,7))}/26 共有カードの引き落とし</div></div>
     <div class="big num">${yen(b.total)}</div>
     <div class="brk">${chip("共有",b.share)}${chip(N.r,b.r)}${chip(N.m,b.m)}<span class="chip num">${b.n}件</span></div>
-    <div class="memo num">${b.refund?`返金 ${yen(b.refund)} を差し引いた正味の請求にござる。<br>`:""}これに家賃ほか ${yen(b.other)} を足し${b.in?`、共有口座への入金 ${yen(b.in)} を差し引い`:""}た <b>${yen(t.out)}</b> が、この日に共有口座から出ていき申す。</div>
+    <div class="memo num">口座から出る額 <b>${yen(t.out)}</b>（家賃ほか ${yen(b.other)}${b.in?`、入金 −${yenPlain(b.in)}`:""}${b.refund?`、返金 −${yenPlain(b.refund)}`:""}を含む）</div>
   </div>`;
 }
 
@@ -1977,11 +1985,9 @@ function sendCard(m){
   if(done){
     const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,done[k]||0))}</div></div>`;
     return `<div class="send done">
-      <div class="hd"><span class="ic">${icon("check_circle")}</span><div class="lbl">${ymLabel(m)}の精算 ―― 済んでござる</div></div>
+      <div class="hd"><span class="ic">${icon("check_circle")}</span><div class="lbl">精算済み（${esc(String(done.on||"").replace(/-/g,"/"))}）</div></div>
       <div class="two">${one("r")}${one("m")}</div>
-      <div class="memo num">${esc(String(done.on||"").replace(/-/g,"/"))} に締め申した。
-        口座から出るのは ${yen(done.out||0)}${done.sv?`、ほかに<b>積立貯蓄</b> ${yenPlain(done.sv)}×2 が残り申す`:""}。この月の記録は凍らせてあり、
-        あとから足したものは次の精算へ回り申す。
+      <div class="memo num">口座から出る額 ${yen(done.out||0)}${done.sv?`・積立 ${yenPlain(done.sv)}×2`:""}
         <button class="mini ghost" data-open="reopen">締めを解く</button></div>
     </div>`;
   }
@@ -1992,18 +1998,13 @@ function sendCard(m){
      代わりに billCard() が「取り込んでくだされ」と告げる。 */
   if(!t.list.length || !t.bill.n) return "";
   const one=(k)=>`<div><div class="who">${esc(N[k])}</div><div class="amt num">${yen(Math.max(0,t.send[k]))}</div></div>`;
-  const back=(k)=>t.send[k]<0 ? `${esc(N[k])}は ${yen(-t.send[k])} 受け取る側にござる。` : "";
+  const back=(k)=>t.send[k]<0 ? `<br>${esc(N[k])}は ${yen(-t.send[k])} 受け取る側` : "";
   /* 精算日を過ぎており、かつ前の月まで締んでいるなら、締めを促す。 */
   const due = today() >= m+"-"+String(settleDay()).padStart(2,"0");
   return `<div class="send">
-    <div class="hd"><span class="ic">${icon("account_balance_wallet")}</span><div class="lbl">${ymLabel(m)}${settleDay()}日 精算 ―― 共有口座へ振り込む額</div></div>
+    <div class="hd"><span class="ic">${icon("account_balance_wallet")}</span><div class="lbl">${settleDay()}日 共有口座へ振り込む額</div></div>
     <div class="two">${one("r")}${one("m")}</div>
-    <div class="memo num">この口座からは、のちの26日に ${yen(t.out)} が出てゆき申す
-      ―― この月に引き落とされるカードと家賃。${t.savings
-        ? `二人の振込 ${yen(t.put)} との差 ${yen(t.savings*2)} は<b>積立貯蓄</b>（一人 ${yenPlain(t.savings)} ずつ）として口座に残り申す。`
-        : "二人の振込を足すとちょうど同じ額になり申す。"}
-      ${t.loan?`<br>二人のあいだの貸し借り ${yen(Math.abs(t.loan))} を折り込んだ額にござる（合計は変わらず）。`:""}
-      ${back("r")}${back("m")}</div>
+    <div class="memo num">口座から出る額 ${yen(t.out)}${t.savings?`・積立 ${yen(t.savings*2)} を含む`:""}${t.loan?`・貸し借り ${yen(Math.abs(t.loan))} を折込`:""}${back("r")}${back("m")}</div>
     <button class="settle ${due?"":"ghost"}" data-open="close">${due?"振り込んだ ―― この月を締める":"先んじて締める"}</button>
   </div>`;
 }
@@ -2017,15 +2018,12 @@ function loanCard(m){
   const from = bal>0 ? N.r : N.m, to = bal>0 ? N.m : N.r;   // 正 = 諒 → 万貴
   const a=Math.abs(bal);
   return `<div class="loan${done?" done":""}">
-    <div class="hd"><span class="ic">${icon("handshake")}</span><div class="lbl">${ymLabel(m)}の精算で 二人のあいだを動かす金</div></div>
+    <div class="hd"><span class="ic">${icon("handshake")}</span><div class="lbl">二人のあいだの受け渡し</div></div>
     <div class="big num">${esc(from)} → ${esc(to)}　${yen(a)}</div>
     <div class="memo">${done
-      ? `${ymLabel(m)}の精算で渡し終えてござる。`
-      : `<b>今月の出費には入っており申さぬ</b>が、<b>振込額に折り込んでござる</b> ――
-         渡す${esc(from)}の振込が ${yen(a)} <b>多く</b>、受け取る${esc(to)}の振込が ${yen(a)} <b>少なく</b>なってござる。
-         その差が${esc(to)}の手元に残り申す。二人の合計は変わり申さぬ。
-         <br>口座を通さず<b>直に手渡しした</b>なら
-         <button class="mini ghost" data-open="clear">こちらで消す</button>`}</div>
+      ? `精算で渡し済み`
+      : `振込額に折り込み済み
+         <button class="mini ghost" data-open="clear">直に渡したので消す</button>`}</div>
   </div>`;
 }
 
@@ -2057,7 +2055,7 @@ function viewHome(){
     ${loanCard(S.month)}
     ${gapWarn(S.month)}
     <div class="sechead"><h2>最近の記録</h2>${s.list.length>6?'<button class="more" data-tab="list">すべて見る</button>':''}</div>
-    <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("まだ記録がござらぬ","＋ から入れてくだされ")}</div>
+    <div class="card">${recent.length?recent.map(rowHTML).join(""):emptyHTML("記録がありません","")}</div>
   </div>`;
 }
 
@@ -2081,7 +2079,7 @@ function rowHTML(x){
     <div class="amt num ${inn?"plus":""}">${inn?"＋":""}${yen(x.amount)}</div>
   </div>`;
 }
-function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">${icon("inbox")}</span>${esc(a)}<br>${esc(b)}</div>`; }
+function emptyHTML(a,b){ return `<div class="empty"><span class="e-ic">${icon("inbox")}</span>${esc(a)}${b?"<br>"+esc(b):""}</div>`; }
 
 function viewStats(){
   const s=summary(S.month), N=S.cfg.names;
@@ -2100,13 +2098,8 @@ function viewStats(){
           <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
           <div class="track"><div class="fill" style="width:${s.total?(v/s.total*100).toFixed(1):0}%;background:var(--m-${c})"></div></div></div>`;
       }).join("")}
-      <div class="note num">支払元の内訳 ―― 共有カード ${yen(s.paid.c)}／${esc(N.r)} ${yen(s.paid.r)}／${esc(N.m)} ${yen(s.paid.m)}</div>
-      <div class="note num">共有の受け持ち ―― ${esc(N.r)} ${yen(s.due.r)}／${esc(N.m)} ${yen(s.due.m)}。
-      ${s.cap<s.base?`この月の共有 ${yen(s.cap)}`:`固定額 ${yen(s.base)}`} を ${Math.round(s.ratio*100)}：${100-Math.round(s.ratio*100)} で按分し、
-      ${s.over>0?`足が出た ${yen(s.over)} を折半`:`足は出ており申さぬ`}。</div>
-      ${(s.gap.r||s.gap.m) ? `<div class="warnbox">上乗せに見合う<b>共有カード払いの個人負担</b>が、この月にはまだ
-        ${yen(s.gap.r||s.gap.m)}ぶん足りており申さぬ。<b>カード明細をまだ取り込んでおらぬ月</b>と見え申す。
-        このままだと精算が ${yen((s.gap.r+s.gap.m)/2)} ずれ申すゆえ、明細を取り込んでくだされ。</div>` : ""}
+      <div class="note num">共有の受け持ち　${esc(N.r)} ${yen(s.due.r)}／${esc(N.m)} ${yen(s.due.m)}</div>
+      ${(s.gap.r||s.gap.m) ? `<div class="warnbox"><b>カード明細が未取込の月です。</b>精算が ${yen((s.gap.r+s.gap.m)/2)} ずれます。</div>` : ""}
     </div>
 
     <div class="sechead"><h2>費目の内訳</h2></div>
@@ -2117,7 +2110,7 @@ function viewStats(){
           <span><span class="vl num">${yen(v)}</span><span class="pc num">${pc}%</span></span></div>
         <div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%;background:${toneOf(i)}"></div></div>
       </div>`;
-    }).join(""):emptyHTML("この月の記録がござらぬ","")}</div>
+    }).join(""):emptyHTML("記録がありません","")}</div>
 
     <div class="sechead"><h2>6ヶ月の推移</h2></div>
     <div class="card">
@@ -2146,13 +2139,118 @@ function viewList(){
       const dd=d.split("-"), w=["日","月","火","水","木","金","土"][new Date(d).getDay()];
       return `<div class="sechead"><h2>${Number(dd[1])}/${Number(dd[2])}（${w}）</h2><span class="more num">${sum?yen(sum):""}</span></div>
         <div class="card">${day.map(rowHTML).join("")}</div>`;
-    }).join(""):`<div class="card">${emptyHTML("この月の記録がござらぬ","＋ から入れてくだされ")}</div>`}
+    }).join(""):`<div class="card">${emptyHTML("記録がありません","")}</div>`}
   </div>`;
 }
 
 /* ---------- 資産タブ（個人帳面） ----------
    ⚠ 色は意味にしか使わない。濃い緑＝貯蓄、中間の緑＝使い道、灰＝まだ分からない分。 */
 const syen = v => (v<0 ? "−" : "") + yen(Math.abs(v));
+
+/* ============================================================
+   投資口座の評価額（2026-11-14 新設）
+   ============================================================
+   口座ごとに「この日の評価額」を手で記録する。1口座・1日につき1件（同じ口座・同じ日は上書き）。
+   運用損益 ＝ 評価額 − 元本。元本は、記録に書いてあればそれ、無ければ個人帳面に記録済みの入出金の累計。
+   保存先は個人帳面の `設定` のキー vals。Code-mine.gs の変更は要らない。
+   ⚠ saveConfig は設定を丸ごと置き換えるので、規則（rules）と必ず一緒に送る（saveMyConfig）。 */
+function normVal(x){
+  if(!x || typeof x!=="object") return null;
+  const date=String(x.date||"").slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const acct=String(x.acct||""); if(!acct) return null;
+  const value=Number(x.value); if(!Number.isFinite(value) || value<0) return null;
+  const p=(x.principal===null||x.principal===undefined||x.principal==="") ? null : Number(x.principal);
+  if(p!==null && (!Number.isFinite(p) || p<0)) return null;
+  const o={date, acct, value:Math.round(value)};
+  if(p!==null) o.principal=Math.round(p);
+  if(x.memo) o.memo=String(x.memo).slice(0,60);
+  return o;
+}
+/* 元本の自動計算：その口座への入金（移動の先・口座へ直接入る収入）を足し、出金（移動の元）を引く。upTo（含む）まで。 */
+function invContrib(acct, upTo){
+  let s=0;
+  S.my.tx.forEach(x=>{
+    if(String(x.date)>upTo) return;
+    if(x.type==="移動"){ if(x.to===acct) s+=x.amount; if(x.acct===acct) s-=x.amount; }
+    else if(x.type==="収入" && x.acct===acct) s+=x.amount;
+  });
+  return s;
+}
+const autoTxt = (a,d) => { const n=invContrib(a,d); return n>0 ? yenPlain(n) : "不明"; };
+function invAccts(){ return S.my.accts.filter(a=>a.kind==="投資" && !a.dormant); }
+function invRecs(acct){ return S.my.vals.filter(v=>v.acct===acct).sort((a,b)=>b.date.localeCompare(a.date)); }
+/* upTo（含む）までで最後の評価。無ければ null。 */
+function invAt(acct, upTo){
+  const v=invRecs(acct).find(r=>r.date<=upTo); if(!v) return null;
+  const auto=v.principal===undefined;
+  let principal=auto ? invContrib(acct, v.date) : v.principal;
+  /* 自動の元本が 0 以下（取り崩しが記録済みの拠出を上回る、拠出が個人帳面に無い、など）なら元本は不明。損益は出さない。 */
+  if(auto && principal<=0) principal=null;
+  const gain=principal==null ? null : v.value-principal;
+  return {date:v.date, value:v.value, principal, auto, gain, rate:principal>0 ? gain/principal : null};
+}
+/* その月末時点の一覧。評価の無い口座は rows に入れず none に挙げる。合計は評価のある口座だけ。 */
+function invSummary(m){
+  const end=m+"-31", rows=[], none=[];
+  invAccts().forEach(a=>{ const r=invAt(a.id,end); if(r) rows.push(Object.assign({a},r)); else none.push(a); });
+  /* 損益と元本は、元本が分かる口座だけで足す。 */
+  const known=rows.filter(r=>r.principal!=null);
+  const value=rows.reduce((s,r)=>s+r.value,0);
+  const principal=known.reduce((s,r)=>s+r.principal,0), gain=known.reduce((s,r)=>s+r.gain,0);
+  return {rows, none, known:known.length, value, principal, gain, rate:principal>0 ? gain/principal : null};
+}
+const pctTxt = r => r==null ? "" : (r>0?"+":r<0?"−":"")+Math.abs(r*100).toFixed(1)+"%";
+const gainCls = g => g>0 ? "pos" : g<0 ? "neg" : "";
+
+function invHTML(m){
+  if(!invAccts().length) return "";
+  const s=invSummary(m);
+  const head=`<div class="sechead"><h2>投資の評価額</h2><button class="more" data-open="m-val">記録する</button></div>`;
+  if(!s.rows.length) return head+`<div class="card">${emptyHTML("評価額が未記録です","")}</div>`;
+  const md=d=>{ const p=String(d).split("-"); return (p[0]!==m.slice(0,4)?p[0]+"/":"")+Number(p[1])+"/"+Number(p[2]); };
+  const line=(r)=>`<div class="setrow" data-val="${esc(r.a.id)}" data-vdate="${esc(r.date)}"><div><div class="sl">${esc(r.a.name)}${r.a.locked?' <span class="tag gray">拘束</span>':""}</div>
+      <div class="sd num">${md(r.date)}時点<br>${r.principal==null?"元本が未入力":"元本 "+yenPlain(r.principal)}</div></div>
+      <div class="num inv-r"><div class="vv">${yen(r.value)}</div>${r.gain==null?`<div class="gn sd">元本を入力</div>`:`<div class="gn ${gainCls(r.gain)}">${syen(r.gain)} ${pctTxt(r.rate)}</div>`}</div></div>`;
+  const rest=s.none.map(a=>`<div class="setrow" data-val="${esc(a.id)}"><div><div class="sl">${esc(a.name)}</div><div class="sd">未記録</div></div>
+      <button class="mini ghost">記録</button></div>`).join("");
+  const months=[]; for(let i=5;i>=0;i--) months.push(shiftMonth(m,-i));
+  const sums=months.map(invSummary);
+  const vmax=Math.max(...sums.map(x=>x.value),1);
+  const trend = sums.filter(x=>x.rows.length).length>=2
+    ? `<div class="sechead"><h2>6ヶ月の評価額</h2></div>
+       <div class="card"><div class="mbars">${sums.map((x,i)=>{
+         const h=x.rows.length ? Math.max(4, Math.round(x.value/vmax*104)) : 4;
+         return `<div class="mbar"><div class="bb ${months[i]===m?"":"dim"}" style="height:${h}px"></div>
+           <div class="ml">${Number(months[i].split("-")[1])}月<span class="rt num">${x.rows.length?Math.round(x.value/10000).toLocaleString("ja-JP")+"万":"–"}</span></div></div>`;
+       }).join("")}</div></div>` : "";
+  return head+`<div class="card inv">
+      <div class="inv-t"><div class="lbl">${ymLabel(m)}末の評価額</div><div class="big num">${yen(s.value)}</div>
+        ${s.known ? `<div class="gain num ${gainCls(s.gain)}">${syen(s.gain)}　${pctTxt(s.rate)}</div>
+          <div class="sub num">元本 ${yen(s.principal)}${s.known<s.rows.length?"（元本のある口座のみ）":""}</div>`
+          : `<div class="sub">元本が未入力です</div>`}</div>
+      ${s.rows.map(line).join("")}${rest}</div>${trend}`;
+}
+
+/* 評価額の入力シート。口座・日付を変えたとき、その口座・その日の記録があれば値を読み込む。 */
+function valHTML(a, d){
+  const rec=S.my.vals.find(v=>v.acct===a && v.date===d);
+  return sheetShell("投資の評価額", `
+    <div class="chips" id="v-accts">${invAccts().map(x=>`<button class="chip ${x.id===a?"on":""}" data-vacct="${esc(x.id)}">${esc(x.name)}</button>`).join("")}</div>
+    <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="評価額" value="${rec?yenPlain(rec.value):""}"></div>
+    <div class="field"><label>日付</label><input id="v-date" type="date" value="${esc(d)}"></div>
+    <div class="field"><label>元本（空欄なら自動：<span id="v-auto" class="num">${autoTxt(a,d)}</span>）</label>
+      <input id="v-prin" type="tel" inputmode="numeric" placeholder="自動" value="${rec&&rec.principal!==undefined?yenPlain(rec.principal):""}"></div>
+    <button class="save" id="v-save">保存する</button>
+    <button class="save del" id="v-del" ${rec?"":'style="display:none"'}>この記録を消す</button>`);
+}
+function openVal(acct, date){
+  const list=invAccts();
+  if(!list.length){ toast("投資の口座がありません"); return; }
+  const a=(acct && list.some(x=>x.id===acct)) ? acct : (invSummary(S.month).none[0]||list[0]).id;
+  const last=new Date(Number(S.month.slice(0,4)), Number(S.month.slice(5,7)), 0).getDate();
+  const d=date || (S.month===ym(new Date()) ? today() : S.month+"-"+String(last).padStart(2,"0"));
+  openSheet(valHTML(a,d), {kind:"m-val", acct:a});
+}
 function myAcctName(id){ const a=myAcct(id); return a ? a.name : ""; }
 
 function myRowHTML(x){
@@ -2181,11 +2279,10 @@ function mineBalancesHTML(m){
   if(!rows.length) return "";
   const total=rows.filter(r=>r.a.kind==="銀行").reduce((s,r)=>s+r.l.bal, 0);
   const md=d=>{ const p=String(d).split("-"); return Number(p[1])+"/"+Number(p[2]); };
-  return `<div class="sechead"><h2>口座の残高（${ymLabel(m)}末）</h2></div>
+  return `<div class="sechead"><h2>口座の残高</h2></div>
     <div class="card">${rows.map(r=>`<div class="setrow"><div><div class="sl">${esc(r.a.name)}${r.a.kind==="共有"?' <span class="tag gray">共有</span>':""}</div>
-        <div class="sd num">最後の取引 ${md(r.l.date)}</div></div><div class="num amt-nw">${syen(r.l.bal)}</div></div>`).join("")}
-      <div class="setrow"><div class="sl">銀行の残高の合計</div><div class="num amt-nw">${syen(total)}</div></div></div>
-    <div class="note">取り込んだ明細の残高です。共有口座は、二人の共有の金ゆえ合計に入れていません。取り込んでいない口座は出ません。</div>`;
+        <div class="sd num">${md(r.l.date)}時点</div></div><div class="num amt-nw vv">${syen(r.l.bal)}</div></div>`).join("")}
+      <div class="setrow"><div class="sl">銀行の合計（共有を除く）</div><div class="num amt-nw vv">${syen(total)}</div></div></div>`;
 }
 
 /* 共有口座への振込の、実際と計算上の照合。実際 = 移動の先が共有口座のもの（銀行の明細から）。 */
@@ -2193,34 +2290,30 @@ function mineHomeHTML(f){
   if(!f.ok || !f.actualHomeN) return "";
   const d=f.actualHome-f.send;
   const same=Math.abs(d)<=1;
-  return `<div class="sechead"><h2>共有口座への振込（実際と計算）</h2></div>
+  return `<div class="sechead"><h2>共有口座への振込</h2></div>
     <div class="card">
-      <div class="setrow"><div class="sl">実際に振り込んだ額（${f.actualHomeN}件）</div><div class="num amt-nw">${yen(f.actualHome)}</div></div>
-      <div class="setrow"><div class="sl">アプリの計算上の振込額</div><div class="num amt-nw">${yen(f.send)}</div></div>
-      <div class="setrow"><div class="sl">差</div><div class="num amt-nw">${syen(d)}</div></div>
-    </div>
-    <div class="note">${same ? "実際の振込と、計算上の振込額が一致しています。"
-      : "差があります。計算に入っていない振込（特別な振込・年会費など）か、記録の漏れです。"}</div>`;
+      <div class="setrow"><div class="sl">実際（${f.actualHomeN}件）</div><div class="num amt-nw vv">${yen(f.actualHome)}</div></div>
+      <div class="setrow"><div class="sl">計算上</div><div class="num amt-nw vv">${yen(f.send)}</div></div>
+      <div class="setrow"><div class="sl">差</div><div class="num amt-nw vv ${same?"":"neg"}">${same?"一致":syen(d)}</div></div>
+    </div>`;
 }
 
 function viewMine(){
   const m=S.month, f=mineFlow(m), N=S.cfg.names, who=N[myMe()];
   const rateTxt = f.rate==null ? "―" : Math.round(f.rate*100)+"%";
   const conn = S.cfg.mineApi ? "" :
-    `<div class="warnbox">個人帳面にはまだ接続していません。いまの記録はこの端末にだけ保存されます。
+    `<div class="warnbox"><b>個人帳面に未接続です</b>（この端末のみ保存）
       <button class="mini" data-open="m-conn" style="margin-left:6px">接続する</button></div>`;
   const err = (S.cfg.mineApi && !S.my.online && !S.my.syncing && S.my.err)
-    ? `<div class="warnbox">個人帳面と通信できません（${esc(S.my.err)}）。表示は前回の控えです。</div>` : "";
+    ? `<div class="warnbox"><b>個人帳面と通信できません</b>（${esc(S.my.err)}）</div>` : "";
   const unk = f.ok ? "" :
-    `<div class="warnbox">${ymLabel(m)}に引き落とされる共有カードの明細が、共有の家計簿にまだありません。
-      家の受け持ちを正しく計算できないため、この月は貯蓄率と「預金に残った分」を出しません。
-      「自分の消費」「積立・投資への拠出」は、個人帳面に記録したものだけの値です。</div>`;
-  const prov = (f.ok && f.provisional) ? `<div class="warnbox">${ymLabel(m)}は、銀行の取引がまだ取り込まれていません。使い道が分からない分が「預金に残った分」に入るため、<b>貯蓄率は実際より高く出ます（暫定）。</b></div>` : "";
+    `<div class="warnbox"><b>${Number(m.slice(5,7))}月引落の共有カード明細が未取込です。</b>貯蓄率は出せません。</div>`;
+  const prov = (f.ok && f.provisional) ? `<div class="warnbox"><b>銀行の取引が未取込です。</b>貯蓄率は実際より高く出ます（暫定）。</div>` : "";
 
   const rows=[];
   if(f.ok) rows.push({k:"家の受け持ち", v:f.due, c:"var(--ramp-3)"});
   /* 明細が未取り込みの月は、共有カード経由の消費・積立が分からない。個人帳面の記録だけの値だと断る。 */
-  const only = f.ok ? "" : "（個人帳面の記録のみ）";
+  const only = f.ok ? "" : "（記録のみ）";
   rows.push({k:"自分の消費"+only, v:f.own, c:"var(--ramp-4)"});
   if(f.ok && f.loanOut) rows.push({k:"二人のあいだの受け渡し", v:f.loanOut, c:"var(--ramp-5)"});
   rows.push({k:"積立・投資への拠出"+only, v:f.savings, c:"var(--ramp-1)"});
@@ -2233,17 +2326,15 @@ function viewMine(){
     </div>`).join("");
 
   /* 検算：家に関わる出金（振込 ＋ 立て替え）と、内訳の合計が合うこと。 */
-  const chk = !f.ok ? "" : (Math.abs(f.diff)<=1
-    ? `<div class="note num">家に関わる出金 ${yen(f.homeOut)}（振込 ${yen(f.send)} ＋ 立て替え ${yen(f.lend)}）は、家の受け持ち・共有カード経由の消費・積立・受け渡しの合計と一致しています。</div>`
-    : `<div class="warnbox">家に関わる出金（振込 ＋ 立て替え）は ${yen(f.homeOut)} ですが、内訳の合計と ${syen(f.diff)} の差があります。
-        ${f.closed?"締めた月の控えと、現在の計算が食い違っている可能性があります。":"共有の家計簿の記録を確かめてください。"}</div>`);
+  const chk = !f.ok ? "" : (Math.abs(f.diff)<=1 ? ""
+    : `<div class="warnbox"><b>家に関わる出金の内訳が ${syen(f.diff)} ずれています。</b>${f.closed?"締めた月の控えを確認してください。":"共有の家計簿の記録を確認してください。"}</div>`);
 
-  const parts=[["共有の積立貯蓄（毎月）",f.sv],["共有カード経由の積立（SBI証券など）",f.takeSave],
-               ["口座を通らない積立（持株の天引きなど）",f.direct],["投資口座への入金（NISA・iDeCo・不動産など）",f.movedIn]].filter(p=>p[1]);
+  const parts=[["共有の積立貯蓄",f.sv],["共有カード経由の積立",f.takeSave],
+               ["持株などの天引き",f.direct],["投資口座への入金",f.movedIn]].filter(p=>p[1]);
   const partsHTML = (parts.length
-    ? parts.map(([k,v])=>`<div class="setrow"><div class="sl">${esc(k)}</div><div class="num amt-nw">${syen(v)}</div></div>`).join("")
-    : emptyHTML("この月の積立・投資の記録はありません",""))
-    + (f.movedOut ? `<div class="setrow"><div class="sl" style="color:var(--m-on-surface-variant)">投資からの引き出し（資産の入れ替え）</div><div class="num amt-nw" style="color:var(--m-on-surface-variant)">${yen(f.movedOut)}</div></div>` : "");
+    ? parts.map(([k,v])=>`<div class="setrow"><div class="sl">${esc(k)}</div><div class="num amt-nw vv">${syen(v)}</div></div>`).join("")
+    : emptyHTML("記録がありません",""))
+    + (f.movedOut ? `<div class="setrow"><div class="sl" style="color:var(--m-on-surface-variant)">投資からの引き出し</div><div class="num amt-nw vv" style="color:var(--m-on-surface-variant)">${yen(f.movedOut)}</div></div>` : "");
 
   const months=[]; for(let i=5;i>=0;i--) months.push(shiftMonth(m,-i));
   const fl=months.map(mineFlow);
@@ -2260,31 +2351,25 @@ function viewMine(){
   return header(true) + `<div class="wrap">
     ${conn}${err}
     <div class="hero">
-      <div class="lbl">${esc(who)}の貯蓄率 ― ${ymLabel(m)}</div>
+      <div class="lbl">貯蓄率</div>
       <div class="big num">${rateTxt}</div>
-      <div class="sub num">収入 <b>${yen(f.income)}</b>　貯蓄 <b>${f.ok?yen(f.saved):"―"}</b>${f.provisional&&f.ok?"（暫定）":""}${f.income>0?"":"<br>この月の収入はまだ記録されていません。"}</div>
+      <div class="sub num">収入 <b>${yen(f.income)}</b>　貯蓄 <b>${f.ok?yen(f.saved):"―"}</b>${f.provisional&&f.ok?"（暫定）":""}${f.income>0?"":"<br>収入の記録がありません"}</div>
     </div>
-    ${unk}${prov}${cardNoteHTML(m)}
+    ${unk}${prov}${cardNoteHTML(m)}${chk}
     <div class="sechead"><h2>収入の行き先</h2></div>
     <div class="card">${bars}</div>
-    ${chk}
-    <div class="note">貯蓄率は、<b>（収入 − 消費）÷ 収入</b>です。積立・投資への拠出と、預金に残った分の合計にあたります。
-      投資からの引き出しや、不動産の手付金のような資産の入れ替えは、貯蓄率に影響しません。<br>
-      収入は、総支給から税・社会保険料を引いた額（持株の天引き分を含む）です。共有口座に入った自分の入金（保険金など）も含め、
-      勤務先から出る交通費などの立替金（立替精算）は含めずに、自分の消費から差し引きます。<br>
-      個人帳面の支出・収入には、<b>共有の家計簿に記録した立て替えや振込を入れないでください</b>（二重に数えます）。
-      「預金に残った分」には、まだ記録されていない使い道（個人のカード明細・現金の使い道）も含まれます。記録が増えるほど、実態に近づきます。</div>
+    ${invHTML(m)}
     ${mineHomeHTML(f)}
     ${mineBalancesHTML(m)}
 
     <div class="sechead"><h2>積立・投資の内訳</h2></div>
     <div class="card">${partsHTML}</div>
 
-    <div class="sechead"><h2>6ヶ月の推移（貯蓄額と貯蓄率）</h2></div>
+    <div class="sechead"><h2>6ヶ月の貯蓄</h2></div>
     <div class="card"><div class="mbars">${trend}</div></div>
 
-    <div class="sechead"><h2>この月の個人の記録（${list.length}件）</h2><span class="more num">＋ から記録</span></div>
-    <div class="card">${list.length?list.map(myRowHTML).join(""):emptyHTML("この月の個人の記録はありません","＋ から入れてください")}</div>
+    <div class="sechead"><h2>この月の個人の記録（${list.length}件）</h2></div>
+    <div class="card">${list.length?list.map(myRowHTML).join(""):emptyHTML("記録がありません","")}</div>
   </div>`;
 }
 
@@ -2293,19 +2378,21 @@ function mineSettingsHTML(){
   const st = !c.mineApi ? '<span class="dot ng"></span>未接続（この端末のみ）'
     : (S.my.online ? '<span class="dot ok"></span>接続中' : '<span class="dot er"></span>'+esc(S.my.err||"通信できません"));
   const dorm=S.my.accts.filter(a=>a.dormant).length;
-  return `<div class="sechead"><h2>個人帳面（資産タブ）</h2></div>
+  return `<div class="sechead"><h2>個人帳面</h2></div>
     <div class="card">
-      <div class="setrow"><div><div class="sl">個人帳面の接続</div><div class="sd">${st}・この端末の持ち主：${esc(me)}</div></div>
+      <div class="setrow"><div><div class="sl">接続</div><div class="sd">${st}・${esc(me)}の端末</div></div>
         <button class="mini" data-open="m-conn">設定</button></div>
-      <div class="setrow"><div><div class="sl">口座</div><div class="sd num">${S.my.accts.length}件${dorm?`（うち休眠 ${dorm}件）`:""}</div></div>
+      <div class="setrow"><div><div class="sl">口座</div><div class="sd num">${S.my.accts.length}件${dorm?`（休眠 ${dorm}件）`:""}</div></div>
         <button class="mini ghost" data-open="m-accts">開く</button></div>
-      <div class="setrow"><div><div class="sl">給与の取り込み</div><div class="sd">salary-export.ps1 で書き出したJSONを読み込む</div></div>
+      <div class="setrow"><div><div class="sl">投資の評価額</div><div class="sd num">${S.my.vals.length}件</div></div>
+        <button class="mini" data-open="m-val">記録</button></div>
+      <div class="setrow"><div class="sl">給与の取り込み</div>
         <button class="mini ghost" data-open="m-sal">取り込む</button></div>
-      <div class="setrow"><div><div class="sl">銀行の取引明細CSV</div><div class="sd">三井住友・三菱UFJの取引履歴を読み込む</div></div>
+      <div class="setrow"><div class="sl">銀行の明細CSV</div>
         <button class="mini" data-open="m-bank">取り込む</button></div>
-      <div class="setrow"><div><div class="sl">個人カードの利用明細CSV</div><div class="sd">PayPayカード・JCBカードの明細を読み込む（複数可）</div></div>
+      <div class="setrow"><div class="sl">個人カードの明細CSV</div>
         <button class="mini" data-open="m-card">取り込む</button></div>
-      <div class="setrow"><div><div class="sl">銀行の分類規則</div><div class="sd num">${S.my.rules.length}件（本人名義・勤務先などの規則）</div></div>
+      <div class="setrow"><div><div class="sl">銀行の分類規則</div><div class="sd num">${S.my.rules.length}件</div></div>
         <button class="mini ghost" data-open="m-rules">開く</button></div>
     </div>`;
 }
@@ -2313,7 +2400,7 @@ function mineSettingsHTML(){
 function viewSettings(){
   const c=S.cfg, p=planFor(S.month), cb=contribOf(p);
   const st = !c.api ? '<span class="dot ng"></span>未接続（この端末のみ）'
-    : (S.online ? '<span class="dot ok"></span>繋がっており申す' : '<span class="dot er"></span>'+esc(S.err||"繋がらず"));
+    : (S.online ? '<span class="dot ok"></span>接続中' : '<span class="dot er"></span>'+esc(S.err||"通信できません"));
   const fx=(p.fixed||[]).reduce((a,b)=>a+(Number(b.amount)||0),0);
   return header() + `<div class="wrap">
     <div class="sechead"><h2>データの置き場</h2></div>
@@ -2327,12 +2414,12 @@ function viewSettings(){
 
     <div class="sechead"><h2>取り込み</h2></div>
     <div class="card">
-      <div class="setrow"><div><div class="sl">レシートを撮る</div><div class="sd">写真から日付・店・金額を読み取る</div></div>
+      <div class="setrow"><div class="sl">レシートを撮る</div>
         <button class="mini" data-open="receipt">開く</button></div>
-      <div class="setrow"><div><div class="sl">カード明細CSV</div><div class="sd">Vpassから落としたCSVを読み込む</div></div>
+      <div class="setrow"><div class="sl">共有カードの明細CSV</div>
         <button class="mini" data-open="csv">取り込む</button></div>
       <div class="setrow"><div><div class="sl">引落月の振り直し</div>
-        <div class="sd num">${needPay().length ? needPay().length+"件に引落月が入っており申さぬ" : "抜けはござらぬ"}</div></div>
+        <div class="sd num">${needPay().length ? needPay().length+"件で引落月が空" : "問題なし"}</div></div>
         <button class="mini ${needPay().length?"":"ghost"}" data-open="fixpay">開く</button></div>
     </div>
 
@@ -2343,10 +2430,10 @@ function viewSettings(){
       <div class="setrow"><div><div class="sl">呼び名</div><div class="sd">${esc(c.names.r)}・${esc(c.names.m)}</div></div>
         <button class="mini ghost" data-open="names">変える</button></div>
       <div class="setrow"><div><div class="sl">精算日</div>
-        <div class="sd num">毎月 ${settleDay()}日に共有口座へ振り込む${closedCount()?"・締めた月 "+closedCount()+"件":""}</div></div>
+        <div class="sd num">毎月 ${settleDay()}日${closedCount()?"・締め済み "+closedCount()+"件":""}</div></div>
         <button class="mini ghost" data-open="settle">変える</button></div>
       <div class="setrow"><div><div class="sl">按分する固定額</div>
-        <div class="sd num">${yen(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)} で按分。足が出た分は折半</div></div>
+        <div class="sd num">${yen(p.base)}・${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)}</div></div>
         <button class="mini ghost" data-open="plan">開く</button></div>
       <div class="setrow"><div><div class="sl">毎月の拠出</div>
         <div class="sd num">${esc(c.names.r)} ${yen(cb.r)}／${esc(c.names.m)} ${yen(cb.m)}</div></div>
@@ -2354,15 +2441,12 @@ function viewSettings(){
       <div class="setrow"><div><div class="sl">固定費</div><div class="sd num">${(p.fixed||[]).length}件・毎月 ${yen(fx)}</div></div>
         <button class="mini ghost" data-open="fixed">開く</button></div>
       <div class="setrow"><div><div class="sl">個人の負担に倒す店</div>
-        <div class="sd num">${(c.mine||[]).length}件・取り込みで自動的に個人の負担へ</div></div>
+        <div class="sd num">${(c.mine||[]).length}件</div></div>
         <button class="mini ghost" data-open="mine">開く</button></div>
-      <div class="setrow"><div><div class="sl">店名の振り分け</div><div class="sd num">${(c.dict||[]).length}件の言葉を覚えており申す</div></div>
+      <div class="setrow"><div><div class="sl">店名の振り分け</div><div class="sd num">${(c.dict||[]).length}件</div></div>
         <button class="mini ghost" data-open="dict">開く</button></div>
     </div>
-    <div class="note">決め事は「いつから」を持ってござる。割合や拠出を変えても、過去の月の精算は当時の決め事のまま動き申さぬ。
-    ${c.api&&S.cfgStale?"<br><b>⚠ 帳面側が古うござる。</b>決め事のやり取りができており申さぬゆえ、いまはこの端末のものが効いており申す。Apps Script を貼り替え、setup() を実行のうえ新バージョンでデプロイなされよ。"
-     :c.api?"<br>ここの決め事は<b>スプレッドシートに置いてあり、二人の端末で揃い申す。</b>（接続先と合言葉、CSVの列だけはこの端末のもの）"
-           :"<br><b>いまは未接続ゆえ、決め事はこの端末にしかござらぬ。</b>繋げば二人で揃い申す。"}</div>
+    ${c.api&&S.cfgStale?`<div class="warnbox"><b>帳面側のApps Scriptが古い版です。</b>貼り替えて新バージョンでデプロイしてください。</div>`:""}
   </div>`;
 }
 
@@ -2417,10 +2501,7 @@ function editorHTML(it, dupWarn){
     ${dupWarn||""}
     <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
     ${loan ? `
-      <div class="note">二人のあいだで動かす金。<b>家の金は動いており申さぬ</b>ゆえ
-      <b>今月の出費には入り申さぬ</b>が、<b>その月の振込額で受け渡しいたす</b> ――
-      <b>渡す人の振込が増え、受け取る人の振込が減り</b>申す。二人の合計は変わり申さぬ。</div>
-      <div class="flabel">誰から誰へ <span class="hint">口座を通して渡す向き</span></div>
+      <div class="flabel">誰から誰へ渡すか</div>
       ${chipRow("f-dir", LOAN_DIR(), it.payer, "dir")}
       <div class="field"><label>何のぶんか</label><input id="f-shop" value="${esc(it.shop||"")}" placeholder="貸す金／立替の返し"></div>
     ` : `
@@ -2429,14 +2510,13 @@ function editorHTML(it, dupWarn){
         <button class="chip ${it.cat===c.k?"on":""}" data-cat="${esc(c.k)}">${icon(c.ic,"s18")}${esc(c.k)}</button>`).join("")}</div>
       <div class="flabel">${inn?"どこへ入ったか":"どこから払ったか"}</div>
       ${chipRow("f-payer", inn?IN_TO():PAYERS(), it.payer, "payer")}
-      <div class="flabel">${inn?"誰のものか":"誰の分か"}
-        <span class="hint">${inn?"共有あてなら二人の振込が減り申す":"共有カードで個人のものを買ったら、ここを個人に"}</span></div>
+      <div class="flabel">${inn?"誰のものか":"誰の分か"}</div>
       ${chipRow("f-burden", BURDENS(), it.burden, "burden")}
       <div class="field"><label>${inn?"何の入金か":"店・内容"}</label>
         <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${inn?"◯◯生命 保険金":"マルエツ"}"></div>
     `}
     <div class="field"><label>日付</label><input id="f-date" type="date" value="${esc(it.date||today())}"></div>
-    <div class="field"><label>精算する月 <span class="hint">${loan?"この月の振込で相殺され申す":settleDay()+"日以降のものは翌月まわし"}。締めた月へは入り申さぬ</span></label>
+    <div class="field"><label>精算する月</label>
       <input id="f-pay" type="month" value="${esc(payOf(it))}"></div>
     <div class="field"><label>メモ</label><textarea id="f-memo" rows="1" placeholder="なくてもよい">${esc(it.memo||"")}</textarea></div>
     <button class="save" id="f-save">保存する</button>
@@ -2523,7 +2603,7 @@ function bindSheet(){
     const g=guessCat(shop.value);
     if(g && g!==sheetCtx.it.cat){
       const btn=root.querySelector(`[data-cat="${CSS.escape(g)}"]`);
-      if(btn){ btn.click(); toast(sheetCtx && sheetCtx.kind==="mrec" ? g+" と判断しました" : g+" と見立て申した"); }
+      if(btn){ btn.click(); toast(sheetCtx && sheetCtx.kind==="mrec" ? g+" と判断しました" : g+" と判断しました"); }
     }
   };
 
@@ -2531,7 +2611,7 @@ function bindSheet(){
   if(sv) sv.onclick=async ()=>{
     const it=sheetCtx.it;
     const n=Number(String(root.querySelector("#f-amt").value).replace(/[^0-9]/g,""));
-    if(!n){ toast("金額を入れてくだされ"); root.querySelector("#f-amt").focus(); return; }
+    if(!n){ toast("金額を入力してください"); root.querySelector("#f-amt").focus(); return; }
     it.amount=n;
     it.shop=(root.querySelector("#f-shop")||{value:""}).value.trim();
     it.date=root.querySelector("#f-date").value||today();
@@ -2549,14 +2629,14 @@ function bindSheet(){
     closeSheet();
     await pushItem(isNew?"add":"update", it);
     if(it.shop && !guessCat(it.shop)) learnDict(it.shop, it.cat);
-    toast(isNew?"入れ申した":"直し申した");
+    toast(isNew?"記録しました":"直しました");
   };
 
   const dl=root.querySelector("#f-del");
   if(dl) dl.onclick=async ()=>{
     if(!confirm("この記録を消しまするか。")) return;
     const it=sheetCtx.it; closeSheet();
-    await pushItem("delete", it); toast("消し申した");
+    await pushItem("delete", it); toast("削除しました");
   };
 
   bindConfigSheet(root);
@@ -2579,8 +2659,7 @@ function openConfig(kind){
     openSheet(sheetShell("スプレッドシートに繋ぐ", `
       <div class="field"><label>ウェブアプリのURL</label><input id="c-api" value="${esc(c.api)}" placeholder="https://script.google.com/macros/s/..."></div>
       <div class="field"><label>合言葉</label><input id="c-token" value="${esc(c.token)}" placeholder="二人で決めた言葉"></div>
-      <div class="note">Apps Scriptを配置したあと、そこで出たURLと合言葉をここへ入れると、二人の記録が一つに集まり申す。空のままでもこの端末だけで使えるでござる。</div>
-      <button class="save" id="c-save">繋ぐ</button>
+      <button class="save" id="c-save">接続する</button>
       <button class="save ghost" id="c-test">試して確かめる</button>
       <div id="c-diag"></div>`), {kind:"conn"});
   }
@@ -2594,20 +2673,12 @@ function openConfig(kind){
     const ps=(c.plans||[]).map(normPlan).slice().sort((a,b)=>b.from.localeCompare(a.from));
     const cur=planFor(S.month);
     openSheet(sheetShell("按分と拠出", `
-      <div class="note">按分の割合が効くのは<b>この固定額だけ</b>でござる。ここから足が出た共有の支払いは<b>折半</b>。
-      按分の外で上乗せしているもの（共有カード払いの個人保険など）は「上乗せ」に入れてくだされ。</div>
-      ${(cur.extra.r||cur.extra.m)
-        ? `<div class="note">上乗せの相殺は<b>カード明細の取り込み</b>が担い申す。
-           「個人の負担に倒す店」に入っている店は、取り込んだ折に自動でその人の負担になり申す。
-           <b>固定費に同じものを入れてはなり申さぬ</b> ―― 二重に数えて精算が狂い申す。</div>` : ""}
       <div class="flabel">${ymLabel(S.month)} に効いている決め事</div>
       <div class="field"><label>按分する固定額（二人合わせて）</label><input id="p-base" type="tel" inputmode="numeric" value="${yenPlain(cur.base)}"></div>
       <div class="field"><label>${esc(c.names.r)} の割合（％）</label><input id="p-ratio" type="tel" inputmode="numeric" value="${Math.round(cur.ratio*1000)/10}"></div>
       <div class="field"><label>${esc(c.names.r)} の上乗せ（保険など・無ければ0）</label><input id="p-er" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.r)}"></div>
       <div class="field"><label>${esc(c.names.m)} の上乗せ（無ければ0）</label><input id="p-em" type="tel" inputmode="numeric" value="${yenPlain(cur.extra.m)}"></div>
       <div class="field"><label>月々の積立貯蓄（<b>一人あたり</b>・無ければ0）</label><input id="p-sv" type="tel" inputmode="numeric" value="${yenPlain(cur.savings)}"></div>
-      <div class="note">積立は<b>二人とも同額</b>を余分に入れ、口座に貯めるもの。カードの請求ではござらぬゆえ、
-      「26日に口座から出る額」には入り申さぬ ―― <b>二人の振込のほうが積立の二人ぶんだけ多く</b>なり申す。</div>
       <div class="warnbox" id="p-calc"></div>
       <button class="save" id="p-save">この期を直す</button>
       <button class="save ghost" id="p-new">${ymLabel(S.month)}から新しい期を始める</button>
@@ -2616,8 +2687,6 @@ function openConfig(kind){
         <div class="sd num">${yenPlain(p.base)} を ${Math.round(p.ratio*100)}：${100-Math.round(p.ratio*100)}${p.extra.r||p.extra.m?"＋上乗せ":""}
         → ${yenPlain(cb.r)} / ${yenPlain(cb.m)}${p.savings?`　＋積立 ${yenPlain(p.savings)}ずつ`:""}</div></div>
         ${ps.length>1?`<button class="mini ghost" data-pdel="${esc(p.from)}">消す</button>`:""}</div>`; }).join("")}
-      <div class="note">割合は年に一度ほど見直すものと承ってござる。変えるときは<b>「新しい期を始める」</b>を押されよ ――
-      いま開いている月から先だけが変わり、過去の精算は動き申さぬ。</div>
       `), {kind:"plan", from:cur.from});
   }
   if(kind==="fixed"){
@@ -2627,8 +2696,7 @@ function openConfig(kind){
         <div class="setrow"><div><div class="sl">${esc(f.name)}</div>
           <div class="sd num">${yen(f.amount)}・${esc(f.cat)}・${esc(payerLabel(f.payer))}から・${esc(burdenLabel(f.burden))}の分</div></div>
           <button class="mini ghost" data-fxdel="${i}">消す</button></div>`).join("")
-        || '<div class="empty"><span class="e-ic">${icon("calendar_month")}</span>まだ無し</div>'}</div>
-      <div class="note">毎月かならず出ていくものを入れておくと、ひとりでに数え上げ申す。<b>共有カードで払っている個人の保険</b>のようなものは、払う元を「共有カード」・誰の分かを「個人」にすると正しく精算されるでござる。</div>
+        || emptyHTML("固定費はありません","")}</div>
       <div class="field"><label>名前</label><input id="fx-name" placeholder="家賃"></div>
       <div class="field"><label>金額</label><input id="fx-amt" type="tel" inputmode="numeric" placeholder="133330"></div>
       <div class="field"><label>費目</label><select id="fx-cat">${CATS.map(x=>`<option ${x.k==="住居"?"selected":""}>${esc(x.k)}</option>`).join("")}</select></div>
@@ -2639,11 +2707,7 @@ function openConfig(kind){
   if(kind==="mine"){
     const who=k=>esc(k==="r"?c.names.r:c.names.m);
     openSheet(sheetShell("個人の負担に倒す店", `
-      <div class="note">共有カードで払ってはいるが、<b>共有すべきでない個人の支出</b>の店。
-      明細を取り込んだ折に、この言葉が店名に含まれていれば自動でその人の負担になり申す。
-      旧Excelで負の数を書いていたものが、これにあたる。</div>
-      <div class="warnbox">上乗せを入れておられるなら、<b>それに見合う額がここで倒れるようにしておくこと。</b>
-      倒れぬと、貸し借りの無い月にも上乗せの半分が精算として出てしまい申す。</div>
+      <div class="warnbox">上乗せがある場合は、見合う店をここに入れてください。</div>
       <div id="mn-list">${(c.mine||[]).map((d,i)=>`
         <div class="setrow"><div><div class="sl">${esc(d.kw)}</div><div class="sd">${who(d.who)}の負担</div></div>
         <button class="mini ghost" data-mndel="${i}">消す</button></div>`).join("")}</div>
@@ -2654,7 +2718,6 @@ function openConfig(kind){
   }
   if(kind==="dict"){
     openSheet(sheetShell("店名の振り分け", `
-      <div class="note">この言葉が店名に含まれていたら、その費目と見立て申す。手で入れた店も覚えてゆく。</div>
       <div id="dc-list">${(c.dict||[]).map((d,i)=>`
         <div class="setrow"><div><div class="sl">${esc(d.kw)}</div><div class="sd">${esc(d.cat)}</div></div>
         <button class="mini ghost" data-dcdel="${i}">消す</button></div>`).join("")}</div>
@@ -2671,56 +2734,37 @@ function openConfig(kind){
     const m=S.month, bal=loanOf(m), N=c.names;
     const from = bal>0 ? N.r : N.m, to = bal>0 ? N.m : N.r;   // 正 = 諒 → 万貴
     openSheet(sheetShell("直に手渡しで済ませた", `
-      <div class="note">${ymLabel(m)}の精算で動かすことになっておるのは
-      <b>${esc(from)} → ${esc(to)} ${yen(Math.abs(bal))}</b> にござる。
-      いまはこれが<b>振込額に折り込まれてござる</b> ―― 渡す${esc(from)}が多く、受け取る${esc(to)}が少なく入れる形。</div>
-      <div class="warnbox"><b>口座を通さず、直に手渡しで済ませた</b>ときだけ押されよ。
-      逆向きの記録を1本立て、この月の貸し借りを0に戻し申す
-      ―― 消さぬのは、いつ幾ら渡したかを残すためでござる。<br>
-      押せば<b>振込額から貸し借りのぶんが消え</b>、二人とも本来の額に戻り申す。</div>
+      <div class="warnbox">口座を通さず直に渡したときだけ押してください。逆向きの記録を1本足し、この月の貸し借りを0に戻します。</div>
       <div class="field"><label>渡した日</label><input id="cr-on" type="date" value="${esc(today())}"></div>
       <button class="save" id="cr-go">${esc(from)} が ${esc(to)} へ ${yen(Math.abs(bal))} を直に手渡した</button>`), {kind:"clear", bal, m});
   }
   if(kind==="settle"){
     const cl=Object.keys(c.closed||{}).sort().reverse();
     openSheet(sheetShell("精算日", `
-      <div class="note">二人が共有口座へ振り込む日にござる。カードの引き落としは<b>26日</b>ゆえ、
-      それより前に入れておく段取り。<b>この日を過ぎると「締める」の札が濃く出申す。</b></div>
       <div class="field"><label>毎月何日か</label><input id="st-day" type="tel" inputmode="numeric" value="${settleDay()}"></div>
-      <div class="note">⚠ これは<b>見込みにすぎ申さぬ。</b>真は「精算した」を押した記録のほう。
-      この日より後に自分の財布から立て替えたものは、翌月の精算へ回り申す。</div>
       <button class="save" id="st-save">変える</button>
       ${cl.length?`<div class="flabel" style="margin-top:22px">締めた月</div>
         ${cl.map(k=>{ const d=c.closed[k]; return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}</div>
-          <div class="sd num">${esc(String(d.on||"").replace(/-/g,"/"))} に締め・${esc(c.names.r)} ${yenPlain(d.r||0)} ／ ${esc(c.names.m)} ${yenPlain(d.m||0)}</div></div></div>`;
-          }).join("")}
-        <div class="note">締めを解くには、その月を開いて精算の札から「締めを解く」を押されよ。</div>`:""}`), {kind:"settle"});
+          <div class="sd num">${esc(String(d.on||"").replace(/-/g,"/"))}・${esc(c.names.r)} ${yenPlain(d.r||0)} ／ ${esc(c.names.m)} ${yenPlain(d.m||0)}</div></div></div>`;
+          }).join("")}`:""}`), {kind:"settle"});
   }
   if(kind==="close"){
     const m=S.month, t=transfer(m), N=c.names;
     const pin=t.list.filter(x=>!x.fixed && !normYM(x.pay));   // 精算月を刻む相手
     openSheet(sheetShell(ymLabel(m)+"の精算を締める", `
-      <div class="note">この月ぶんを<b>共有口座へ振り込んだ</b>ら締めてくだされ。
-      締めると額が控えとして残り、<b>あとから按分や固定費を直しても動き申さぬ。</b>
-      以後に足した記録は、次の精算へひとりでに回り申す。</div>
       <div class="sumrow"><span>${esc(N.r)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.r))}</b></div>
       <div class="sumrow"><span>${esc(N.m)} が振り込む</span><b class="num">${yen(Math.max(0,t.send.m))}</b></div>
       ${t.savings?`<div class="sumrow"><span>うち積立貯蓄（一人ずつ）</span><b class="num">${yen(t.savings)}</b></div>`:""}
       <div class="sumrow big"><span>26日に口座から出る</span><b class="num">${yen(t.out)}</b></div>
-      <div class="note num">この精算に乗っているのは <b>${t.list.filter(x=>!x.fixed).length}件</b>
-        （うち <b>${pin.length}件</b>に精算月を刻んで凍らせ申す）＋ 固定費。</div>
+      <div class="note num">対象 <b>${t.list.filter(x=>!x.fixed).length}件</b>（うち ${pin.length}件の精算月を固定）＋ 固定費</div>
       <div class="field"><label>振り込んだ日</label><input id="cl-on" type="date" value="${esc(today())}"></div>
       <button class="save" id="cl-go">この額で締める</button>`), {kind:"close", m});
   }
   if(kind==="reopen"){
     const m=S.month, d=closedOf(m)||{}, N=c.names;
     openSheet(sheetShell(ymLabel(m)+"の締めを解く", `
-      <div class="warnbox">締めを解くと、この月の振込額は<b>いまの決め事で算し直され申す。</b>
-      ${esc(String(d.on||"").replace(/-/g,"/"))} に控えた
-      <b>${esc(N.r)} ${yen(d.r||0)}／${esc(N.m)} ${yen(d.m||0)}</b> は失われ申す。</div>
-      <div class="note">記録に刻んだ精算月は<b>そのまま残し申す。</b>
-      解いたあと締め直しても、同じ記録が同じ月に乗るようにするためでござる。
-      どうしても動かしたい記録があれば、その記録を開いて「精算する月」を直してくだされ。</div>
+      <div class="warnbox"><b>この月の振込額は、いまの決め事で再計算されます。</b>
+      ${esc(String(d.on||"").replace(/-/g,"/"))} に控えた ${esc(N.r)} ${yen(d.r||0)}／${esc(N.m)} ${yen(d.m||0)} は失われます。</div>
       <button class="save del" id="ro-go">締めを解く</button>`), {kind:"reopen", m});
   }
   /* 引落月の振り直し（2026-08-20 追加）
@@ -2732,15 +2776,12 @@ function openConfig(kind){
     bad.forEach(x=>{ const k=String(x.date).slice(0,7); (byM[k]=byM[k]||[]).push(x); });
     const keys=Object.keys(byM).sort();
     openSheet(sheetShell("引落月を振り直す", `
-      <div class="note">共有カードは<b>月末締め・翌月26日払い</b>にござる。
-      取り込んだ明細に引落月が入っておらぬと、振込の札が出ぬまま
-      「明細がまだ1件もござらぬ」と鳴り続け申す。ここで<b>利用月の翌月</b>を当て直せまする。</div>
       ${keys.length ? keys.map(k=>{
         const sum=byM[k].reduce((a,b)=>a+(Number(b.amount)||0),0);
         return `<div class="setrow"><div><div class="sl num">${ymLabel(k)}利用・${byM[k].length}件</div>
           <div class="sd num">${yen(sum)} → <b>${ymLabel(shiftMonth(k,1))}</b>引落へ</div></div></div>`;
         }).join("")
-      : `<div class="empty"><span class="e-ic">${icon("check_circle")}</span>引落月の抜けはござらぬ</div>`}
+      : `<div class="empty"><span class="e-ic">${icon("check_circle")}</span>抜けはありません</div>`}
       ${keys.length?`<button class="save" id="fp-go">${bad.length}件に振り直す</button>`:""}`), {kind:"fixpay"});
   }
 }
@@ -2757,8 +2798,8 @@ function bindConfigSheet(root){
     const box=root.querySelector("#c-diag");
     const api0=root.querySelector("#c-api").value.trim().replace(/\/exec.*$/,"/exec");
     const tok0=root.querySelector("#c-token").value.trim();
-    if(!api0){ box.innerHTML=`<div class="warnbox">URLが空でござる。</div>`; return; }
-    box.innerHTML=`<div class="note">試しており申す…</div>`;
+    if(!api0){ box.innerHTML=`<div class="warnbox">URLが空です。</div>`; return; }
+    box.innerHTML=`<div class="note">確認しています…</div>`;
     const hit = async (action, tok) => {
       const u = api0 + (api0.includes("?")?"&":"?") + "action="+encodeURIComponent(action)
               + "&token="+encodeURIComponent(tok||"");
@@ -2773,31 +2814,30 @@ function bindConfigSheet(root){
       await hit("ping","");
     }catch(e){
       box.innerHTML = e.message==="HTML"
-        ? ng("デプロイの「アクセスできるユーザー」が『全員』になっており申さぬ。",
+        ? ng("デプロイの「アクセスできるユーザー」が『全員』になっていません。",
              "Apps Script → デプロイ → デプロイを管理 → 鉛筆 →「アクセスできるユーザー」を<b>全員</b>に。")
-        : ng("URLへ届き申さぬ ―― "+esc(e.message),
-             "末尾が <b>/exec</b> のURLでござるか。デプロイを一度も行っておらぬ、または消してしまった見込み。");
+        : ng("URLに届きません（"+esc(e.message)+"）。",
+             "末尾が <b>/exec</b> のURLか、デプロイ済みかを確認してください。");
       return;
     }
     let j;
     try{ j = await hit("list", tok0); }
-    catch(e){ box.innerHTML = ng("URLは生きており申すが、明細が読めず申さぬ ―― "+esc(e.message), "帳面の `setup` を実行なされたか。"); return; }
+    catch(e){ box.innerHTML = ng("URLは生きていますが、明細が読めません（"+esc(e.message)+"）。", "帳面の <code>setup</code> を実行したか確認してください。"); return; }
     if(j.ok===false && /合言葉/.test(j.error||"")){
-      box.innerHTML = ng("URLは正しゅうござるが、<b>合言葉が食い違うており申す。</b>",
-        "帳面の <code>Code.gs</code> を貼り替えると <code>var TOKEN</code> が雛形へ戻り申す。"
-        + "そこを二人の合言葉に直すか、スクリプト プロパティに <b>TOKEN</b> を登録なされよ（以後は貼り替えても保たれ申す）。");
+      box.innerHTML = ng("<b>合言葉が一致しません。</b>",
+        "<code>Code.gs</code> を貼り替えると <code>var TOKEN</code> が雛形へ戻ります。"
+        + "スクリプト プロパティに <b>TOKEN</b> を登録すると、貼り替えても保たれます。");
       return;
     }
-    if(j.ok===false){ box.innerHTML = ng("帳面が断り申した ―― "+esc(j.error||""), "「知らぬ用向き」と出るなら、<b>新バージョンでのデプロイ</b>がまだにござる。"); return; }
+    if(j.ok===false){ box.innerHTML = ng("帳面が断りました（"+esc(j.error||"")+"）。", "「知らぬ用向き」と出るなら、新バージョンでのデプロイがまだです。"); return; }
     /* ⚠ 古い帳面は「知らぬ用向き: config」を **JSONで正しく** 返す。
-       投げてはこぬゆえ、`ok===false` も併せて見ねば「万全」と偽って告げてしまう。 */
-    const stale = "<br>⚠ ただし<b>帳面が古うござる。</b>決め事のやり取りができており申さぬ。"
-                + "<code>Code.gs</code> を貼り替え、<code>setup</code> を実行のうえ新バージョンでデプロイなされよ。";
+       投げてこないので、`ok===false` も併せて見ないと「問題なし」と誤って伝えてしまう。 */
+    const stale = "<br><b>帳面が古い版です。</b><code>Code.gs</code> を貼り替え、<code>setup</code> を実行し、新バージョンでデプロイしてください。";
     let cfgMsg="";
-    try{ const c=await hit("config", tok0); cfgMsg = (c && c.ok) ? "決め事のやり取りもでき申す。" : stale; }
+    try{ const c=await hit("config", tok0); cfgMsg = (c && c.ok) ? "" : stale; }
     catch(e){ cfgMsg = stale; }
     box.innerHTML = `<div class="warnbox" style="background:var(--m-primary-container);color:var(--m-on-primary-container)">
-      <b>繋がってござる。</b>明細 ${((j.items||[]).length)} 件が読め申した。${cfgMsg}</div>`;
+      <b>接続できました。</b>明細 ${((j.items||[]).length)} 件を確認しました。${cfgMsg}</div>`;
   };
 
   const sv=root.querySelector("#c-save");
@@ -2811,14 +2851,14 @@ function bindConfigSheet(root){
       if(nu){ try{ const p=await mineHit(nu,"ping",""); if(p && p.kind==="mine"){ toast("これは個人帳面のURLです。共有の家計簿のURLを入れてください"); return; } }catch(e){} }
       c.api=nu;
       c.token=root.querySelector("#c-token").value.trim();
-      save("cfg",c); closeSheet(); toast("繋ぎにゆき申す"); await pullAll();
-      toast(S.online?"繋がり申した":"繋がらず："+S.err); return;
+      save("cfg",c); closeSheet(); toast("接続します"); await pullAll();
+      toast(S.online?"接続しました":"接続できません："+S.err); return;
     }
     if(k==="names"){
       c.names.r=root.querySelector("#c-n1").value.trim()||"諒";
       c.names.m=root.querySelector("#c-n2").value.trim()||"万貴";
     }
-    saveCfg(); closeSheet(); render(); toast("変え申した");
+    saveCfg(); closeSheet(); render(); toast("変更しました");
   };
 
   const readPlan = ()=>({
@@ -2831,8 +2871,8 @@ function bindConfigSheet(root){
   if(calc){
     const show=()=>{
       const v=readPlan(), cb=contribOf(v);
-      calc.innerHTML = `毎月 共有の財布へ入れる額 ―― <b>${esc(c.names.r)} ${yen(cb.r)}</b>／<b>${esc(c.names.m)} ${yen(cb.m)}</b>`
-        + (v.savings?`<br>これに<b>積立 ${yen(v.savings)}</b> を二人とも上乗せ ―― 口座には毎月 ${yen(v.savings*2)} 貯まり申す。`:"");
+      calc.innerHTML = `毎月の拠出　<b>${esc(c.names.r)} ${yen(cb.r)}</b>／<b>${esc(c.names.m)} ${yen(cb.m)}</b>`
+        + (v.savings?`<br>積立 ${yen(v.savings)} ずつ上乗せ（毎月 ${yen(v.savings*2)}）`:"");
     };
     ["p-base","p-ratio","p-er","p-em","p-sv"].forEach(id=>{ const el=root.querySelector("#"+id); if(el) el.oninput=show; });
     show();
@@ -2841,7 +2881,7 @@ function bindConfigSheet(root){
   if(psv) psv.onclick=()=>{
     const v=readPlan(), p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
     if(p){ p.base=v.base; p.ratio=v.ratio; p.extra=v.extra; p.savings=v.savings; }
-    saveCfg(); closeSheet(); render(); toast("直し申した");
+    saveCfg(); closeSheet(); render(); toast("直しました");
   };
   const pnew=root.querySelector("#p-new");
   if(pnew) pnew.onclick=()=>{
@@ -2874,7 +2914,7 @@ function bindConfigSheet(root){
   const stv=root.querySelector("#st-save");
   if(stv) stv.onclick=()=>{
     const d=Math.min(28,Math.max(1,num(root.querySelector("#st-day"))||20));
-    c.settleDay=d; saveCfg(); closeSheet(); render(); toast("毎月"+d+"日に改め申した");
+    c.settleDay=d; saveCfg(); closeSheet(); render(); toast("精算日を毎月"+d+"日にしました");
   };
 
   const clg=root.querySelector("#cl-go");
@@ -2887,13 +2927,13 @@ function bindConfigSheet(root){
     c.closed=Object.assign({}, c.closed||{}, {[m]:{
       on, r:Math.max(0,t.send.r), m:Math.max(0,t.send.m), out:Math.round(t.out),
       sv:t.savings, n:t.list.filter(x=>!x.fixed).length}});
-    saveCfg(); render(); toast(ymLabel(m)+"の精算を締め申した");
+    saveCfg(); render(); toast(ymLabel(m)+"の精算を締めました");
   };
   const rog=root.querySelector("#ro-go");
   if(rog) rog.onclick=()=>{
     const m=sheetCtx.m, nx=Object.assign({}, c.closed||{});
     delete nx[m]; c.closed=nx;
-    saveCfg(); closeSheet(); render(); toast(ymLabel(m)+"の締めを解き申した");
+    saveCfg(); closeSheet(); render(); toast(ymLabel(m)+"の締めを解きました");
   };
 
   const fpg=root.querySelector("#fp-go");
@@ -2901,18 +2941,18 @@ function bindConfigSheet(root){
     const bad=needPay(); closeSheet();
     for(const x of bad) await pushItem("update", Object.assign({}, x,
       {pay: shiftMonth(String(x.date).slice(0,7), 1)}));
-    render(); toast(bad.length+"件の引落月を振り直し申した");
+    render(); toast(bad.length+"件の引落月を振り直しました");
   };
 
   const fxa=root.querySelector("#fx-add");
   if(fxa) fxa.onclick=()=>{
     const name=root.querySelector("#fx-name").value.trim();
     const amt=num(root.querySelector("#fx-amt"));
-    if(!name||!amt){ toast("名前と金額を入れてくだされ"); return; }
+    if(!name||!amt){ toast("名前と金額を入力してください"); return; }
     const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
     (p.fixed=p.fixed||[]).push({name,amount:amt,cat:root.querySelector("#fx-cat").value,
       payer:root.querySelector("#fx-payer").value, burden:root.querySelector("#fx-burden").value, on:true});
-    saveCfg(); closeSheet(); render(); toast("足し申した");
+    saveCfg(); closeSheet(); render(); toast("追加しました");
   };
   root.querySelectorAll("[data-fxdel]").forEach(b=>b.onclick=()=>{
     const p=c.plans.map(normPlan).find(x=>x.from===sheetCtx.from);
@@ -2923,9 +2963,9 @@ function bindConfigSheet(root){
   const mna=root.querySelector("#mn-add");
   if(mna) mna.onclick=()=>{
     const kw=root.querySelector("#mn-kw").value.trim();
-    if(!kw){ toast("言葉を入れてくだされ"); return; }
+    if(!kw){ toast("言葉を入力してください"); return; }
     (c.mine=c.mine||[]).push({kw,who:root.querySelector("#mn-who").value});
-    saveCfg(); openConfig("mine"); toast("覚え申した");
+    saveCfg(); openConfig("mine"); toast("覚えました");
   };
   root.querySelectorAll("[data-mndel]").forEach(b=>b.onclick=()=>{
     c.mine.splice(Number(b.dataset.mndel),1); saveCfg(); openConfig("mine");
@@ -2933,9 +2973,9 @@ function bindConfigSheet(root){
   const dca=root.querySelector("#dc-add");
   if(dca) dca.onclick=()=>{
     const kw=root.querySelector("#dc-kw").value.trim();
-    if(!kw){ toast("言葉を入れてくだされ"); return; }
+    if(!kw){ toast("言葉を入力してください"); return; }
     c.dict.push({kw,cat:root.querySelector("#dc-cat").value});
-    saveCfg(); openConfig("dict"); toast("覚え申した");
+    saveCfg(); openConfig("dict"); toast("覚えました");
   };
   root.querySelectorAll("[data-dcdel]").forEach(b=>b.onclick=()=>{
     c.dict.splice(Number(b.dataset.dcdel),1); saveCfg(); openConfig("dict");
@@ -2946,9 +2986,7 @@ function bindConfigSheet(root){
 
 function openReceipt(){
   openSheet(sheetShell("レシートを撮る", `
-    <div class="note">レシートを1枚まるごと写してくだされ。日付・店名・合計を読み取り、入力の画面に載せ申す。
-    カード明細に同じ買い物がすでに入っておれば、その場でお知らせいたす。</div>
-    ${S.cfg.api?"":'<div class="warnbox">スプレッドシートに繋いでおらぬため、この機能は使えませぬ。先に「データの置き場」を設定してくだされ。</div>'}
+    ${S.cfg.api?"":'<div class="warnbox"><b>スプレッドシートに未接続です。</b>設定から接続してください。</div>'}
     <div class="field"><label>レシートの写真</label><input id="rc-file" type="file" accept="image/*" capture="environment" ${S.cfg.api?"":"disabled"}></div>
     <div id="rc-body"></div>`), {kind:"receipt"});
 }
@@ -2957,10 +2995,10 @@ function openReceipt(){
 function shrinkImage(file, maxEdge){
   return new Promise((resolve,reject)=>{
     const rd=new FileReader();
-    rd.onerror=()=>reject(new Error("写真が読めず"));
+    rd.onerror=()=>reject(new Error("写真を読めませんでした"));
     rd.onload=()=>{
       const img=new Image();
-      img.onerror=()=>reject(new Error("写真が開けず"));
+      img.onerror=()=>reject(new Error("写真を開けませんでした"));
       img.onload=()=>{
         const sc=Math.min(1, maxEdge/Math.max(img.width,img.height));
         const w=Math.round(img.width*sc), h=Math.round(img.height*sc);
@@ -2981,33 +3019,30 @@ function bindReceiptSheet(root){
   f.onchange=async ()=>{
     const file=f.files[0]; if(!file) return;
     const body=document.getElementById("rc-body");
-    body.innerHTML=`<div class="note"><span class="spin"></span>写真を整えており申す…</div>`;
+    body.innerHTML=`<div class="note"><span class="spin"></span>写真を整えています…</div>`;
     let img;
     try{ img=await shrinkImage(file, 1600); }
     catch(e){ body.innerHTML=`<div class="warnbox">${esc(e.message)}</div>`; return; }
 
     body.innerHTML=`<img class="thumb" src="${img.dataUrl}" alt="">
-      <div class="note"><span class="spin"></span>読み取っており申す。しばしお待ちを…</div>`;
+      <div class="note"><span class="spin"></span>読み取っています…</div>`;
     try{
       const j=await api("receipt", {image:img.base64, mime:"image/jpeg"});
       const r=j.receipt||{};
       const amount=Number(r.total)||0;
-      if(!amount) throw new Error("合計が読み取れ申さず");
+      if(!amount) throw new Error("合計を読み取れませんでした");
       const it={ id:"", date:r.date||today(), cat:guessCat(r.shop)||"食費",
                  amount, payer:"c", burden:"share", shop:r.shop||"",
                  memo:(r.items||[]).slice(0,4).map(x=>x.name).filter(Boolean).join("・") };
       const dup=findDup(it, S.items);
       const warn = dup
-        ? `<div class="warnbox">同じ買い物がすでに入っておるやもしれませぬ ――
-             <b>${esc(dup.shop||dup.cat)} ${yen(dup.amount)}（${esc(dup.date)}）</b>。
-             重ねて入れると二重に数えられ申す。閉じるか、金額を確かめてくだされ。</div>`
+        ? `<div class="warnbox"><b>同じ買い物が入っている可能性があります：</b>${esc(dup.shop||dup.cat)} ${yen(dup.amount)}（${esc(dup.date)}）</div>`
         : "";
       closeSheet();
       setTimeout(()=>openEditor(it, {warn, src:"レシート"}), 260);
-      if(!dup) toast("読み取り申した");
+      if(!dup) toast("読み取りました");
     }catch(e){
-      body.innerHTML=`<div class="warnbox">読み取れ申さず：${esc(e.message)}</div>
-        <div class="note">明るいところで、レシート全体が入るように撮り直してくだされ。それでも駄目なら ＋ から手で入れられ申す。</div>`;
+      body.innerHTML=`<div class="warnbox"><b>読み取れませんでした：</b>${esc(e.message)}</div>`;
     }
   };
 }
@@ -3034,9 +3069,6 @@ function parseCSV(text){
 
 function openCsv(){
   openSheet(sheetShell("カード明細を取り込む", `
-    <div class="note">Vpass（パソコン）で明細を開き「CSV形式で保存する」で落としたファイルを選んでくだされ。
-    どの列が何かは、この後この画面で選び申す。一度選べば次から覚えており申す。
-    取り込んだ分はすべて<b>共有カード払い・共有の負担</b>として入り申すゆえ、個人のものは後から履歴で振り分けてくだされ。</div>
     <div class="field"><label>CSVファイル</label><input id="cv-file" type="file" accept=".csv,text/csv"></div>
     <div id="cv-body"></div>`), {kind:"csv"});
 }
@@ -3062,7 +3094,7 @@ function bindCsvSheet(root){
 }
 
 function showCsvMap(rows){
-  if(!rows.length){ toast("中身が読めず"); return; }
+  if(!rows.length){ toast("中身を読めませんでした"); return; }
   const width=Math.max(...rows.map(r=>r.length));
   const head=rows[0], saved=S.cfg.csvMap||{};
   const colOpts=sel=>Array.from({length:width},(_,i)=>
@@ -3077,11 +3109,8 @@ function showCsvMap(rows){
     <div class="maprow"><span class="mk">金額</span><select id="m-amt">${colOpts("amt")}</select></div>
     <div class="maprow"><span class="mk">飛ばす行</span><select id="m-skip">
       ${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${String(saved.skip)===String(n)?"selected":""}>先頭 ${n} 行</option>`).join("")}</select></div>
-    <div class="flabel">いつ共有口座から引き落とされる分か</div>
+    <div class="flabel">引き落とされる月（Vpassの「お支払い分」）</div>
     <div class="maprow"><span class="mk">引落月</span><input id="m-pay" type="month" value="${guessPay(rows)}"></div>
-    <div class="note">明細に載っている<b>利用日</b>と、口座から<b>出ていく日</b>はひと月ずれ申す（毎月26日引落）。
-    振込額はこの引落月で数え申すゆえ、ここを違えると振込が合わなくなり申す。
-    <b>Vpassで開いていた「◯年◯月お支払い分」と同じ月</b>を選んでくだされ。</div>
     <div id="cv-prev"></div>
     <button class="save" id="cv-go">取り込む</button>`;
 
@@ -3109,13 +3138,9 @@ function showCsvMap(rows){
     const mine=fresh.filter(x=>x.burden!=="share").length;
     document.getElementById("cv-prev").innerHTML = list.length
       ? `<div class="card" style="margin-top:14px">${fresh.slice(0,5).map(rowHTML).join("")||emptyHTML("新しいものは無し","")}</div>
-         <div class="note num">読めたもの ${list.length} 件のうち、新しいものは <b>${fresh.length} 件・${yen(sum)}</b>。
-         ${list.length-fresh.length?`残り ${list.length-fresh.length} 件はすでに入っており申す。`:""}
-         ${mine?`<br>うち <b>${mine}件</b>は「個人の負担に倒す店」に当たったゆえ、自動で個人の負担にいたす。`:""}</div>
-         ${clash.length?`<div class="warnbox">取り込む行と<b>同じ額の固定費</b>がござる ――
-           ${clash.slice(0,4).map(v=>esc(v.f)+"（明細では「"+esc(v.s)+"」）").join("、")}。
-           <b>二重に数えて精算が狂い申す。</b>設定 → 固定費 から、その固定費を外してくだされ。</div>`:""}`
-      : `<div class="note">その組み合わせでは1件も読めており申さぬ。列か、飛ばす行を変えてくだされ。</div>`;
+         <div class="note num">読めた ${list.length} 件のうち新規 <b>${fresh.length} 件・${yen(sum)}</b>${list.length-fresh.length?`（取込済み ${list.length-fresh.length} 件）`:""}${mine?`・個人の負担 ${mine} 件`:""}</div>
+         ${clash.length?`<div class="warnbox"><b>同じ額の固定費があります：</b>${clash.slice(0,4).map(v=>esc(v.f)+"（明細では「"+esc(v.s)+"」）").join("、")}。二重に数えるため、設定の固定費から外してください。</div>`:""}`
+      : `<div class="note">1件も読めません。列か飛ばす行を変えてください。</div>`;
     document.getElementById("cv-go").disabled = !fresh.length;
   };
   ["m-date","m-shop","m-amt","m-skip","m-pay"].forEach(id=>document.getElementById(id).onchange=refresh);
@@ -3130,7 +3155,7 @@ function showCsvMap(rows){
     const fresh=csvToItems(rows,map).filter(x=>!findDup(x,S.items));
     closeSheet();
     await pushMany("add", fresh);          // ⚠ 1件ずつ送ると40件で40往復して待たされる
-    toast(fresh.length+"件を取り込み申した");
+    toast(fresh.length+"件を取り込みました");
   };
 
   function autoGuess(){
@@ -3202,8 +3227,7 @@ function myEditorHTML(it){
   let mid;
   if(t==="移動"){
     mid = `<div class="field"><label>元の口座</label><select id="m-acct">${acctOpts(it.acct,true)}</select></div>
-      <div class="field"><label>先の口座</label><select id="m-to">${acctOpts(it.to,true)}</select></div>
-      <div class="note">自分の口座間の動きです。収入にも支出にも数えません。投資口座へ移すと、貯蓄として数えます。</div>`;
+      <div class="field"><label>先の口座</label><select id="m-to">${acctOpts(it.to,true)}</select></div>`;
   }else{
     /* 支出の費目に「貯蓄」は出さない。積立・投資への入金は「移動」で記録する（消費に数えられてしまうため）。 */
     /* 「共有立替」はカード明細の取り込みが付ける費目。手入力の新規では出さず、カードの行を直すときだけ出す。 */
@@ -3218,9 +3242,9 @@ function myEditorHTML(it){
       <div class="field"><label>${t==="収入"?"何の収入か":"店・内容"}</label>
         <input id="f-shop" value="${esc(it.shop||"")}" placeholder="${t==="収入"?"給与":"店名など"}"></div>
       <div class="note">${t==="収入"
-        ? "共有口座に入った入金（保険金・助成金など）は、共有の家計簿に記録します。ここには入れないでください。"
-        : "共有の家計簿に記録した立て替えや、20日の振込は入れないでください（二重に数えます）。積立・投資への入金は「移動」で記録します。"}</div>
-      ${(t==="支出" && it.to && myAcct(it.to) && myAcct(it.to).kind==="カード") ? `<div class="note">銀行から取り込んだ、${esc(myAcctName(it.to))}の引落です。<b>カード明細を取り込むと、移動に切り替わります。</b>金額・日付は直さないでください（明細の合計と合わなくなります）。</div>` : ""}`;
+        ? "共有口座への入金は、共有の家計簿に記録します。"
+        : "共有の家計簿に記録済みの立て替え・振込は入れない（二重になります）。投資への入金は「移動」で記録します。"}</div>
+      ${(t==="支出" && it.to && myAcct(it.to) && myAcct(it.to).kind==="カード") ? `<div class="note">${esc(myAcctName(it.to))}の引落（暫定）。金額・日付は直さないでください。</div>` : ""}`;
   }
   return sheetShell(isNew?"個人の記録":"記録を直す", `${typeRow}
     <div class="amtbox"><input id="f-amt" type="tel" inputmode="numeric" placeholder="0" value="${it.amount?yenPlain(it.amount):""}"></div>
@@ -3255,9 +3279,7 @@ function openMine(kind){
   if(kind==="m-conn"){
     const N=c.names;
     openSheet(sheetShell("個人帳面に接続", `
-      <div class="note">資産タブ用の個人帳面（共有の家計簿とは別のスプレッドシート）に接続します。
-      URLと合言葉は、共有の家計簿とは別のものを入れてください。空のままでも、この端末だけで記録できます。</div>
-      <div class="field"><label>ウェブアプリのURL</label><input id="m-api" value="${esc(c.mineApi)}" placeholder="https://script.google.com/macros/s/..."></div>
+      <div class="field"><label>ウェブアプリのURL（共有とは別のもの）</label><input id="m-api" value="${esc(c.mineApi)}" placeholder="https://script.google.com/macros/s/..."></div>
       <div class="field"><label>合言葉</label><input id="m-token" value="${esc(c.mineToken)}" placeholder="個人帳面用の合言葉"></div>
       <div class="flabel">この端末の持ち主</div>
       <div class="trio" id="m-owner">${["r","m"].map(k=>`<button class="chip ${myMe()===k?"on":""}" data-owner="${k}">${esc(N[k])}</button>`).join("")}</div>
@@ -3268,41 +3290,28 @@ function openMine(kind){
   if(kind==="m-accts"){
     const list=S.my.accts.slice().sort((a,b)=>(a.order||0)-(b.order||0));
     openSheet(sheetShell("口座", `
-      <div class="note">資産として数える口座です。使っていない口座は「休眠」にすると、選択肢の後ろに回ります。
-      「拘束」は、iDeCoのように引き出せない資産に付けます。取引で使われている口座は削除できません。</div>
       <div id="ma-list">${list.map(a=>acctRowHTML(a,false)).join("")}</div>
       <button class="save ghost" id="ma-add">口座を追加</button>
       <button class="save" id="ma-save">保存する</button>`), {kind:"m-accts"});
   }
   if(kind==="m-sal"){
     openSheet(sheetShell("給与の取り込み", `
-      <div class="note">salary-export.ps1 で書き出した「給与取り込み.json」を選びます。給与・賞与・給付金を収入として取り込みます。
-      同じ内容を何度取り込んでも二重にはなりません（idで上書きします）。</div>
-      <div class="field"><label>JSONファイル</label><input id="ms-file" type="file" accept=".json,application/json"></div>
+      <div class="field"><label>給与取り込み.json</label><input id="ms-file" type="file" accept=".json,application/json"></div>
       <div id="ms-body"></div>`), {kind:"m-sal"});
   }
   if(kind==="m-bank"){
     openSheet(sheetShell("銀行の明細を取り込む", `
-      <div class="note">三井住友・三菱UFJの取引履歴のCSVを選びます（Shift_JISのまま読めます）。
-      給与・賞与・給付金は、給与の取り込みで入れた行へ、実際の入金日と口座を書き込みます。
-      同じ明細を何度取り込んでも、二重にはなりません。</div>
-      <div class="field"><label>CSVファイル</label><input id="mb-file" type="file" accept=".csv,text/csv"></div>
+      <div class="field"><label>三井住友・三菱UFJのCSV</label><input id="mb-file" type="file" accept=".csv,text/csv"></div>
       <div id="mb-body"></div>`), {kind:"m-bank"});
   }
   if(kind==="m-card"){
     openSheet(sheetShell("個人カードの明細を取り込む", `
-      <div class="note">PayPayカード・JCBカードの利用明細CSVを選びます。複数のファイルを一度に選べます（文字コードは自動で読み分けます）。
-      銀行の引落は、金額が明細の合計と一致すれば「移動」に切り替わり、消費を二重に数えません。
-      同じ明細を何度取り込んでも、二重にはなりません。</div>
-      <div class="field"><label>CSVファイル</label><input id="mc-file" type="file" multiple accept=".csv,text/csv"></div>
+      <div class="field"><label>PayPay・JCBのCSV（複数可）</label><input id="mc-file" type="file" multiple accept=".csv,text/csv"></div>
       <div id="mc-body"></div>`), {kind:"m-card"});
   }
   if(kind==="m-rules"){
     openSheet(sheetShell("銀行の分類規則", `
-      <div class="note">本人の名義・勤務先・相手先などに当たる規則です。個人帳面の <b>設定</b> に保存され、公開されるアプリのコードには入りません。
-      <b>個人帳面/銀行ルール.json</b> を選ぶと取り込めます（同じ規則は上書きされます）。
-      取り込みの画面で「要確認」の行に費目を選ぶと、規則として覚えさせることもできます。</div>
-      <div class="field"><label>規則のJSONファイル</label><input id="mr-file" type="file" accept=".json,application/json"></div>
+      <div class="field"><label>銀行ルール.json</label><input id="mr-file" type="file" accept=".json,application/json"></div>
       <div id="mr-body"></div>`), {kind:"m-rules"});
   }
 }
@@ -3359,6 +3368,43 @@ function cardEnv(){
 function bindMineSheet(root){
   const k = sheetCtx && sheetCtx.kind;
   if(!k) return;
+
+  /* ---- 投資の評価額 ---- */
+  if(k==="m-val"){
+    const amt=root.querySelector("#f-amt"), prin=root.querySelector("#v-prin"), dt=root.querySelector("#v-date");
+    const digits=el=>String(el.value).replace(/[^0-9]/g,"");
+    const fmt=el=>{ const n=digits(el); el.value=n?Number(n).toLocaleString("ja-JP"):""; };
+    prin.oninput=()=>fmt(prin);
+    const recNow=()=>S.my.vals.find(v=>v.acct===sheetCtx.acct && v.date===dt.value);
+    /* 口座を替えたら値を入れ直す。日付を替えたときは、その日の記録があるときだけ入れ直す（打った値を消さない）。 */
+    const sync=(force)=>{
+      const rec=recNow();
+      if(rec){ amt.value=yenPlain(rec.value); prin.value=rec.principal!==undefined?yenPlain(rec.principal):""; }
+      else if(force){ amt.value=""; prin.value=""; }
+      root.querySelector("#v-auto").textContent=autoTxt(sheetCtx.acct, dt.value||today());
+      root.querySelector("#v-del").style.display=rec?"":"none";
+    };
+    root.querySelectorAll("[data-vacct]").forEach(b=>b.onclick=()=>{
+      sheetCtx.acct=b.dataset.vacct;
+      root.querySelectorAll("[data-vacct]").forEach(x=>x.classList.toggle("on", x===b));
+      sync(true);
+    });
+    dt.onchange=()=>sync(false);
+    root.querySelector("#v-save").onclick=()=>{
+      if(!digits(amt)){ toast("評価額を入力してください"); amt.focus(); return; }
+      if(!dt.value){ toast("日付を入力してください"); return; }
+      const rec=normVal({date:dt.value, acct:sheetCtx.acct, value:Number(digits(amt)), principal:digits(prin)?Number(digits(prin)):null});
+      if(!rec){ toast("入力を確かめてください"); return; }
+      S.my.vals=S.my.vals.filter(x=>!(x.acct===rec.acct && x.date===rec.date)).concat(rec);
+      saveMyVals(); closeSheet(); render(); toast("記録しました");
+    };
+    root.querySelector("#v-del").onclick=()=>{
+      const rec=recNow(); if(!rec) return;
+      if(!confirm("この記録を削除しますか。")) return;
+      S.my.vals=S.my.vals.filter(x=>x!==rec);
+      saveMyVals(); closeSheet(); render(); toast("削除しました");
+    };
+  }
 
   /* ---- 記録 ---- */
   if(k==="mrec"){
@@ -3538,8 +3584,8 @@ function bindMineSheet(root){
           <div class="note num">読み取れた ${ok.length} 件（${ymLabel(ms[0])}〜${ymLabel(ms[ms.length-1])}）のうち、
             新規 <b>${fresh.length}</b> 件・内容が変わったもの <b>${chg.length}</b> 件・変更なし ${ok.length-todo.length} 件です。</div>
           ${bad?`<div class="warnbox">形が合わず読めなかった行が ${bad} 件あります。</div>`:""}
-          ${mg.deletes.length?`<div class="note">銀行の明細から取り込み済みの入金 <b>${mg.deletes.length}</b> 件は、入金日と口座をこの行へ引き継ぎ、銀行側の行は消します（二重に数えないため）。</div>`:""}
-          ${unk.length?`<div class="warnbox">口座の一覧にない口座があります：${unk.map(esc).join("、")}。取り込みはできますが、口座の画面で追加してください。</div>`:""}
+          ${mg.deletes.length?`<div class="note">銀行側の入金 <b>${mg.deletes.length}</b> 件を、この行に統合します。</div>`:""}
+          ${unk.length?`<div class="warnbox"><b>口座の一覧にない口座：</b>${unk.map(esc).join("、")}。取り込み後に口座を追加してください。</div>`:""}
           <button class="save" id="ms-go" ${(todo.length||mg.deletes.length)?"":"disabled"}>${todo.length}件を取り込む</button>`;
         box.querySelector("#ms-go").onclick=async ()=>{
           closeSheet(); await pushMyMany(todo);
@@ -3566,15 +3612,14 @@ function bindMineSheet(root){
           <select data-ub="${esc(u.id)}">${catsOf(u.dir).map(c=>`<option ${c==="その他"?"selected":""}>${esc(c)}</option>`).join("")}</select></div>`).join("");
       const n=plan.items.length+plan.updates.length;
       prev.innerHTML=`
-        ${myIsShared(acct)?`<div class="note">共有口座の明細です。共有口座の収入・支出は、家の勘定で数え済みのため、<b>自分の収入・消費には入れません</b>。
-          残高と、本人名義の振込の組だけを使います。個人の収支を見るだけなら、取り込まなくて構いません。</div>`:""}
+        ${myIsShared(acct)?`<div class="note">共有口座の明細です。自分の収入・消費には入れません（残高と振込の組だけ使います）。</div>`:""}
         <div class="note num">${esc(bankName())}・${plan.from.replace(/-/g,"/")}〜${plan.to.replace(/-/g,"/")}・${plan.count}件のうち、
           新規 <b>${plan.items.length}</b> 件・取り込み済み ${plan.skipped} 件・既存の行の更新 ${plan.updates.length} 件
           （給与の突き合わせ ${plan.linked}・本人名義の組 ${plan.paired}）です。</div>
         ${plan.bad?`<div class="note">日付や金額が読めず飛ばした行が ${plan.bad} 行あります（見出し・合計の行など）。</div>`:""}
         ${plan.warnings.map(w=>`<div class="warnbox">${esc(w)}</div>`).join("")}
         ${plan.uncertain.length?`<div class="flabel">要確認：規則に当たらなかった行 ${plan.uncertain.length} 件（費目を選んでください。既定は「その他」）</div>${unc}
-          <label class="note" style="display:block"><input type="checkbox" id="mb-learn" checked> 選んだ費目を、規則として覚える（次回から自動で分類）</label>`:""}
+          <label class="note" style="display:block"><input type="checkbox" id="mb-learn" checked> 選んだ費目を規則として覚える</label>`:""}
         <button class="save" id="mb-go" ${n?"":"disabled"}>${plan.items.length}件を取り込む</button>`;
       prev.querySelector("#mb-go").onclick=async ()=>{
         const choice={}; prev.querySelectorAll("[data-ub]").forEach(s=>choice[s.dataset.ub]=s.value);
@@ -3606,8 +3651,7 @@ function bindMineSheet(root){
       const def = cand.some(a=>a.id===parsed.bank) ? parsed.bank : (cand[0]&&cand[0].id);
       box.innerHTML=`
         <div class="field"><label>取り込む口座</label><select id="mb-acct">${cand.map(a=>`<option value="${esc(a.id)}" ${a.id===def?"selected":""}>${esc(a.name)}</option>`).join("")}</select></div>
-        <div class="note">${parsed.bank==="smbc"?"三井住友は、個人用と共有用など、口座が複数あっても同じ形式で、ファイルに口座の印がありません。<b>どの口座の明細かを選んでください。</b>":"三菱UFJの明細として読みました。"}
-          口座を取り違えると、前回の残高とつながらない警告が出ます。</div>
+        ${parsed.bank==="smbc"?`<div class="note"><b>どの口座の明細か選んでください。</b>（三井住友はファイルに口座の印がありません）</div>`:""}
         <div id="mb-prev"></div>`;
       root.querySelector("#mb-acct").onchange=show;
       show();
@@ -3640,19 +3684,17 @@ function bindMineSheet(root){
       prev.innerHTML=`
         <div class="note num">${esc(names)}・${plan.files}本・利用日 ${plan.from?ymdS(plan.from)+"〜"+ymdS(plan.to):"―"}・${plan.count}件のうち、
           新規 <b>${plan.items.length}</b> 件・取り込み済み ${plan.skipped} 件です。</div>
-        <div class="note num">銀行の引落との突き合わせ：移動へ切り替え <b>${plan.matched}</b> 件・切り替え済み ${plan.already} 件・
-          銀行の引落が見つからない明細 ${plan.pending.length} 件。${plan.pending.length?`<br>見つからない明細は、銀行の明細より前の支払いか、銀行の明細がまだ取り込まれていないものです
-          （${plan.pending.slice(0,3).map(p=>esc(p.name)+" "+md(p.pay)+" "+yen(p.total)).join("、")}${plan.pending.length>3?"…":""}）。後者は、銀行の明細を取り込むと自動で移動になります。`:""}</div>
+        <div class="note num">銀行の引落と一致：移動へ切り替え <b>${plan.matched}</b> 件・切り替え済み ${plan.already} 件・引落が見つからない明細 ${plan.pending.length} 件${plan.pending.length?`
+          （${plan.pending.slice(0,3).map(p=>esc(p.name)+" "+md(p.pay)+" "+yen(p.total)).join("、")}${plan.pending.length>3?"…":""}）`:""}</div>
         ${failed.length?`<div class="warnbox">読めなかったファイル：${failed.map(esc).join("、")}</div>`:""}
         ${plan.bad?`<div class="note">日付が読めず飛ばした行が ${plan.bad} 行あります。</div>`:""}
         ${plan.warnings.map(w=>`<div class="warnbox">${esc(w)}</div>`).join("")}
-        ${plan.unsupported.length?`<div class="warnbox">取り込めない行が ${plan.unsupported.length} 件あります（返金・分割・リボ・訂正など）。<b>その行のある明細は、明細ごと取り込みません</b>（一部だけ入れると、引落と二重になるため）。その明細の引落は、暫定の消費（引落の日）のままです。
+        ${plan.unsupported.length?`<div class="warnbox"><b>取り込めない行が ${plan.unsupported.length} 件あります。</b>その行のある明細は、明細ごと取り込みません。
           ${plan.unsupported.slice(0,4).map(u=>esc(u.name)+" "+md(u.date)+" "+esc(u.shop)+" "+yen(u.amount)+"（"+esc(u.why)+"）").join("、")}${plan.unsupported.length>4?"…":""}</div>`:""}
-        ${(S.cfg.api && !S.online)?`<div class="warnbox">共有の家計簿と同期できていません。共有の立て替えとの照合は、この端末の古い控えで行います。</div>`:""}
-        ${plan.dups.length?`<div class="flabel">共有の家計簿に、自分が払った共有の立て替えで、同じ額・3日以内のものがあります（${plan.dups.length}件）</div>
-          <div class="note">チェックを付けた行は費目「共有立替」で取り込み、個人の消費に数えません（家に関わる出金で数え済みのため）。外すと、個人の消費に数えます。共有側の1件は、カードの1行にだけ当てています。店名が違う候補は、チェックなしです。</div>${dupHTML}`:""}
-        ${groups.length?`<div class="flabel">要確認：費目が決まらない店 ${groups.length} 件（${plan.uncertain.length}行。選ばなければ「その他」）</div>${unc}
-          <label class="note" style="display:block"><input type="checkbox" id="mc-learn" checked> 選んだ費目を、規則として覚える（個人帳面にだけ保存。共有の店名辞書には入れません）</label>`:""}
+        ${(S.cfg.api && !S.online)?`<div class="warnbox"><b>共有の家計簿と未同期です。</b>立て替えの照合は古い控えで行います。</div>`:""}
+        ${plan.dups.length?`<div class="flabel">共有の立て替えと重なる候補（${plan.dups.length}件）・チェック＝個人の消費に数えない</div>${dupHTML}`:""}
+        ${groups.length?`<div class="flabel">要確認：費目が決まらない店 ${groups.length} 件（未選択は「その他」）</div>${unc}
+          <label class="note" style="display:block"><input type="checkbox" id="mc-learn" checked> 選んだ費目を規則として覚える</label>`:""}
         <button class="save" id="mc-go" ${n?"":"disabled"}>${plan.items.length}件を取り込む</button>`;
       prev.querySelector("#mc-go").onclick=async ()=>{
         const learn=!!(prev.querySelector("#mc-learn") && prev.querySelector("#mc-learn").checked);
@@ -3747,9 +3789,11 @@ function bindAll(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const k=b.dataset.open;
     if(k==="csv") openCsv(); else if(k==="receipt") openReceipt();
+    else if(k==="m-val") openVal();
     else if(k.indexOf("m-")===0) openMine(k);
     else openConfig(k);
   });
+  document.querySelectorAll("[data-val]").forEach(r=>r.onclick=()=>openVal(r.dataset.val, r.dataset.vdate));
   document.querySelectorAll("[data-sync]").forEach(b=>b.onclick=()=>pullAll());
   /* 設定は右上の歯車から開く（ナビは資産タブに譲った）。 */
   document.querySelectorAll(".gear").forEach(b=>b.onclick=()=>{ S.tab="settings"; render(); window.scrollTo(0,0); });
