@@ -364,6 +364,7 @@ const ICON_D = {
   savings:"M668.5-531.5Q680-543 680-560t-11.5-28.5Q657-600 640-600t-28.5 11.5Q600-577 600-560t11.5 28.5Q623-520 640-520t28.5-11.5ZM320-600h200v-80H320v80ZM180-120q-34-114-67-227.5T80-580q0-92 64-156t156-64h200q29-38 70.5-59t89.5-21q25 0 42.5 17.5T720-820q0 6-1.5 12t-3.5 11q-4 11-7.5 22.5T702-751l91 91h87v279l-113 37-67 224H480v-80h-80v80H180Zm60-80h80v-80h240v80h80l62-206 98-33v-141h-40L620-720q0-20 2.5-38.5T630-796q-29 8-51 27.5T547-720H300q-58 0-99 41t-41 99q0 98 27 191.5T240-200Zm240-298Z",
   swap_horiz:"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z",
   settings:"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z",
+  fitness_center:"m536-84-56-56 142-142-340-340-142 142-56-56 56-58-56-56 84-84-56-58 56-56 58 56 84-84 56 56 58-56 56 56-142 142 340 340 142-142 56 56-56 58 56 56-84 84 56 58-56 56-58-56-84 84-56-56-58 56Z",
   more_horiz:"M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
 };
 function icon(n, cls){
@@ -392,6 +393,7 @@ const CATS = [
   {k:"教育",     ic:"school"},
   {k:"美容",     ic:"content_cut"},
   {k:"娯楽",     ic:"sports_esports"},
+  {k:"運動・趣味", ic:"fitness_center"},
   {k:"旅行",     ic:"flight"},
   {k:"衣服",     ic:"checkroom"},
   {k:"交際",     ic:"redeem"},
@@ -431,6 +433,133 @@ const DEFAULT_PLANS = [
   {from:"2026-06", base:250000, ratio:0.48, extra:{r:16285, m:0}, savings:5000, fixed:[RENT()]}
 ];
 
+/* ---------- 店名辞書の追補（2026-11-16 追補1） ----------
+   出費の分析（第二の脳 `03_資料/家計簿アプリ/出費の分析_2026-11.md`）で決めた置き場所の見直しと、
+   カード明細から拾った店名の語。割り振りの根拠は `家計簿\scripts\spend-analyze.js` の PROPOSAL（確実・推定の分）。
+   「要判断」の店（施設名だけの支払い・Amazon・PayPayチャージなど）は、確認が済むまで入れていない。
+   ⚠ 保存済みの `dict` は既定を丸ごと上書きする（load() は浅い重ね合わせ）。既定へ語を足しても、
+     すでに使っている端末・帳面には届かない。そこで、足す語をここへ切り出し、
+     起動時と決め事の取得後に ensureDictRev() が保存済みの辞書へ差し込む。
+   * kw  … 店名に含まれる言葉（fold() で半角・小文字に畳んで照らす）
+   * was … この語が以前の既定で持っていた費目（動いた語だけ）。保存済みの辞書にその費目で残っていれば、消して入れ替える。
+           本人が別の費目に直していた語（was と違うもの）には触らない。
+   * 差し込む位置は先頭の「貯蓄」の直後。上から順・最初に当たったものを採るので、追補は旧い語より先に当たる。
+   次の追補は DICT_ADD_2 を作って DICT_ADDS の末尾へ足す（DICT_REV は件数から決まる）。 */
+const DICT_ADD_1 = [
+  // サブスク ―― 定額の課金はここへ寄せる(A3)
+  {kw:"Amazonプライム",cat:"サブスク"},{kw:"YouTubePremi",cat:"サブスク"},{kw:"めちゃコミック",cat:"サブスク"},{kw:"APPLECOMBILL",cat:"サブスク"},
+
+  // 娯楽 ―― 漫画アプリ・動画の課金
+  {kw:"SHUEISHA",cat:"娯楽"},{kw:"集英社",cat:"娯楽"},{kw:"DMM",cat:"娯楽"},
+
+  // 車 ―― EV充電・ETC・駐車場は車の維持費として寄せる(A1)
+  {kw:"TERRACHARGE",cat:"車"},{kw:"MyPLUGO",cat:"車"},{kw:"ENELIVER",cat:"車"},{kw:"ETC",cat:"車",was:"交通"},
+  {kw:"タイムズ",cat:"車",was:"交通"},{kw:"駐車",cat:"車",was:"交通"},{kw:"パーキング",cat:"車",was:"交通"},{kw:"リパーク",cat:"車"},
+  {kw:"リパ－ク",cat:"車"},{kw:"ナカメグロジ",cat:"車"},
+
+  // 交通 ―― シェア自転車・タクシー（電車のSuicaは別の行）
+  {kw:"Luup",cat:"交通"},{kw:"タクシー",cat:"交通"},
+
+  // 運動・趣味 ―― ゴルフ・ジム（戸越公園＝AF戸越公園）・スキー・登山・スポーツ用品(A2)
+  {kw:"ゴルフ",cat:"運動・趣味",was:"娯楽"},{kw:"カントリークラブ",cat:"運動・趣味",was:"娯楽"},{kw:"練習場",cat:"運動・趣味",was:"娯楽"},{kw:"打ちっぱなし",cat:"運動・趣味",was:"娯楽"},
+  {kw:"グリーンクロス",cat:"運動・趣味",was:"娯楽"},{kw:"アコーディア",cat:"運動・趣味",was:"娯楽"},{kw:"PUTTOUT",cat:"運動・趣味",was:"娯楽"},{kw:"CHICKENGOLF",cat:"運動・趣味"},
+  {kw:"戸越公園",cat:"運動・趣味",was:"娯楽"},{kw:"スキー場",cat:"運動・趣味"},{kw:"エイブル白馬",cat:"運動・趣味"},{kw:"そのだスポーツ",cat:"運動・趣味"},
+  {kw:"好日山荘",cat:"運動・趣味",was:"衣服"},{kw:"フィールド＆マウンテン",cat:"運動・趣味"},{kw:"ミズノ",cat:"運動・趣味",was:"衣服"},
+
+  // 美容
+  {kw:"SALOWIN",cat:"美容"},
+
+  // 娯楽 ―― カラオケ・温泉・サウナ・銭湯
+  {kw:"第一興商",cat:"娯楽"},{kw:"カラオケ",cat:"娯楽"},{kw:"富士見湯",cat:"娯楽"},{kw:"サウナ",cat:"娯楽"},
+  {kw:"温泉",cat:"娯楽"},{kw:"RAKUSPA",cat:"娯楽",was:"旅行"},{kw:"銭湯",cat:"娯楽"},
+
+  // 旅行 ―― 旅先の宿・観光・SA・道の駅(A4)
+  {kw:"いちのや",cat:"旅行"},{kw:"離れ庵",cat:"旅行"},{kw:"季粋の宿",cat:"旅行"},{kw:"鴨川シ",cat:"旅行"},
+  {kw:"まきば売店",cat:"旅行"},{kw:"小泉八雲",cat:"旅行"},{kw:"松江城",cat:"旅行"},{kw:"道の駅",cat:"旅行"},
+  {kw:"出雲",cat:"旅行"},{kw:"爺ガ岳",cat:"旅行"},{kw:"東富士山荘",cat:"旅行"},{kw:"ルオムの森",cat:"旅行"},
+  {kw:"那須ガーデン",cat:"旅行"},{kw:"QUICKTRIP",cat:"旅行"},{kw:"ネクスコ東日本",cat:"旅行"},{kw:"SA・PA",cat:"旅行"},
+  {kw:"ハイウェイ",cat:"旅行"},{kw:"ANAFESTA",cat:"旅行"},
+
+  // 食費 ―― スーパー・自販機・食料品
+  {kw:"フアミリ",cat:"食費"},{kw:"Bunkado",cat:"食費"},{kw:"三和ラゾ",cat:"食費"},{kw:"東急ストア",cat:"食費"},
+  {kw:"西友",cat:"食費"},{kw:"ヤオコー",cat:"食費"},{kw:"カルディ",cat:"食費"},{kw:"おかしのまち",cat:"食費"},
+  {kw:"生鮮市場",cat:"食費"},{kw:"まいばす",cat:"食費"},{kw:"Aコープ",cat:"食費"},{kw:"コンフォートマーケット",cat:"食費"},
+  {kw:"渋谷東急フードショー",cat:"食費"},{kw:"豆吉本舗",cat:"食費"},{kw:"etomo",cat:"食費"},{kw:"NewDays",cat:"食費"},
+  {kw:"アサヒ飲料",cat:"食費"},{kw:"コカ・コ―ラジハン",cat:"食費"},{kw:"ジハンピ",cat:"食費"},{kw:"自販機",cat:"食費"},
+  {kw:"伊藤園",cat:"食費"},{kw:"キリンビバレッジ",cat:"食費"},{kw:"IJOOZ",cat:"食費"},{kw:"CokeON",cat:"食費"},
+  {kw:"アペックス",cat:"食費"},{kw:"ユカ",cat:"食費"},{kw:"八洋",cat:"食費"},{kw:"MEAT＆DELI",cat:"食費"},
+  {kw:"ことぶきベーカリー",cat:"食費"},{kw:"ほしのベーカリー",cat:"食費"},{kw:"LA・PAN",cat:"食費"},{kw:"オリジン",cat:"食費"},
+
+  // 外食 ―― 飲食店・カフェ・菓子
+  {kw:"すき家",cat:"外食"},{kw:"松屋フーズ",cat:"外食"},{kw:"なか卯",cat:"外食"},{kw:"丸亀",cat:"外食"},
+  {kw:"はなまる",cat:"外食"},{kw:"大戸屋",cat:"外食"},{kw:"デニーズ",cat:"外食"},{kw:"バーミヤン",cat:"外食"},
+  {kw:"ジョナサン",cat:"外食"},{kw:"スシロー",cat:"外食"},{kw:"すた丼",cat:"外食"},{kw:"一風堂",cat:"外食"},
+  {kw:"天下一品",cat:"外食"},{kw:"AFURI",cat:"外食"},{kw:"六厘舎",cat:"外食"},{kw:"モスバーガー",cat:"外食"},
+  {kw:"吉野家",cat:"外食"},{kw:"ドトール",cat:"外食"},{kw:"エクセルシオール",cat:"外食"},{kw:"PRONTO",cat:"外食"},
+  {kw:"サンマルク",cat:"外食"},{kw:"タリーズ",cat:"外食"},{kw:"ベローチェ",cat:"外食"},{kw:"ハイデイ日高",cat:"外食"},
+  {kw:"珈琲",cat:"外食"},{kw:"コーヒー",cat:"外食"},{kw:"らーめん",cat:"外食"},{kw:"つけ麺",cat:"外食"},
+  {kw:"つけめん",cat:"外食"},{kw:"うどん",cat:"外食"},{kw:"餃子",cat:"外食"},{kw:"カレー",cat:"外食"},
+  {kw:"クレープ",cat:"外食"},{kw:"ベーカリー",cat:"外食"},{kw:"パスタ",cat:"外食"},{kw:"ステーキ",cat:"外食"},
+  {kw:"ハンバーグ",cat:"外食"},{kw:"ダイニング",cat:"外食"},{kw:"とんかつ",cat:"外食"},{kw:"麺や",cat:"外食"},
+  {kw:"麺屋",cat:"外食"},{kw:"麺匠",cat:"外食"},{kw:"おにやんま",cat:"外食"},{kw:"たこ一",cat:"外食"},
+  {kw:"ダンダダン",cat:"外食"},{kw:"肉十八番",cat:"外食"},{kw:"すてーき亭",cat:"外食"},{kw:"串ばってん",cat:"外食"},
+  {kw:"MENSHO",cat:"外食"},{kw:"鶏そば",cat:"外食"},{kw:"鶏白湯",cat:"外食"},{kw:"富喜製麺",cat:"外食"},
+  {kw:"せい家",cat:"外食"},{kw:"かいか",cat:"外食"},{kw:"幸運豚人",cat:"外食"},{kw:"土鍋炊",cat:"外食"},
+  {kw:"月島もんじゃ",cat:"外食"},{kw:"中国料理",cat:"外食"},{kw:"王鼎記",cat:"外食"},{kw:"広州市場",cat:"外食"},
+  {kw:"BREEZE",cat:"外食"},{kw:"ブリ－ズ",cat:"外食"},{kw:"タントンタン",cat:"外食"},{kw:"ラパン戸越",cat:"外食"},
+  {kw:"おにぎり戸越",cat:"外食"},{kw:"スパゲティ",cat:"外食"},{kw:"でめきん",cat:"外食"},{kw:"柳小路",cat:"外食"},
+  {kw:"ローズマリー",cat:"外食"},{kw:"つづみ団子",cat:"外食"},{kw:"プティフール",cat:"外食"},{kw:"コージーコーナー",cat:"外食"},
+  {kw:"トミーズプリン",cat:"外食"},{kw:"I’mdonut",cat:"外食"},{kw:"亀屋万年堂",cat:"外食"},{kw:"Oclock",cat:"外食"},
+
+  // 日用品 ―― 雑貨・家電・クリーニング・ネット通販
+  {kw:"ケーズデンキ",cat:"日用品"},{kw:"無印良品",cat:"日用品"},{kw:"銀座ロフト",cat:"日用品"},{kw:"ワッツ",cat:"日用品"},
+  {kw:"ダイソー",cat:"日用品"},{kw:"ウエルシア",cat:"日用品"},{kw:"トモズ",cat:"日用品"},{kw:"クリーニング",cat:"日用品"},
+  {kw:"アクタス",cat:"日用品"},{kw:"INSTA360",cat:"日用品"},{kw:"アークランドサービス",cat:"日用品"},{kw:"LINEEC",cat:"日用品"},
+  {kw:"AliExpress",cat:"日用品"},{kw:"Creema",cat:"日用品"},{kw:"QRIOSTORE",cat:"日用品"},
+
+  // 医療
+  {kw:"耳鼻咽喉科",cat:"医療"},{kw:"皮膚科",cat:"医療"},{kw:"内科",cat:"医療"},{kw:"眼科",cat:"医療"},
+
+  // 税・公金
+  {kw:"戸籍住民課",cat:"税・公金"},
+
+  // 交際 ―― 花の贈り物
+  {kw:"フラワーショップ",cat:"交際"},{kw:"花エリカ",cat:"交際"}
+];
+const DICT_ADDS = [DICT_ADD_1];
+const DICT_REV = DICT_ADDS.length;
+
+/* 保存済みの辞書へ追補を差し込む。返すのは新しい配列（引数は書き換えない）。
+   ・同じ言葉が同じ費目で既にある → 何もしない
+   ・同じ言葉が was の費目で残っている → 消して、追補を先頭側へ入れる
+   ・同じ言葉が別の費目で残っている → 本人の判断なので、そのまま残して追補は入れない */
+function migrateDict(dict, add){
+  const out=(Array.isArray(dict)?dict:[]).filter(d=>d && d.kw);
+  const fresh=[];
+  add.forEach(a=>{
+    const f=fold(a.kw), same=out.filter(d=>fold(d.kw)===f);
+    if(same.some(d=>d.cat===a.cat)) return;
+    if(same.length){
+      if(!a.was || !same.some(d=>d.cat===a.was)) return;
+      same.filter(d=>d.cat===a.was).forEach(d=>out.splice(out.indexOf(d),1));
+    }
+    fresh.push({kw:a.kw, cat:a.cat});
+  });
+  let at=0; while(at<out.length && out[at].cat==="貯蓄") at++;
+  out.splice(at, 0, ...fresh);
+  return out;
+}
+
+/* 追補が済んでいなければ差し込む。戻り値 true = 版を進めた（辞書が変わった）。 */
+function ensureDictRev(){
+  const cur=Number(S.cfg.dictRev)||0;
+  if(cur>=DICT_REV) return false;
+  let d=S.cfg.dict;
+  for(let r=cur; r<DICT_REV; r++) d=migrateDict(d, DICT_ADDS[r]);
+  S.cfg.dict=d; S.cfg.dictRev=DICT_REV;
+  return true;
+}
+
 const DEFAULT_CFG = {
   api:"", token:"",
   names:{r:"諒", m:"万貴"},
@@ -462,6 +591,9 @@ const DEFAULT_CFG = {
   dict:[
     // 貯蓄 ―― そもそも出費ではないので、何より先に外す
     {kw:"SBI証券",cat:"貯蓄"},{kw:"投信",cat:"貯蓄"},{kw:"積立貯蓄",cat:"貯蓄"},
+
+    // 2026-11-16 の追補（DICT_ADD_1）。旧い語より先に当てる
+    ...DICT_ADDS.slice().reverse().flat().map(({kw,cat})=>({kw,cat})),
 
     // 子ども ―― 「病院」「クリニック」より必ず先
     {kw:"東京品川病院",cat:"子ども"},{kw:"レディ",cat:"子ども"},{kw:"西松屋",cat:"子ども"},
@@ -496,7 +628,7 @@ const DEFAULT_CFG = {
 
     // 旅行 ―― 宿と観光。移動そのものは「交通」のまま
     {kw:"ホテル",cat:"旅行"},{kw:"HOTEL",cat:"旅行"},{kw:"アマン東京",cat:"旅行"},
-    {kw:"RAKUSPA",cat:"旅行"},{kw:"美術館",cat:"旅行"},{kw:"旅館",cat:"旅行"},
+    {kw:"美術館",cat:"旅行"},{kw:"旅館",cat:"旅行"},
     {kw:"じゃらん",cat:"旅行"},{kw:"楽天トラベル",cat:"旅行"},{kw:"空港",cat:"旅行"},{kw:"お土産",cat:"旅行"},
     // 台湾旅行ぶん。渡航先の名で括ると、現地の移動・買い物までまとめて旅行に寄せられる
     {kw:"TAIPEI",cat:"旅行"},{kw:"HOLAFLY",cat:"旅行"},{kw:"乗船",cat:"旅行"},
@@ -515,11 +647,9 @@ const DEFAULT_CFG = {
     {kw:"よるご",cat:"外食"},{kw:"ランチ",cat:"外食"},
 
     // 娯楽
-    {kw:"歌広場",cat:"娯楽"},{kw:"戸越公園",cat:"娯楽"},   // ＡＦ戸越公園＝ジム
+    {kw:"歌広場",cat:"娯楽"},
     {kw:"GOOGLE PLAY",cat:"娯楽"},{kw:"GOOGLE GENSHIN",cat:"娯楽"},{kw:"課金",cat:"娯楽"},
-    {kw:"ゴルフ",cat:"娯楽"},{kw:"カントリークラブ",cat:"娯楽"},{kw:"練習場",cat:"娯楽"},
-    {kw:"打ちっぱなし",cat:"娯楽"},{kw:"グリーンクロス",cat:"娯楽"},{kw:"アコーディア",cat:"娯楽"},
-    {kw:"PUTTOUT",cat:"娯楽"},{kw:"ウィンズ",cat:"娯楽"},{kw:"Tジョイ",cat:"娯楽"},
+    {kw:"ウィンズ",cat:"娯楽"},{kw:"Tジョイ",cat:"娯楽"},
     {kw:"宝くじ",cat:"娯楽"},{kw:"映画",cat:"娯楽"},{kw:"マンガ",cat:"娯楽"},
 
     // 医療
@@ -545,13 +675,12 @@ const DEFAULT_CFG = {
     {kw:"ドコモ",cat:"通信"},{kw:"ソフトバンク",cat:"通信"},{kw:"NTT",cat:"通信"},
 
     // 交通
-    {kw:"ETC",cat:"交通"},{kw:"Suica",cat:"交通"},{kw:"タイムズ",cat:"交通"},
+    {kw:"Suica",cat:"交通"},
     {kw:"JR",cat:"交通"},{kw:"メトロ",cat:"交通"},{kw:"UBER RIDES",cat:"交通"},
-    {kw:"駐車",cat:"交通"},{kw:"パーキング",cat:"交通"},
 
     // 衣服
     {kw:"ZARA",cat:"衣服"},{kw:"ユニクロ",cat:"衣服"},{kw:"しまむら",cat:"衣服"},
-    {kw:"ミズノ",cat:"衣服"},{kw:"好日山荘",cat:"衣服"},{kw:"スニーカー",cat:"衣服"}
+    {kw:"スニーカー",cat:"衣服"}
   ],
   /* 精算日 ―― 二人が共有口座へ振り込む日（2026-08-21 上様の指図により制定）。
      ⚠ これは**決まりではなく見込み**である。真は `closed`（締めた記録）のほう。
@@ -631,7 +760,7 @@ const myCatOf = k => MY_CATS.find(c=>c.k===k) || CATS[CATS.length-1];
 
 /* 二人で揃える決め事。これだけがスプレッドシートの `設定` シートへ行き来する。
    ⚠ `api`・`token`・`csvMap`・`lastSync` は**端末ごと**ゆえ、決してここへ入れない。 */
-const SHARED_KEYS = ["names","plans","mine","dict","settleDay","closed"];
+const SHARED_KEYS = ["names","plans","mine","dict","dictRev","settleDay","closed"];
 function sharedCfg(){ const o={}; SHARED_KEYS.forEach(k=>{ if(S.cfg[k]!==undefined) o[k]=S.cfg[k]; }); return o; }
 
 const S = {
@@ -644,6 +773,9 @@ const S = {
        vals:load("myvals", []).map(normVal).filter(Boolean), online:false, syncing:false, err:"" },
   myq:load("myq", [])
 };
+
+/* 店名辞書の追補を、この端末の控えへ差し込む。シートへは、決め事を取ってから pullConfig が送り返す。 */
+if(ensureDictRev()) save("cfg", S.cfg);
 
 function load(k,def){ try{ const v=localStorage.getItem("shuppi."+k); return v?Object.assign(structuredClone(def),JSON.parse(v)):structuredClone(def); }catch(e){ return structuredClone(def); } }
 function save(k,v){ try{ localStorage.setItem("shuppi."+k, JSON.stringify(v)); }catch(e){} }
@@ -767,7 +899,11 @@ async function pullConfig(){
   S.cfgStale=false;
   if(!j.config) return;                       // シートがまだ空。こちらの控えを正とする
   SHARED_KEYS.forEach(k=>{ if(j.config[k]!=null) S.cfg[k]=j.config[k]; });
+  /* 追補より前の辞書（dictRev を持たぬもの）が届いたら、版を戻して追補し直し、シートへも送り返す。 */
+  if(j.config.dict!=null && j.config.dictRev==null) S.cfg.dictRev=0;
+  const patched=ensureDictRev();
   save("cfg", S.cfg);
+  if(patched && (Number(j.config.dictRev)||0)<DICT_REV) saveCfg();
 }
 
 /* 決め事を控えて、シートへも送る。**共有の決め事を変えたら必ずこれを通すこと。**
@@ -1602,6 +1738,53 @@ function pushedOut(x){ return !normYM(x.pay) && x.payer!=="c" && !x.fixed && pay
 function needPay(){
   return S.items.filter(x => x.payer==="c" && !x.fixed && x.src==="CSV"
     && !normYM(x.pay) && String(x.date||"").length>=7);
+}
+/* ---------- 費目の当て直し（2026-11-16 追加） ----------
+   辞書を直したあと、取り込み済みの記録の費目を、いまの辞書に合わせて直すための計画を作る。画面に依らず、副作用なし。
+   対象はカード明細から取り込んだ行だけ（共有 = src が CSV、個人 = src がカードの支出）。手で入れた行・銀行の行には触れない。
+   次の場合だけ直す。
+     ・いまの費目が「その他」（辞書に無くて落ちていた行）
+     ・新しい費目が RECAT_TO の中（追補1で置き場所を見直した費目へ寄せる）
+   本人が直した費目まで巻き戻さぬよう、それ以外の食い違いは対象にしない。個人の記録は、本人が覚えさせた規則を先に見る（取り込みと同じ順）。 */
+const RECAT_TO = ["車","運動・趣味","サブスク","旅行"];
+const RECAT_KEEP = ["貯蓄","共有立替","カード引落","奨学金"];
+function recatPlan(){
+  const D=(S.cfg.dict||[]).filter(d=>d && d.kw).map(d=>({f:fold(d.kw), cat:d.cat}));
+  const memo=new Map();
+  const guess=shop=>{
+    let g=memo.get(shop);
+    if(g===undefined){ const s=fold(shop), h=D.find(d=>d.f && s.includes(d.f)); g=h?h.cat:""; memo.set(shop,g); }
+    return g;
+  };
+  const env={guess};
+  const pick=(cur,g)=> !!g && g!=="その他" && g!=="貯蓄" && g!==cur && !RECAT_KEEP.includes(cur)
+    && (cur==="その他" || RECAT_TO.includes(g));
+  const shared=[], mine=[];
+  S.items.forEach(x=>{
+    if(x.src!=="CSV" || x.fixed || !x.shop) return;
+    const g=guess(x.shop);
+    if(pick(x.cat, g)) shared.push({it:x, to:g});
+  });
+  S.my.tx.forEach(x=>{
+    if(x.type!=="支出" || x.src!=="カード" || !x.shop || x.shop==="PayPayチャージ") return;
+    const c=cardClassify(x.shop, x.acct==="paypay"?"paypay":"", S.my.rules, env);
+    if(c.known && pick(x.cat, c.cat)) mine.push({it:x, to:c.cat});
+  });
+  return {shared, mine, n:shared.length+mine.length};
+}
+/* 「いまの費目 → 新しい費目」ごとにまとめる（画面で一括して外せるように）。金額の大きい順。 */
+function recatGroups(p){
+  const mk=(list,scope)=>{
+    const m=new Map();
+    list.forEach(({it,to})=>{
+      const k=it.cat+"→"+to; let g=m.get(k);
+      if(!g){ g={scope, from:it.cat, to, list:[], sum:0, shops:new Map()}; m.set(k,g); }
+      const a=Number(it.amount)||0;
+      g.list.push({it,to}); g.sum+=a; g.shops.set(it.shop,(g.shops.get(it.shop)||0)+a);
+    });
+    return [...m.values()].sort((a,b)=>b.sum-a.sum);
+  };
+  return mk(p.shared,"共有").concat(mk(p.mine,"個人"));
 }
 function monthItems(m){ return S.items.filter(x=>String(x.date||"").slice(0,7)===m); }
 function payItems(m){ return S.items.filter(x=>payOf(x)===m); }
@@ -2465,6 +2648,7 @@ function viewSettings(){
   const st = !c.api ? '<span class="dot ng"></span>未接続（この端末のみ）'
     : (S.online ? '<span class="dot ok"></span>接続中' : '<span class="dot er"></span>'+esc(S.err||"通信できません"));
   const fx=(p.fixed||[]).reduce((a,b)=>a+(Number(b.amount)||0),0);
+  const rcN=recatPlan().n;
   return header() + `<div class="wrap">
     <div class="sechead"><h2>データの置き場</h2></div>
     <div class="card">
@@ -2484,6 +2668,9 @@ function viewSettings(){
       <div class="setrow"><div><div class="sl">引落月の振り直し</div>
         <div class="sd num">${needPay().length ? needPay().length+"件で引落月が空" : "問題なし"}</div></div>
         <button class="mini ${needPay().length?"":"ghost"}" data-open="fixpay">開く</button></div>
+      <div class="setrow"><div><div class="sl">費目の当て直し</div>
+        <div class="sd num">${rcN ? rcN+"件を直せます" : "対象なし"}</div></div>
+        <button class="mini ${rcN?"":"ghost"}" data-open="recat">開く</button></div>
     </div>
 
     ${mineSettingsHTML()}
@@ -2830,6 +3017,28 @@ function openConfig(kind){
       ${esc(String(d.on||"").replace(/-/g,"/"))} に控えた ${esc(N.r)} ${yen(d.r||0)}／${esc(N.m)} ${yen(d.m||0)} は失われます。</div>
       <button class="save del" id="ro-go">締めを解く</button>`), {kind:"reopen", m});
   }
+  /* 費目の当て直し（2026-11-16 追加）
+     辞書の追補のあと、取り込み済みの記録を新しい費目へ寄せる。押す前に、何件がどう動くかを見せる。
+     ⚠ 計画の作り方と、直す対象の限り（その他・追補で寄せた先だけ）は recatPlan() を見よ。 */
+  if(kind==="recat"){
+    const gs=recatGroups(recatPlan());
+    const scopeName={"共有":"共有の家計簿","個人":"個人帳面"};
+    let body="";
+    if(!gs.length) body=`<div class="empty"><span class="e-ic">${icon("check_circle")}</span>直すものはありません</div>`;
+    else{
+      let last="";
+      body=`<div class="note">辞書に合わせて直します。直さぬ行は印を外してください。</div>`
+        + gs.map((g,i)=>{
+          const head = g.scope!==last ? (last=g.scope, `<div class="flabel" style="margin-top:14px">${esc(scopeName[g.scope])}</div>`) : "";
+          const top=[...g.shops.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join("、");
+          return head+`<label class="setrow" style="cursor:pointer"><div><div class="sl">${esc(g.from)} → ${esc(g.to)}</div>
+            <div class="sd num">${g.list.length}件・${yen(g.sum)}　${esc(top)}</div></div>
+            <input type="checkbox" data-rcg="${i}" checked style="width:22px;height:22px;flex:none;margin-left:12px"></label>`;
+        }).join("")
+        + `<button class="save" id="rc-go">${gs.reduce((a,g)=>a+g.list.length,0)}件を当て直す</button>`;
+    }
+    openSheet(sheetShell("費目の当て直し", body), {kind:"recat", groups:gs});
+  }
   /* 引落月の振り直し（2026-08-20 追加）
      共有カードは月末締め・翌月26日払いゆえ、引落月＝**利用月の翌月**で一意に決まる。
      ⚠ 当て直すのは「共有カード払い・CSVから取り込んだ・引落月を持たぬ」ものだけ。
@@ -3006,6 +3215,22 @@ function bindConfigSheet(root){
       {pay: shiftMonth(String(x.date).slice(0,7), 1)}));
     render(); toast(bad.length+"件の引落月を振り直しました");
   };
+
+  const rcg=root.querySelector("#rc-go");
+  if(rcg){
+    const gs=sheetCtx.groups||[];
+    const picked=()=>gs.filter((g,i)=>{ const b=root.querySelector(`[data-rcg="${i}"]`); return b && b.checked; });
+    const label=()=>{ const n=picked().reduce((a,g)=>a+g.list.length,0); rcg.textContent=n+"件を当て直す"; rcg.disabled=!n; };
+    root.querySelectorAll("[data-rcg]").forEach(b=>b.onchange=label);
+    rcg.onclick=async ()=>{
+      const use=picked(), sh=[], my=[];
+      use.forEach(g=>g.list.forEach(({it,to})=>(g.scope==="共有"?sh:my).push(Object.assign({}, it, {cat:to}))));
+      closeSheet();
+      if(sh.length) await pushMany("update", sh);
+      if(my.length) await pushMyMany(my);
+      render(); toast((sh.length+my.length)+"件の費目を直しました");
+    };
+  }
 
   const fxa=root.querySelector("#fx-add");
   if(fxa) fxa.onclick=()=>{
